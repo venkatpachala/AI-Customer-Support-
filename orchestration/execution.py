@@ -5,33 +5,44 @@ from typing import Dict, Any, Set, List
 from orchestration.state import AgentState
 from tools.registry import TOOL_REGISTRY
 import re
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+
 
 def extract_order_id(text: str) -> str:
     match = re.search(r'(?:order\s*#?|#)?(\d{5,})', text, re.IGNORECASE)
     return match.group(1) if match else "12345"
 
 def run_tool_with_retries(tool_spec, params: Dict[str, Any]) -> Dict:
+    """
+    Execute a tool with retries + real timeout.
+    """
     last_error = None
 
     for attempt in range(1, tool_spec.max_retries + 2):
         try:
-            print(f"  Attempt {attempt} for {tool_spec.name}")
-            start = time.time()
-            result = tool_spec.function(**params)
-            duration = time.time() - start
+            print(f"  Attempt {attempt} for {tool_spec.name} (timeout={tool_spec.timeout}s)")
+
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(tool_spec.function, **params)
+                result = future.result(timeout=tool_spec.timeout)
 
             return {
                 "status": "success",
                 "data": result,
                 "attempts": attempt,
-                "duration": round(duration, 3),
+                "timeout": tool_spec.timeout,
                 "idempotent": tool_spec.idempotent
             }
+
+        except FuturesTimeoutError:
+            last_error = f"Timeout after {tool_spec.timeout} seconds"
+            print(f"  Timeout on attempt {attempt} for {tool_spec.name}")
 
         except Exception as e:
             last_error = str(e)
             print(f"  Failed attempt {attempt}: {e}")
-            time.sleep(0.4 * attempt)
+
+        time.sleep(0.4 * attempt)  # backoff
 
     return {
         "status": "error",
