@@ -17,44 +17,69 @@ def detect_injection(text: str) -> bool:
     suspicious = [
         "ignore previous", "jailbreak", "system prompt",
         "pretend you are", "you are now", "act as",
-        "disregard the rules", "bypass"
+        "disregard the rules", "bypass", "override instructions"
     ]
     return any(phrase in text.lower() for phrase in suspicious)
 
 def is_out_of_scope(text: str) -> bool:
-    """
-    Reject queries that are clearly outside Zepto customer support scope.
-    """
-    out_of_scope_keywords = [
-        "write a poem", "write a story", "tell me a joke",
+    text_lower = text.lower().strip()
+
+    # Creative requests
+    creative = [
+        "write a poem", "write a story", "write a song", "make a song",
+        "sing a song", "tell me a joke", "make a joke", "compose a",
+        "generate a story", "write lyrics", "rap about", "make a rap"
+    ]
+
+    # Malicious / dangerous
+    malicious = [
+        "delete the database", "drop table", "delete all customers",
+        "wipe the data", "hack", "sql injection", "rm -rf",
+        "destroy the system", "leak customer data"
+    ]
+
+    # General knowledge / unrelated
+    general = [
         "who is the prime minister", "what is the capital",
         "solve this math", "code for me", "python script",
         "recipe for", "how to cook", "weather in",
-        "stock price", "bitcoin", "who won the match",
-        "personal advice", "relationship advice",
-        "medical advice", "legal advice"
+        "stock price", "bitcoin", "who won the match"
     ]
-    
-    text_lower = text.lower()
-    return any(keyword in text_lower for keyword in out_of_scope_keywords)
+
+    if any(k in text_lower for k in creative):
+        return True
+    if any(k in text_lower for k in malicious):
+        return True
+    if any(k in text_lower for k in general):
+        return True
+
+    return False
 
 def apply_guardrails(state: Dict) -> Dict:
     last_message = get_last_user_message(state.get("messages", []))
 
-    # 1. PII check
+    # 1. PII
     has_pii, msg = detect_pii(last_message)
     if has_pii:
-        return {"error": msg, "blocked": True}
+        return {
+            "blocked": True,
+            "error": msg
+        }
 
     # 2. Prompt injection
     if detect_injection(last_message):
-        return {"error": "Potential prompt injection detected", "blocked": True}
-
-    # 3. Out of scope check
-    if is_out_of_scope(last_message):
         return {
-            "error": "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments.",
-            "blocked": True
+            "blocked": True,
+            "error": "Potential prompt injection detected. I cannot process this request."
         }
 
-    return {"blocked": False}
+    # 3. Out of scope / malicious
+    if is_out_of_scope(last_message):
+        return {
+            "blocked": True,
+            "error": "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments."
+        }
+
+    return {
+        "blocked": False
+    }

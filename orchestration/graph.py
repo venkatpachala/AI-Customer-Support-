@@ -4,15 +4,15 @@ from security.guardrails import apply_guardrails
 from orchestration.supervisor import supervisor_node
 from orchestration.planner import planner_node
 from orchestration.execution import execution_engine_node
+from orchestration.verifier import verifier_node
 from orchestration.hitl import check_escalation
 from agents.qa import qa_node
-
-from orchestration.verifier import verifier_node
 
 def build_graph():
     graph = StateGraph(AgentState)
 
-    graph.add_node("guardrails", lambda s: apply_guardrails(s))
+    # Nodes
+    graph.add_node("guardrails", apply_guardrails)
     graph.add_node("supervisor", supervisor_node)
     graph.add_node("planner", planner_node)
     graph.add_node("executor", execution_engine_node)
@@ -20,19 +20,24 @@ def build_graph():
     graph.add_node("hitl_check", check_escalation)
     graph.add_node("qa", qa_node)
 
+    # Entry
     graph.set_entry_point("guardrails")
 
+    # Guardrails → stop if blocked, otherwise continue
     graph.add_conditional_edges(
         "guardrails",
         lambda s: "blocked" if s.get("blocked") else "supervisor",
-        {"blocked": END, "supervisor": "supervisor"}
+        {
+            "blocked": END,
+            "supervisor": "supervisor"
+        }
     )
 
     graph.add_edge("supervisor", "planner")
     graph.add_edge("planner", "executor")
     graph.add_edge("executor", "verifier")
 
-    # After verification
+    # Verifier decision
     graph.add_conditional_edges(
         "verifier",
         lambda s: "escalate" if not s.get("verification_passed", True) else "hitl_check",
@@ -42,6 +47,7 @@ def build_graph():
         }
     )
 
+    # HITL decision
     graph.add_conditional_edges(
         "hitl_check",
         lambda s: "escalate" if s.get("needs_escalation") else "qa",

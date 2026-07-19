@@ -1,21 +1,22 @@
 import time
-import traceback
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, Any, Set, List
+import re
+from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
+from typing import Dict, Any, Set
 from orchestration.state import AgentState
 from tools.registry import TOOL_REGISTRY
-import re
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
-
 
 def extract_order_id(text: str) -> str:
     match = re.search(r'(?:order\s*#?|#)?(\d{5,})', text, re.IGNORECASE)
     return match.group(1) if match else "12345"
 
+def extract_amount(text: str) -> int:
+    """Extract refund amount from user message"""
+    match = re.search(r'(?:₹|rs\.?|inr)?\s*(\d{3,6})', text.lower().replace(",", ""))
+    if match:
+        return int(match.group(1))
+    return 500
+
 def run_tool_with_retries(tool_spec, params: Dict[str, Any]) -> Dict:
-    """
-    Execute a tool with retries + real timeout.
-    """
     last_error = None
 
     for attempt in range(1, tool_spec.max_retries + 2):
@@ -36,13 +37,13 @@ def run_tool_with_retries(tool_spec, params: Dict[str, Any]) -> Dict:
 
         except FuturesTimeoutError:
             last_error = f"Timeout after {tool_spec.timeout} seconds"
-            print(f"  Timeout on attempt {attempt} for {tool_spec.name}")
+            print(f"  Timeout on attempt {attempt}")
 
         except Exception as e:
             last_error = str(e)
             print(f"  Failed attempt {attempt}: {e}")
 
-        time.sleep(0.4 * attempt)  # backoff
+        time.sleep(0.4 * attempt)
 
     return {
         "status": "error",
@@ -52,9 +53,6 @@ def run_tool_with_retries(tool_spec, params: Dict[str, Any]) -> Dict:
     }
 
 def execution_engine_node(state: AgentState) -> Dict:
-    """
-    Advanced Execution Engine with parallel support
-    """
     plan = state.get("current_plan") or {}
     tool_results = state.get("tool_results") or {}
     messages = state.get("messages", [])
@@ -65,21 +63,18 @@ def execution_engine_node(state: AgentState) -> Dict:
         last_query = last.content if hasattr(last, "content") else str(last)
 
     order_id = extract_order_id(last_query)
+    amount = extract_amount(last_query)
     steps = plan.get("steps") or []
     missing_inputs = set(plan.get("missing_inputs") or [])
 
-    print("\n=== Advanced Execution Engine (Parallel Ready) ===")
-    print(f"Order ID: {order_id}")
+    print("\n=== Advanced Execution Engine ===")
+    print(f"Order ID: {order_id} | Amount: ₹{amount}")
     print(f"Missing inputs: {missing_inputs}")
 
     completed_steps: Set[int] = set()
-    execution_log = []
-
-    # Keep executing rounds until no more steps can run
     remaining_steps = [s for s in steps if isinstance(s, dict)]
 
     while remaining_steps:
-        # Find steps that are ready (dependencies satisfied)
         ready_steps = []
         still_waiting = []
 
@@ -91,7 +86,6 @@ def execution_engine_node(state: AgentState) -> Dict:
                 still_waiting.append(step)
 
         if not ready_steps:
-            # No progress possible
             for step in still_waiting:
                 tool_name = step.get("tool")
                 tool_results[tool_name] = {
@@ -100,9 +94,8 @@ def execution_engine_node(state: AgentState) -> Dict:
                 }
             break
 
-        print(f"\nReady to execute in parallel: {[s.get('tool') for s in ready_steps]}")
+        print(f"Ready steps: {[s.get('tool') for s in ready_steps]}")
 
-        # Execute ready steps in parallel
         with ThreadPoolExecutor(max_workers=4) as executor:
             future_to_step = {}
 
@@ -110,7 +103,6 @@ def execution_engine_node(state: AgentState) -> Dict:
                 tool_name = step.get("tool")
                 step_num = step.get("step")
 
-                # Skip if critical input missing
                 if "photos" in missing_inputs and tool_name in ["shopify_initiate_return", "stripe_refund"]:
                     tool_results[tool_name] = {
                         "status": "skipped",
@@ -129,17 +121,16 @@ def execution_engine_node(state: AgentState) -> Dict:
                     completed_steps.add(step_num)
                     continue
 
-                # Prepare params
+                # Prepare parameters
                 params = {"order_id": order_id}
                 if tool_name == "shopify_initiate_return":
                     params["reason"] = "damaged"
                 if tool_name == "stripe_refund":
-                    params["amount"] = 500
+                    params["amount"] = amount
 
                 future = executor.submit(run_tool_with_retries, tool_spec, params)
                 future_to_step[future] = step
 
-            # Collect results
             for future in as_completed(future_to_step):
                 step = future_to_step[future]
                 tool_name = step.get("tool")
@@ -148,28 +139,15 @@ def execution_engine_node(state: AgentState) -> Dict:
                 try:
                     result = future.result()
                     tool_results[tool_name] = result
-
                     if result["status"] == "success":
                         completed_steps.add(step_num)
-                        execution_log.append(f"Step {step_num} ({tool_name}) succeeded")
                         print(f"Completed: {tool_name}")
                     else:
-                        execution_log.append(f"Step {step_num} ({tool_name}) failed")
                         print(f"Failed: {tool_name}")
-
                 except Exception as e:
-                    tool_results[tool_name] = {
-                        "status": "error",
-                        "error": str(e)
-                    }
-                    print(f"Exception in {tool_name}: {e}")
+                    tool_results[tool_name] = {"status": "error", "error": str(e)}
 
-        # Update remaining steps
         remaining_steps = still_waiting
 
     print("=== Execution Finished ===\n")
-
-    return {
-        "tool_results": tool_results,
-        "execution_log": execution_log
-    }
+    return {"tool_results": tool_results}

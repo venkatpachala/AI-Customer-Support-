@@ -42,26 +42,41 @@ async def chat(request: ChatRequest):
         "needs_escalation": False,
         "escalation_reason": "",
         "verification_passed": True,
-        "verification_issues": []
+        "verification_issues": [],
+        "missing_photos": False
     }
 
     try:
         result = compiled_graph.invoke(inputs)
 
-        # 1. Verification failed
-        if result.get("verification_passed") is False:
-            issues = result.get("verification_issues", [])
+        # ============================================
+        # 1. FIRST: Check if Guardrails blocked it
+        # ============================================
+        if result.get("blocked") is True:
             return {
-                "response": "I was unable to fully process your request due to an internal issue. A support agent will review this case shortly.",
-                "escalated": True,
-                "reason": result.get("escalation_reason", "Verification failed"),
-                "verification_issues": issues,
+                "response": result.get("error", "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments."),
+                "escalated": False,
+                "blocked": True,
                 "confidence": 0.0,
                 "citations": []
             }
 
-        # 2. Normal HITL escalation
-        if result.get("needs_escalation"):
+        # ============================================
+        # 2. Verification failed
+        # ============================================
+        if result.get("verification_passed") is False:
+            return {
+                "response": "I was unable to fully process your request due to an internal issue. A support agent will review this case shortly.",
+                "escalated": True,
+                "reason": result.get("escalation_reason", "Verification failed"),
+                "confidence": 0.0,
+                "citations": []
+            }
+
+        # ============================================
+        # 3. HITL escalation
+        # ============================================
+        if result.get("needs_escalation") is True:
             return {
                 "response": "This request requires human assistance. A support agent will review your case shortly.",
                 "escalated": True,
@@ -70,9 +85,30 @@ async def chat(request: ChatRequest):
                 "citations": result.get("citations", [])
             }
 
-        # 3. Normal successful response
-        last_msg = result["messages"][-1]
+        # ============================================
+        # 4. Normal response
+        # ============================================
+        messages = result.get("messages", [])
+        if not messages:
+            return {
+                "response": "I could not generate a response. Please try again.",
+                "escalated": False,
+                "confidence": 0.0,
+                "citations": []
+            }
+
+        last_msg = messages[-1]
         response_text = get_message_content(last_msg)
+
+        # Safety: don't return the original user message
+        if response_text.strip() == request.message.strip():
+            return {
+                "response": "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments.",
+                "escalated": False,
+                "blocked": True,
+                "confidence": 0.0,
+                "citations": []
+            }
 
         return {
             "response": response_text,

@@ -5,7 +5,7 @@ from typing import Dict
 
 def qa_node(state: AgentState) -> Dict:
     query = get_last_user_message(state.get("messages", []))
-
+    missing_photos = state.get("missing_photos", False)
     # 1. Retrieve policy documents
     from rag.retrieval import AdvancedRAGRetriever
     rag = AdvancedRAGRetriever()
@@ -43,16 +43,25 @@ def qa_node(state: AgentState) -> Dict:
     print(f"DEBUG: Retrieved {len(docs)} documents | Tools: {list(tool_results.keys())} | Brand: {brand_name}")
 
     # 4. Strict grounded prompt
+    extra_instruction = ""
+    if missing_photos:
+        extra_instruction = """
+IMPORTANT:
+The return cannot be fully processed yet because photos of the damaged product are required.
+Politely ask the customer to share clear photos of the damage.
+Do not invent any return label or shipping steps.
+"""
+
     prompt = f"""You are a customer support agent for {brand_name}.
 Tone: {tone}
 
-STRICT RULES (must follow):
-1. Only use information that is explicitly present in the POLICY CONTEXT and TOOL RESULTS below.
-2. Never invent return labels, shipping addresses, email confirmations, refund amounts, or timelines.
+STRICT RULES:
+1. Only use information present in the POLICY CONTEXT and TOOL RESULTS.
+2. Never invent return labels, addresses, refund amounts, or timelines.
 3. Only mention actions that actually appear in the TOOL RESULTS.
-4. If the policy requires the customer to provide photos or additional information, clearly ask for it.
-5. If the policy context is empty or insufficient, clearly say that you do not have enough information.
-6. Stay strictly within {brand_name} policies. Do not give generic e-commerce advice.
+4. If photos are required, clearly ask the customer to provide them.
+
+{extra_instruction}
 
 ------------------------
 POLICY CONTEXT
@@ -60,7 +69,7 @@ POLICY CONTEXT
 {context}
 
 ------------------------
-TOOL RESULTS (Only these actions actually happened)
+TOOL RESULTS
 ------------------------
 {tool_context}
 
@@ -69,7 +78,7 @@ CUSTOMER QUESTION
 ------------------------
 {query}
 
-Write a clear, honest, and professional reply based only on the information above:"""
+Write a clear and professional reply:"""
 
     llm = ChatOllama(
         model="qwen2.5:7b",
