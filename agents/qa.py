@@ -6,59 +6,71 @@ from typing import Dict
 def qa_node(state: AgentState) -> Dict:
     query = get_last_user_message(state.get("messages", []))
 
-    # 1. Retrieve policy documents
+    # 1. Retrieve policy
     from rag.retrieval import AdvancedRAGRetriever
     rag = AdvancedRAGRetriever()
-    docs = rag.retrieve(query, min_score=0.6)
+    docs = rag.retrieve(query, min_score=0.50)
 
-    if docs:
-        context = "\n\n".join(doc.page_content for doc in docs)
-        citations = [doc.metadata.get("source", "N/A") for doc in docs]
-    else:
-        context = "No relevant policy found."
-        citations = []
+    context = "\n\n".join([doc.page_content for doc in docs]) if docs else "No relevant policy found."
+    citations = [doc.metadata.get("citation", "N/A") for doc in docs]
 
+    # 2. Clean tool results
     tool_results = state.get("tool_results") or {}
-    
-    if tool_results:
-        tool_lines = []
-        for tool_name, result in tool_results.items():
-            status = result.get("status", "unknown") if isinstance(result, dict) else "success"
-            data = result.get("data", result) if isinstance(result, dict) else result
-            tool_lines.append(f"- {tool_name}: status={status}, data={data}")
-        tool_context = "\n".join(tool_lines)
-    else:
-        tool_context = "No tools were executed."
+    tool_summary = []
 
-    print(f"DEBUG: Retrieved {len(docs)} documents | Tools: {list(tool_results.keys())}")
+    for tool_name, result in tool_results.items():
+        if isinstance(result, dict):
+            status = result.get("status", "unknown")
+            data = result.get("data", {})
+            tool_summary.append(f"- {tool_name}: {status} → {data}")
+        else:
+            tool_summary.append(f"- {tool_name}: {result}")
 
-    # 3. Improved prompt for better response quality
-    prompt = f"""You are a polite and professional Zepto customer support agent.
+    tool_context = "\n".join(tool_summary) if tool_summary else "No tools were executed."
 
-POLICY CONTEXT:
+    print(f"DEBUG: Retrieved {len(docs)} documents | Tools used: {list(tool_results.keys())}")
+
+    # 3. Strict prompt
+    prompt = f"""You are a professional Zepto customer support agent.
+
+You must answer ONLY using the information given below.
+Do NOT invent any amounts, policies, or actions.
+
+------------------------
+POLICY CONTEXT
+------------------------
 {context}
 
-TOOL RESULTS:
+------------------------
+TOOL RESULTS (What actually happened)
+------------------------
 {tool_context}
 
-CUSTOMER MESSAGE:
+------------------------
+CUSTOMER QUESTION
+------------------------
 {query}
 
-Guidelines:
-1. Acknowledge the customer's issue with empathy.
-2. Clearly mention what actions have already been taken (based on tool results).
-3. Explain the next steps the customer needs to complete.
-4. If photos are required according to policy, politely ask for them.
-5. Do not invent any rules that are not in the policy.
-6. Keep the tone helpful, clear and professional.
+Instructions:
+- Be polite and clear.
+- Clearly state what has already been done based on the tool results.
+- Tell the customer the next steps according to the policy.
+- If photos are required, ask for them.
+- If information is missing, say so honestly.
+- Never invent refund amounts or policy rules.
 
 Write a natural customer support reply:"""
 
-    llm = ChatOllama(model="qwen2.5:7b", temperature=0.6)
+    llm = ChatOllama(
+        model="qwen2.5:7b",
+        base_url="http://127.0.0.1:11434",
+        temperature=0.4
+    )
+
     response = llm.invoke(prompt)
 
     return {
         "messages": [response],
         "citations": citations,
-        "confidence": 0.9 if docs else 0.5,
+        "confidence": 0.9 if docs else 0.55
     }

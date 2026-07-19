@@ -1,14 +1,18 @@
 from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 from orchestration.state import AgentState
-from orchestration.plans import ExecutionPlan, PlanStep
+from orchestration.plans import ExecutionPlan
 from common.messages import get_last_user_message
 from typing import Dict
 import uuid
 import json
 import re
 
-llm = ChatOllama(model="qwen2.5:7b", temperature=0)
+llm = ChatOllama(
+    model="qwen2.5:7b",
+    base_url="http://127.0.0.1:11434",
+    temperature=0
+)
 
 planner_prompt = ChatPromptTemplate.from_template(
     """You are a planner for Zepto customer support.
@@ -23,14 +27,14 @@ Available tools:
 
 Create a realistic execution plan. Return ONLY valid JSON.
 
-Example for damaged product:
+Example:
 {{
   "plan_id": "plan_001",
   "intent": "return",
   "steps": [
     {{"step": 1, "description": "Fetch order details", "tool": "shopify_get_order", "required": true}},
-    {{"step": 2, "description": "Check return eligibility using policy", "tool": "rag_search", "required": true}},
-    {{"step": 3, "description": "Initiate return if eligible", "tool": "shopify_initiate_return", "required": false}}
+    {{"step": 2, "description": "Check return eligibility", "tool": "rag_search", "required": true}},
+    {{"step": 3, "description": "Initiate return", "tool": "shopify_initiate_return", "required": false}}
   ],
   "requires_human_approval": false,
   "confidence": 0.85,
@@ -47,9 +51,7 @@ def planner_node(state: AgentState) -> Dict:
     response = llm.invoke(planner_prompt.format(query=query))
     content = response.content.strip()
 
-    # Clean JSON if model adds extra text
     try:
-        # Extract JSON block
         json_match = re.search(r'\{.*\}', content, re.DOTALL)
         if json_match:
             content = json_match.group(0)

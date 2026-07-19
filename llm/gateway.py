@@ -5,13 +5,17 @@ import os
 class LLMGateway:
     def __init__(self):
         self.primary = "ollama"  # Change to "openai" when needed
-        self.ollama = ChatOllama(model="qwen2.5:7b", temperature=0.7)
+        llm = ChatOllama(
+    model="qwen2.5:7b",
+    base_url="http://127.0.0.1:11434",   # Use 127.0.0.1 instead of localhost
+    temperature=0.6
+)
         self.openai = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
 
     def invoke(self, prompt):
         if self.primary == "ollama":
             try:
-                print("Using Ollama (Qwen2.5:7b)")
+                print("Using Ollama (qwen2.5:7b)")
                 return self.ollama.invoke(prompt)
             except Exception as e:
                 print(f"Ollama failed: {e}")

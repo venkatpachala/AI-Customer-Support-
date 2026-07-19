@@ -15,7 +15,7 @@ class ChatRequest(BaseModel):
     message: str
     customer_id: str = "default"
 
-app = FastAPI(title="D2C AI Support Agent - Phase 1 + HITL")
+app = FastAPI(title="D2C AI Support Agent")
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
@@ -37,7 +37,6 @@ async def chat(request: ChatRequest):
     try:
         result = compiled_graph.invoke(inputs)
 
-        # Check if Human-in-the-Loop is required
         if result.get("needs_escalation"):
             return {
                 "response": "This request requires human assistance. A support agent will review your case shortly.",
@@ -47,7 +46,6 @@ async def chat(request: ChatRequest):
                 "citations": result.get("citations", [])
             }
 
-        # Normal response
         last_msg = result["messages"][-1]
         response_text = get_message_content(last_msg)
 
