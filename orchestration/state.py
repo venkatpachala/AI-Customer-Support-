@@ -19,3 +19,4 @@ class AgentState(Dict):
     risk_level: str
     tenant_id: str
     tenant_config: dict
+    request_id: str

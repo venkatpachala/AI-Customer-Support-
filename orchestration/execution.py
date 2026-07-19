@@ -4,13 +4,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as
 from typing import Dict, Any, Set
 from orchestration.state import AgentState
 from tools.registry import TOOL_REGISTRY
+from observability.logging import log_event
+from observability.metrics import TOOL_COUNT, NODE_LATENCY
 
 def extract_order_id(text: str) -> str:
     match = re.search(r'(?:order\s*#?|#)?(\d{5,})', text, re.IGNORECASE)
     return match.group(1) if match else "12345"
 
 def extract_amount(text: str) -> int:
-    """Extract refund amount from user message"""
     match = re.search(r'(?:₹|rs\.?|inr)?\s*(\d{3,6})', text.lower().replace(",", ""))
     if match:
         return int(match.group(1))
@@ -53,6 +54,9 @@ def run_tool_with_retries(tool_spec, params: Dict[str, Any]) -> Dict:
     }
 
 def execution_engine_node(state: AgentState) -> Dict:
+    request_id = state.get("request_id", "unknown")
+    start_time = time.time()
+
     plan = state.get("current_plan") or {}
     tool_results = state.get("tool_results") or {}
     messages = state.get("messages", [])
@@ -66,6 +70,12 @@ def execution_engine_node(state: AgentState) -> Dict:
     amount = extract_amount(last_query)
     steps = plan.get("steps") or []
     missing_inputs = set(plan.get("missing_inputs") or [])
+
+    log_event("executor_started", request_id, node="executor", data={
+        "order_id": order_id,
+        "amount": amount,
+        "missing_inputs": list(missing_inputs)
+    })
 
     print("\n=== Advanced Execution Engine ===")
     print(f"Order ID: {order_id} | Amount: ₹{amount}")
@@ -92,6 +102,7 @@ def execution_engine_node(state: AgentState) -> Dict:
                     "status": "skipped",
                     "reason": f"Unmet dependencies: {step.get('depends_on')}"
                 }
+                TOOL_COUNT.labels(tool_name=tool_name, status="skipped").inc()
             break
 
         print(f"Ready steps: {[s.get('tool') for s in ready_steps]}")
@@ -108,6 +119,7 @@ def execution_engine_node(state: AgentState) -> Dict:
                         "status": "skipped",
                         "reason": "Missing required input: photos"
                     }
+                    TOOL_COUNT.labels(tool_name=tool_name, status="skipped").inc()
                     print(f"Skipped {tool_name} - missing photos")
                     completed_steps.add(step_num)
                     continue
@@ -118,10 +130,10 @@ def execution_engine_node(state: AgentState) -> Dict:
                         "status": "error",
                         "error": f"Tool '{tool_name}' not registered"
                     }
+                    TOOL_COUNT.labels(tool_name=tool_name, status="error").inc()
                     completed_steps.add(step_num)
                     continue
 
-                # Prepare parameters
                 params = {"order_id": order_id}
                 if tool_name == "shopify_initiate_return":
                     params["reason"] = "damaged"
@@ -139,15 +151,28 @@ def execution_engine_node(state: AgentState) -> Dict:
                 try:
                     result = future.result()
                     tool_results[tool_name] = result
-                    if result["status"] == "success":
+                    status = result.get("status", "unknown")
+                    TOOL_COUNT.labels(tool_name=tool_name, status=status).inc()
+
+                    if status == "success":
                         completed_steps.add(step_num)
                         print(f"Completed: {tool_name}")
                     else:
                         print(f"Failed: {tool_name}")
                 except Exception as e:
                     tool_results[tool_name] = {"status": "error", "error": str(e)}
+                    TOOL_COUNT.labels(tool_name=tool_name, status="error").inc()
 
         remaining_steps = still_waiting
+
+    duration = time.time() - start_time
+    NODE_LATENCY.labels(node="executor").observe(duration)
+
+    log_event("executor_completed", request_id, node="executor", data={
+        "tools_executed": list(tool_results.keys()),
+        "tool_statuses": {k: v.get("status") for k, v in tool_results.items()},
+        "duration": round(duration, 3)
+    })
 
     print("=== Execution Finished ===\n")
     return {"tool_results": tool_results}

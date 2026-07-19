@@ -2,6 +2,7 @@ from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 from orchestration.state import AgentState
 from common.messages import get_last_user_message
+from observability.logging import log_event
 from typing import Dict
 import json
 import re
@@ -16,9 +17,7 @@ supervisor_prompt = ChatPromptTemplate.from_template(
     """You are a supervisor for Zepto customer support.
 
 Classify the user query. Be conservative with risk.
-
-Only mark risk as "high" if there is clear fraud, threat, abuse, or attempt to manipulate the system.
-Normal complaints, returns, refunds, and slightly rude language should be "low" or "medium".
+Only mark risk as "high" for clear fraud, threat, or abuse.
 
 Query: {query}
 
@@ -32,35 +31,38 @@ Return ONLY valid JSON:
 )
 
 def supervisor_node(state: AgentState) -> Dict:
+    request_id = state.get("request_id", "unknown")
+    log_event("supervisor_started", request_id, node="supervisor")
+
     query = get_last_user_message(state.get("messages", []))
 
     try:
         response = llm.invoke(supervisor_prompt.format(query=query))
         content = response.content.strip()
 
-        # Extract JSON
         json_match = re.search(r'\{.*\}', content, re.DOTALL)
         if json_match:
             content = json_match.group(0)
 
         data = json.loads(content)
-
         intent = data.get("intent", "general")
         risk = data.get("risk", "low")
         needs_escalation = data.get("needs_escalation", False)
 
-        # Safety: only allow high risk for clear dangerous cases
         dangerous_keywords = ["fraud", "scam", "hack", "threat", "kill", "bomb", "abuse"]
         if risk == "high" and not any(k in query.lower() for k in dangerous_keywords):
             risk = "medium"
 
     except Exception as e:
-        print(f"Supervisor error: {e}")
+        log_event("supervisor_error", request_id, node="supervisor", data={"error": str(e)}, level="error")
         intent = "general"
         risk = "low"
         needs_escalation = False
 
-    print(f"Supervisor → Intent: {intent} | Risk: {risk}")
+    log_event("supervisor_completed", request_id, node="supervisor", data={
+        "intent": intent,
+        "risk": risk
+    })
 
     return {
         "risk_level": risk,
