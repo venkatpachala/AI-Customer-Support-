@@ -16,7 +16,22 @@ def qa_node(state: AgentState) -> Dict:
     from rag.retrieval import AdvancedRAGRetriever
     rag = AdvancedRAGRetriever()
     docs = rag.retrieve(query, min_score=0.6)  # Lower threshold for testing
-    
+    tool_results = state.get("tool_results", {})
+    tool_context = "\n".join([f"{k}: {v}" for k, v in tool_results.items()]) if tool_results else "No tool results"
+
+    prompt = f"""You are a helpful Zepto customer support agent.
+
+Use the following information:
+
+Policy Context:
+{context or "No relevant policy found."}
+
+Tool Results:
+{tool_context}
+
+User Question: {query}
+
+Answer professionally based on the policy and tool results. Be clear and helpful."""
     context = "\n\n".join([doc.page_content for doc in docs])
     citations = [doc.metadata.get("citation", "N/A") for doc in docs]
     
