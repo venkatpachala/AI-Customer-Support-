@@ -9,10 +9,10 @@ def qa_node(state: AgentState) -> Dict:
     # 1. Retrieve policy documents
     from rag.retrieval import AdvancedRAGRetriever
     rag = AdvancedRAGRetriever()
-    docs = rag.retrieve(query, min_score=0.45)
+    docs = rag.retrieve(query, k=8, final_k=4)
 
     if docs:
-        context = "\n\n".join(doc.page_content for doc in docs)
+        context = "\n\n".join([doc.page_content for doc in docs])
         citations = [doc.metadata.get("citation", "N/A") for doc in docs]
     else:
         context = "No relevant policy information was found."
@@ -20,13 +20,14 @@ def qa_node(state: AgentState) -> Dict:
 
     # 2. Format tool results cleanly
     tool_results = state.get("tool_results") or {}
+    
     if tool_results:
         tool_lines = []
         for name, result in tool_results.items():
             if isinstance(result, dict):
                 status = result.get("status", "unknown")
                 data = result.get("data", {})
-                tool_lines.append(f"- {name}: {status} → {data}")
+                tool_lines.append(f"- {name}: status={status}, data={data}")
             else:
                 tool_lines.append(f"- {name}: {result}")
         tool_context = "\n".join(tool_lines)
@@ -35,15 +36,24 @@ def qa_node(state: AgentState) -> Dict:
 
     print(f"DEBUG: Retrieved {len(docs)} documents | Tools: {list(tool_results.keys())}")
 
-    # 3. Very strict prompt
-    prompt = f"""You are a professional Zepto customer support agent.
+    # 3. Strict grounded prompt
+    prompt = f"""You are a customer support agent for Zepto.
 
-STRICT RULES (must follow):
-1. Only use information present in the POLICY CONTEXT and TOOL RESULTS below.
-2. Do NOT invent any refund amounts, currency, timelines, or policy rules.
-3. If a specific amount is not mentioned in the tool results, do not invent one.
-4. If policy information is missing, clearly say so and ask for more details.
-5. Be honest, clear, and helpful.
+You must follow these rules without exception:
+
+1. You can ONLY use information that is explicitly present in the POLICY CONTEXT and TOOL RESULTS below.
+2. You are NOT allowed to invent:
+   - Return labels
+   - Shipping addresses
+   - Email confirmations
+   - Refund amounts
+   - Timelines
+   - Replacement processes
+   - Any step that is not present in the tool results or policy
+3. If the policy requires the customer to provide photos or additional information, clearly ask for it.
+4. If the policy context is empty or insufficient, clearly say that you do not have enough policy information to answer fully.
+5. Only mention actions that actually appear in the TOOL RESULTS.
+6. Stay strictly within Zepto company policies. Do not give general e-commerce advice.
 
 ------------------------
 POLICY CONTEXT
@@ -60,12 +70,13 @@ CUSTOMER QUESTION
 ------------------------
 {query}
 
-Write a natural, professional customer support reply based ONLY on the information above:"""
+Write a clear, factual, and professional reply based only on the information above.
+If you cannot answer properly due to missing information, say so."""
 
     llm = ChatOllama(
         model="qwen2.5:7b",
         base_url="http://127.0.0.1:11434",
-        temperature=0.3
+        temperature=0.2
     )
 
     response = llm.invoke(prompt)
