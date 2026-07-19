@@ -6,8 +6,14 @@ import re
 import traceback
 
 def extract_order_id(text: str) -> str:
-    """Extract order ID from user message"""
-    match = re.search(r'#?(\d{4,})', text)
+    """Better order ID extraction"""
+    # Look for patterns like #12345 or order 12345
+    match = re.search(r'(?:order\s*#?|#)(\d{5,})', text, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    
+    # Fallback
+    match = re.search(r'\b(\d{5,})\b', text)
     return match.group(1) if match else "12345"
 
 def execution_engine_node(state: AgentState) -> Dict:

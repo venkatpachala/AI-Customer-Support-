@@ -14,3 +14,6 @@ class AgentState(Dict):
     memory_retrieved: List[str]
     risk_level: str
     needs_escalation: bool
+    needs_escalation: bool
+    escalation_reason: str
+    risk_level: str

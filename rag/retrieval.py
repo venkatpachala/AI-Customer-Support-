@@ -18,7 +18,7 @@ class AdvancedRAGRetriever:
             index_name=index_name,
             embedding=self.embeddings
         )
-        self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+        self.llm = ChatOpenAI(model="qwen2.5:7b", temperature=0)
         
         # Compressor for context compression
         compressor = LLMChainExtractor.from_llm(self.llm)

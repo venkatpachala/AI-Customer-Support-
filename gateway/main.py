@@ -3,23 +3,22 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 print("DEBUG: OPENAI_API_KEY loaded =", "YES" if os.getenv("OPENAI_API_KEY") else "NO")
+print("DEBUG: PINECONE_API_KEY loaded =", "YES" if os.getenv("PINECONE_API_KEY") else "NO")
 
 from fastapi import FastAPI
 from pydantic import BaseModel
 from orchestration.graph import compiled_graph
 from langchain_core.messages import HumanMessage
 from common.messages import get_message_content
-from memory.customer import customer_memory
 
 class ChatRequest(BaseModel):
     message: str
     customer_id: str = "default"
 
-app = FastAPI(title="D2C AI Support Agent - Phase 1")
+app = FastAPI(title="D2C AI Support Agent - Phase 1 + HITL")
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
-    customer_context = customer_memory.get_customer_context(request.customer_id)
     inputs = {
         "messages": [HumanMessage(content=request.message)],
         "customer_id": request.customer_id,
@@ -31,22 +30,41 @@ async def chat(request: ChatRequest):
         "citations": [],
         "memory_retrieved": [],
         "risk_level": "low",
-        "needs_escalation": False
+        "needs_escalation": False,
+        "escalation_reason": ""
     }
 
     try:
         result = compiled_graph.invoke(inputs)
+
+        # Check if Human-in-the-Loop is required
+        if result.get("needs_escalation"):
+            return {
+                "response": "This request requires human assistance. A support agent will review your case shortly.",
+                "escalated": True,
+                "reason": result.get("escalation_reason", "Requires manual review"),
+                "confidence": result.get("confidence", 0.0),
+                "citations": result.get("citations", [])
+            }
+
+        # Normal response
         last_msg = result["messages"][-1]
         response_text = get_message_content(last_msg)
-        
+
         return {
             "response": response_text,
             "confidence": result.get("confidence", 0.0),
-            "citations": result.get("citations", [])
+            "citations": result.get("citations", []),
+            "escalated": False,
+            "tool_results": result.get("tool_results", {})
         }
+
     except Exception as e:
-        print("Error:", str(e))
-        return {"error": str(e)}
+        print("Error during graph execution:", str(e))
+        return {
+            "error": str(e),
+            "escalated": False
+        }
 
 if __name__ == "__main__":
     import uvicorn
