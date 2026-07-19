@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from orchestration.graph import compiled_graph
 from langchain_core.messages import HumanMessage
 from common.messages import get_message_content
+from memory.customer import customer_memory
 
 class ChatRequest(BaseModel):
     message: str
@@ -18,6 +19,7 @@ app = FastAPI(title="D2C AI Support Agent - Phase 1")
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
+    customer_context = customer_memory.get_customer_context(request.customer_id)
     inputs = {
         "messages": [HumanMessage(content=request.message)],
         "customer_id": request.customer_id,
