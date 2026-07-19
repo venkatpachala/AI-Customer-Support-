@@ -11,12 +11,13 @@ from orchestration.graph import compiled_graph
 from langchain_core.messages import HumanMessage
 from common.messages import get_message_content
 from config.loaders import load_tenant_config
+
 app = FastAPI(title="D2C AI Support Agent")
 
 class ChatRequest(BaseModel):
     message: str
     customer_id: str = "default"
-    tenant_id: str = "zepto"          # New field
+    tenant_id: str = "zepto"
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
@@ -39,12 +40,27 @@ async def chat(request: ChatRequest):
         "memory_retrieved": [],
         "risk_level": "low",
         "needs_escalation": False,
-        "escalation_reason": ""
+        "escalation_reason": "",
+        "verification_passed": True,
+        "verification_issues": []
     }
 
     try:
         result = compiled_graph.invoke(inputs)
 
+        # 1. Verification failed
+        if result.get("verification_passed") is False:
+            issues = result.get("verification_issues", [])
+            return {
+                "response": "I was unable to fully process your request due to an internal issue. A support agent will review this case shortly.",
+                "escalated": True,
+                "reason": result.get("escalation_reason", "Verification failed"),
+                "verification_issues": issues,
+                "confidence": 0.0,
+                "citations": []
+            }
+
+        # 2. Normal HITL escalation
         if result.get("needs_escalation"):
             return {
                 "response": "This request requires human assistance. A support agent will review your case shortly.",
@@ -54,6 +70,7 @@ async def chat(request: ChatRequest):
                 "citations": result.get("citations", [])
             }
 
+        # 3. Normal successful response
         last_msg = result["messages"][-1]
         response_text = get_message_content(last_msg)
 
