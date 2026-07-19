@@ -1,0 +1,29 @@
+tenant_id: zepto
+
+brand:
+  brand_name: Zepto
+  support_email: support@zeptonow.com
+  tone: "professional, empathetic, and concise"
+  language: en
+
+approval:
+  refund_auto_approve_limit: 500
+  high_value_refund_limit: 2000
+  require_photos_for_return: true
+
+tools:
+  shopify_base_url: null
+  stripe_api_key_env: STRIPE_API_KEY
+  custom_tools: {}
+
+escalation:
+  contacts:
+    - support-lead@zeptonow.com
+  slack_webhook: null
+  escalate_on:
+    - high_value_refund
+    - fraud
+    - low_confidence
+
+policy_namespace: zepto
+active: true

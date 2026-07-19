@@ -18,7 +18,7 @@ def qa_node(state: AgentState) -> Dict:
         context = "No relevant policy information was found."
         citations = []
 
-    # 2. Format tool results cleanly
+    # 2. Format tool results
     tool_results = state.get("tool_results") or {}
     
     if tool_results:
@@ -34,26 +34,25 @@ def qa_node(state: AgentState) -> Dict:
     else:
         tool_context = "No tools were executed."
 
-    print(f"DEBUG: Retrieved {len(docs)} documents | Tools: {list(tool_results.keys())}")
+    # 3. Load brand config
+    tenant_config = state.get("tenant_config") or {}
+    brand = tenant_config.get("brand", {})
+    brand_name = brand.get("brand_name", "our company")
+    tone = brand.get("tone", "professional, polite, and helpful")
 
-    # 3. Strict grounded prompt
-    prompt = f"""You are a customer support agent for Zepto.
+    print(f"DEBUG: Retrieved {len(docs)} documents | Tools: {list(tool_results.keys())} | Brand: {brand_name}")
 
-You must follow these rules without exception:
+    # 4. Strict grounded prompt
+    prompt = f"""You are a customer support agent for {brand_name}.
+Tone: {tone}
 
-1. You can ONLY use information that is explicitly present in the POLICY CONTEXT and TOOL RESULTS below.
-2. You are NOT allowed to invent:
-   - Return labels
-   - Shipping addresses
-   - Email confirmations
-   - Refund amounts
-   - Timelines
-   - Replacement processes
-   - Any step that is not present in the tool results or policy
-3. If the policy requires the customer to provide photos or additional information, clearly ask for it.
-4. If the policy context is empty or insufficient, clearly say that you do not have enough policy information to answer fully.
-5. Only mention actions that actually appear in the TOOL RESULTS.
-6. Stay strictly within Zepto company policies. Do not give general e-commerce advice.
+STRICT RULES (must follow):
+1. Only use information that is explicitly present in the POLICY CONTEXT and TOOL RESULTS below.
+2. Never invent return labels, shipping addresses, email confirmations, refund amounts, or timelines.
+3. Only mention actions that actually appear in the TOOL RESULTS.
+4. If the policy requires the customer to provide photos or additional information, clearly ask for it.
+5. If the policy context is empty or insufficient, clearly say that you do not have enough information.
+6. Stay strictly within {brand_name} policies. Do not give generic e-commerce advice.
 
 ------------------------
 POLICY CONTEXT
@@ -61,7 +60,7 @@ POLICY CONTEXT
 {context}
 
 ------------------------
-TOOL RESULTS
+TOOL RESULTS (Only these actions actually happened)
 ------------------------
 {tool_context}
 
@@ -70,13 +69,12 @@ CUSTOMER QUESTION
 ------------------------
 {query}
 
-Write a clear, factual, and professional reply based only on the information above.
-If you cannot answer properly due to missing information, say so."""
+Write a clear, honest, and professional reply based only on the information above:"""
 
     llm = ChatOllama(
         model="qwen2.5:7b",
         base_url="http://127.0.0.1:11434",
-        temperature=0.2
+        temperature=0.15
     )
 
     response = llm.invoke(prompt)

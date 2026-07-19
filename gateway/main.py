@@ -10,18 +10,26 @@ from pydantic import BaseModel
 from orchestration.graph import compiled_graph
 from langchain_core.messages import HumanMessage
 from common.messages import get_message_content
+from config.loaders import load_tenant_config
+app = FastAPI(title="D2C AI Support Agent")
 
 class ChatRequest(BaseModel):
     message: str
     customer_id: str = "default"
-
-app = FastAPI(title="D2C AI Support Agent")
+    tenant_id: str = "zepto"          # New field
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
+    try:
+        tenant_config = load_tenant_config(request.tenant_id)
+    except Exception as e:
+        return {"error": f"Invalid tenant: {str(e)}"}
+
     inputs = {
         "messages": [HumanMessage(content=request.message)],
         "customer_id": request.customer_id,
+        "tenant_id": request.tenant_id,
+        "tenant_config": tenant_config.dict(),
         "customer_context": {},
         "current_plan": None,
         "workflow_steps": [],

@@ -17,3 +17,5 @@ class AgentState(Dict):
     needs_escalation: bool
     escalation_reason: str
     risk_level: str
+    tenant_id: str
+    tenant_config: dict

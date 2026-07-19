@@ -15,9 +15,9 @@ llm = ChatOllama(
 )
 
 planner_prompt = ChatPromptTemplate.from_template(
-    """You are an enterprise-grade planner for Zepto customer support.
+    """You are an enterprise-grade planner for customer support.
 
-Analyze the user query and create a structured execution plan.
+{config_context}
 
 User Query: {query}
 
@@ -27,7 +27,7 @@ Available tools:
 - stripe_refund
 - rag_search
 
-Return ONLY valid JSON in this exact structure:
+Create a structured execution plan. Return ONLY valid JSON in this format:
 
 {{
   "plan_id": "plan_xxx",
@@ -54,22 +54,43 @@ Return ONLY valid JSON in this exact structure:
   "estimated_steps": 3
 }}
 
-Important rules:
-- Identify what information is required vs missing
-- Add dependencies between steps
-- Flag human approval when needed (high value refund, fraud suspicion, etc.)
-- Keep the plan realistic and minimal
+Rules:
+- Identify required vs missing inputs
+- Add realistic step dependencies
+- Use the tenant configuration for approval decisions
+- Keep the plan minimal and executable
 """
 )
 
 def planner_node(state: AgentState) -> Dict:
     query = get_last_user_message(state.get("messages", []))
+    
+    # Load tenant configuration
+    tenant_config = state.get("tenant_config") or {}
+    approval = tenant_config.get("approval", {})
+    brand = tenant_config.get("brand", {})
+    
+    require_photos = approval.get("require_photos_for_return", True)
+    auto_approve_limit = approval.get("refund_auto_approve_limit", 500)
+    high_value_limit = approval.get("high_value_refund_limit", 2000)
+    brand_name = brand.get("brand_name", "the company")
 
-    response = llm.invoke(planner_prompt.format(query=query))
+    config_context = f"""Tenant Configuration for {brand_name}:
+- Require photos for returns: {require_photos}
+- Auto-approve refund limit: ₹{auto_approve_limit}
+- High value refund limit: ₹{high_value_limit}
+"""
+
+    response = llm.invoke(
+        planner_prompt.format(
+            query=query,
+            config_context=config_context
+        )
+    )
+    
     content = response.content.strip()
 
     try:
-        # Extract JSON
         json_match = re.search(r'\{.*\}', content, re.DOTALL)
         if json_match:
             content = json_match.group(0)
