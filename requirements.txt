@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+langgraph
+langchain
+langchain-openai
+langchain-community
+pinecone-client
+psycopg2-binary
+redis
+shopify
+stripe
+python-dotenv
+pydantic-settings
+langsmith
+ollama  # for Qwen fallback
+presidio-analyzer  # PII (optional)
