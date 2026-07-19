@@ -7,6 +7,8 @@ from orchestration.execution import execution_engine_node
 from orchestration.hitl import check_escalation
 from agents.qa import qa_node
 
+from orchestration.verifier import verifier_node
+
 def build_graph():
     graph = StateGraph(AgentState)
 
@@ -14,21 +16,32 @@ def build_graph():
     graph.add_node("supervisor", supervisor_node)
     graph.add_node("planner", planner_node)
     graph.add_node("executor", execution_engine_node)
+    graph.add_node("verifier", verifier_node)
     graph.add_node("hitl_check", check_escalation)
     graph.add_node("qa", qa_node)
 
     graph.set_entry_point("guardrails")
-    
+
     graph.add_conditional_edges(
         "guardrails",
         lambda s: "blocked" if s.get("blocked") else "supervisor",
         {"blocked": END, "supervisor": "supervisor"}
     )
-    
+
     graph.add_edge("supervisor", "planner")
     graph.add_edge("planner", "executor")
-    graph.add_edge("executor", "hitl_check")
-    
+    graph.add_edge("executor", "verifier")
+
+    # After verification
+    graph.add_conditional_edges(
+        "verifier",
+        lambda s: "escalate" if not s.get("verification_passed", True) else "hitl_check",
+        {
+            "escalate": END,
+            "hitl_check": "hitl_check"
+        }
+    )
+
     graph.add_conditional_edges(
         "hitl_check",
         lambda s: "escalate" if s.get("needs_escalation") else "qa",
@@ -37,10 +50,9 @@ def build_graph():
             "qa": "qa"
         }
     )
-    
+
     graph.add_edge("qa", END)
 
     return graph.compile()
 
-# This line is very important
 compiled_graph = build_graph()
