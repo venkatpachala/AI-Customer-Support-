@@ -1,10 +1,13 @@
-# Test
-retriever = AdvancedRAGRetriever()
-docs = retriever.retrieve(
-    query="What is the return policy for damaged products in India?",
-    metadata_filter={"category": "policy", "region": "IN"}
-)
+# rag/clear_index.py
+from pinecone import Pinecone
+import os
+from dotenv import load_dotenv
 
-for doc in docs:
-    print(doc.page_content[:300], "...")
-    print("Citation:", doc.metadata.get("citation"))
+load_dotenv()
+
+pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+index = pc.Index(os.getenv("PINECONE_INDEX_NAME"))
+
+# Delete all vectors
+index.delete(delete_all=True)
+print("✅ All previous documents deleted from Pinecone index.")
