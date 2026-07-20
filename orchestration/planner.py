@@ -20,6 +20,9 @@ planner_prompt = ChatPromptTemplate.from_template(
 
 {config_context}
 
+Memory Context:
+{memory_context}
+
 User Query: {query}
 
 Available tools:
@@ -27,6 +30,12 @@ Available tools:
 - shopify_initiate_return
 - stripe_refund
 - rag_search
+
+Important memory rules:
+- If active_order_id is already present, do not ask for order ID again.
+- If photos_requested is true and photos_received is false, keep photos in missing_inputs.
+- If case_status is escalated, create a minimal plan and avoid new tool actions.
+- Reuse known details from memory.
 
 Return ONLY valid JSON:
 {{
@@ -62,6 +71,8 @@ def planner_node(state: AgentState) -> Dict:
 
     query = get_last_user_message(state.get("messages", []))
     tenant_config = state.get("tenant_config") or {}
+    memory_context = state.get("memory_context") or {}
+
     approval = tenant_config.get("approval", {})
     brand = tenant_config.get("brand", {})
 
@@ -76,8 +87,24 @@ def planner_node(state: AgentState) -> Dict:
 - High value refund limit: ₹{high_value_limit}
 """
 
+    memory_text = f"""
+- session_id: {memory_context.get('session_id')}
+- case_id: {memory_context.get('case_id')}
+- active_order_id: {memory_context.get('active_order_id')}
+- issue_type: {memory_context.get('issue_type')}
+- case_status: {memory_context.get('case_status')}
+- missing_inputs: {memory_context.get('missing_inputs')}
+- photos_requested: {memory_context.get('photos_requested')}
+- photos_received: {memory_context.get('photos_received')}
+- tools_executed: {memory_context.get('tools_executed')}
+"""
+
     response = llm.invoke(
-        planner_prompt.format(query=query, config_context=config_context)
+        planner_prompt.format(
+            query=query,
+            config_context=config_context,
+            memory_context=memory_text
+        )
     )
     content = response.content.strip()
 
@@ -98,6 +125,23 @@ def planner_node(state: AgentState) -> Dict:
             replan_triggers=["parsing_failure"]
         )
 
+    # Hard memory overrides for reliability
+    missing_inputs = list(plan.missing_inputs or [])
+    active_order_id = memory_context.get("active_order_id")
+    photos_requested = memory_context.get("photos_requested", False)
+    photos_received = memory_context.get("photos_received", False)
+
+    if active_order_id and "order_id" in missing_inputs:
+        missing_inputs = [m for m in missing_inputs if m != "order_id"]
+
+    if photos_requested and not photos_received and "photos" not in missing_inputs:
+        missing_inputs.append("photos")
+
+    if photos_received and "photos" in missing_inputs:
+        missing_inputs = [m for m in missing_inputs if m != "photos"]
+
+    plan.missing_inputs = missing_inputs
+
     log_event("planner_completed", request_id, node="planner", data={
         "plan_id": plan.plan_id,
         "intent": plan.intent,
@@ -109,5 +153,5 @@ def planner_node(state: AgentState) -> Dict:
     return {
         "current_plan": plan.dict(),
         "workflow_steps": [step.dict() for step in plan.steps],
-        "needs_escalation": plan.approval_rules.requires_human_approval
+        "needs_escalation": False
     }

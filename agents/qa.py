@@ -1,10 +1,28 @@
 import time
+from pathlib import Path
+import pickle
+from typing import Dict
+
 from langchain_ollama import ChatOllama
 from orchestration.state import AgentState
 from common.messages import get_last_user_message
 from observability.logging import log_event
 from observability.metrics import RAG_COUNT, NODE_LATENCY
-from typing import Dict
+
+_rag_instance = None
+
+def get_rag():
+    global _rag_instance
+    if _rag_instance is None:
+        from rag.retrieval import AdvancedRAGRetriever
+        _rag_instance = AdvancedRAGRetriever()
+        bm25_path = Path("rag/bm25_corpus.pkl")
+        if bm25_path.exists():
+            with open(bm25_path, "rb") as f:
+                bm25_docs = pickle.load(f)
+            _rag_instance.load_bm25_documents(bm25_docs)
+    return _rag_instance
+
 
 def qa_node(state: AgentState) -> Dict:
     request_id = state.get("request_id", "unknown")
@@ -14,23 +32,22 @@ def qa_node(state: AgentState) -> Dict:
     log_event("qa_started", request_id, node="qa")
 
     query = get_last_user_message(state.get("messages", []))
+    memory_context = state.get("memory_context") or {}
 
-    # RAG retrieval
-    from rag.retrieval import AdvancedRAGRetriever
-    rag = AdvancedRAGRetriever()
-    
-    docs = rag.retrieve(query, k=8, final_k=4)
+    # RAG
+    rag = get_rag()
+    docs = rag.retrieve(query, k=8, final_k=4, use_hybrid=True)
 
     if docs:
         context = "\n\n".join([doc.page_content for doc in docs])
-        citations = [doc.metadata.get("citation") for doc in docs]
+        citations = [doc.metadata.get("citation", "N/A") for doc in docs]
         RAG_COUNT.labels(tenant_id=tenant_id, status="hit").inc()
     else:
         context = "No relevant policy information was found."
         citations = []
         RAG_COUNT.labels(tenant_id=tenant_id, status="miss").inc()
 
-    # Tool results
+    # Tools
     tool_results = state.get("tool_results") or {}
     if tool_results:
         tool_lines = []
@@ -45,30 +62,52 @@ def qa_node(state: AgentState) -> Dict:
     else:
         tool_context = "No tools were executed."
 
-    # Brand config
+    # Brand
     tenant_config = state.get("tenant_config") or {}
     brand = tenant_config.get("brand", {})
     brand_name = brand.get("brand_name", "our company")
     tone = brand.get("tone", "professional, polite, and helpful")
-    missing_photos = state.get("missing_photos", False)
+
+    active_order_id = memory_context.get("active_order_id")
+    missing_inputs = memory_context.get("missing_inputs") or []
+    photos_requested = memory_context.get("photos_requested", False)
+    photos_received = memory_context.get("photos_received", False)
+    case_status = memory_context.get("case_status")
 
     extra_instruction = ""
-    if missing_photos:
-        extra_instruction = """
+    if ("photos" in missing_inputs or photos_requested) and not photos_received:
+        extra_instruction = f"""
 IMPORTANT:
-The return cannot be fully processed yet because photos of the damaged product are required.
-Politely ask the customer to share clear photos of the damage.
-Do not invent any return label or shipping steps.
+Photos are still required to continue the return/refund process.
+Ask politely for clear photos of the damaged product.
+If order ID is known ({active_order_id}), mention it.
+Do not invent return labels or shipping steps.
 """
+
+    recent_messages = memory_context.get("recent_messages") or []
+    history_text = "\n".join(
+        [f"{m.get('role')}: {m.get('content')}" for m in recent_messages[-4:]]
+    ) or "No prior messages."
 
     prompt = f"""You are a customer support agent for {brand_name}.
 Tone: {tone}
 
 STRICT RULES:
-1. Only use information present in the POLICY CONTEXT and TOOL RESULTS.
+1. Only use POLICY CONTEXT, TOOL RESULTS, and MEMORY.
 2. Never invent return labels, addresses, refund amounts, or timelines.
-3. Only mention actions that actually appear in the TOOL RESULTS.
-4. If photos are required, clearly ask for them.
+3. Do not re-ask for information already present in memory.
+4. If photos are required and not received, ask for photos.
+5. If case_status is escalated, inform the user that a human agent will review.
+
+MEMORY:
+- active_order_id: {active_order_id}
+- missing_inputs: {missing_inputs}
+- photos_requested: {photos_requested}
+- photos_received: {photos_received}
+- case_status: {case_status}
+
+RECENT CONVERSATION:
+{history_text}
 
 {extra_instruction}
 
@@ -86,9 +125,6 @@ TOOL RESULTS
 CUSTOMER QUESTION
 ------------------------
 {query}
-------------------------
-If you use policy information, mention the citation naturally,
-for example: "As per Zepto Terms of Use, Page 14, Clause 7.7.3...
 
 Write a clear and professional reply:"""
 
@@ -106,7 +142,8 @@ Write a clear and professional reply:"""
     log_event("qa_completed", request_id, node="qa", data={
         "docs_retrieved": len(docs),
         "citations": citations,
-        "missing_photos": missing_photos,
+        "missing_inputs": missing_inputs,
+        "active_order_id": active_order_id,
         "duration": round(duration, 3)
     })
 

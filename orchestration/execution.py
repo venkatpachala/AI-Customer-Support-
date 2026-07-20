@@ -7,15 +7,31 @@ from tools.registry import TOOL_REGISTRY
 from observability.logging import log_event
 from observability.metrics import TOOL_COUNT, NODE_LATENCY
 
-def extract_order_id(text: str) -> str:
+
+def extract_order_id(text: str) -> str | None:
     match = re.search(r'(?:order\s*#?|#)?(\d{5,})', text, re.IGNORECASE)
-    return match.group(1) if match else "12345"
+    return match.group(1) if match else None
+
 
 def extract_amount(text: str) -> int:
-    match = re.search(r'(?:₹|rs\.?|inr)?\s*(\d{3,6})', text.lower().replace(",", ""))
-    if match:
-        return int(match.group(1))
-    return 500
+    """
+    Extract refund amount safely.
+    Avoid treating order IDs like #12345 as amounts.
+    """
+    text = text.lower().replace(",", "")
+
+    patterns = [
+        r'(?:refund|amount|pay|paid|worth|value)\s*(?:of|is|for)?\s*(?:₹|rs\.?|inr)?\s*(\d{3,6})',
+        r'(?:₹|rs\.?|inr)\s*(\d{3,6})',
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, text)
+        if match:
+            return int(match.group(1))
+
+    return 0
+
 
 def run_tool_with_retries(tool_spec, params: Dict[str, Any]) -> Dict:
     last_error = None
@@ -53,6 +69,7 @@ def run_tool_with_retries(tool_spec, params: Dict[str, Any]) -> Dict:
         "data": None
     }
 
+
 def execution_engine_node(state: AgentState) -> Dict:
     request_id = state.get("request_id", "unknown")
     start_time = time.time()
@@ -60,26 +77,32 @@ def execution_engine_node(state: AgentState) -> Dict:
     plan = state.get("current_plan") or {}
     tool_results = state.get("tool_results") or {}
     messages = state.get("messages", [])
+    memory_context = state.get("memory_context") or {}
 
     last_query = ""
     if messages:
         last = messages[-1]
         last_query = last.content if hasattr(last, "content") else str(last)
 
-    order_id = extract_order_id(last_query)
+    # Prefer order ID from memory, fallback to extraction
+    order_id = memory_context.get("active_order_id") or extract_order_id(last_query)
     amount = extract_amount(last_query)
+
     steps = plan.get("steps") or []
-    missing_inputs = set(plan.get("missing_inputs") or [])
+    missing_inputs = set(plan.get("missing_inputs") or memory_context.get("missing_inputs") or [])
+    already_executed = set(memory_context.get("tools_executed") or [])
 
     log_event("executor_started", request_id, node="executor", data={
         "order_id": order_id,
         "amount": amount,
-        "missing_inputs": list(missing_inputs)
+        "missing_inputs": list(missing_inputs),
+        "already_executed": list(already_executed)
     })
 
     print("\n=== Advanced Execution Engine ===")
     print(f"Order ID: {order_id} | Amount: ₹{amount}")
     print(f"Missing inputs: {missing_inputs}")
+    print(f"Already executed: {already_executed}")
 
     completed_steps: Set[int] = set()
     remaining_steps = [s for s in steps if isinstance(s, dict)]
@@ -114,6 +137,18 @@ def execution_engine_node(state: AgentState) -> Dict:
                 tool_name = step.get("tool")
                 step_num = step.get("step")
 
+                # Skip if already executed in previous turns and idempotent read-like tools
+                if tool_name in already_executed and tool_name in ["shopify_get_order", "rag_search"]:
+                    tool_results[tool_name] = {
+                        "status": "skipped",
+                        "reason": "Already executed in this case"
+                    }
+                    TOOL_COUNT.labels(tool_name=tool_name, status="skipped").inc()
+                    completed_steps.add(step_num)
+                    print(f"Skipped {tool_name} - already executed")
+                    continue
+
+                # Skip return/refund tools if photos still missing
                 if "photos" in missing_inputs and tool_name in ["shopify_initiate_return", "stripe_refund"]:
                     tool_results[tool_name] = {
                         "status": "skipped",
@@ -121,6 +156,17 @@ def execution_engine_node(state: AgentState) -> Dict:
                     }
                     TOOL_COUNT.labels(tool_name=tool_name, status="skipped").inc()
                     print(f"Skipped {tool_name} - missing photos")
+                    completed_steps.add(step_num)
+                    continue
+
+                # Need order_id for order-dependent tools
+                if tool_name in ["shopify_get_order", "shopify_initiate_return", "stripe_refund"] and not order_id:
+                    tool_results[tool_name] = {
+                        "status": "skipped",
+                        "reason": "Missing required input: order_id"
+                    }
+                    TOOL_COUNT.labels(tool_name=tool_name, status="skipped").inc()
+                    print(f"Skipped {tool_name} - missing order_id")
                     completed_steps.add(step_num)
                     continue
 
@@ -134,11 +180,13 @@ def execution_engine_node(state: AgentState) -> Dict:
                     completed_steps.add(step_num)
                     continue
 
-                params = {"order_id": order_id}
+                params = {}
+                if tool_name in ["shopify_get_order", "shopify_initiate_return", "stripe_refund"]:
+                    params["order_id"] = order_id
                 if tool_name == "shopify_initiate_return":
                     params["reason"] = "damaged"
                 if tool_name == "stripe_refund":
-                    params["amount"] = amount
+                    params["amount"] = amount if amount > 0 else 500
 
                 future = executor.submit(run_tool_with_retries, tool_spec, params)
                 future_to_step[future] = step
@@ -171,8 +219,13 @@ def execution_engine_node(state: AgentState) -> Dict:
     log_event("executor_completed", request_id, node="executor", data={
         "tools_executed": list(tool_results.keys()),
         "tool_statuses": {k: v.get("status") for k, v in tool_results.items()},
+        "order_id": order_id,
         "duration": round(duration, 3)
     })
 
     print("=== Execution Finished ===\n")
-    return {"tool_results": tool_results}
+    return {
+        "tool_results": tool_results,
+        # expose resolved order_id for memory writeback if needed
+        "resolved_order_id": order_id
+    }

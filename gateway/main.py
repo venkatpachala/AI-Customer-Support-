@@ -1,5 +1,6 @@
 import os
 import time
+from typing import Optional
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -27,28 +28,32 @@ from observability.metrics import (
     ACTIVE_REQUESTS,
     metrics_endpoint
 )
+from memory.service import MemoryService
 
 from langsmith import traceable
 from langsmith.run_helpers import get_current_run_tree
 
 app = FastAPI(title="D2C AI Support Agent")
+memory_service = MemoryService()
 
 
 class ChatRequest(BaseModel):
     message: str
     customer_id: str = "default"
     tenant_id: str = "zepto"
+    session_id: Optional[str] = None
 
 
 @traceable(name="d2c_chat_request")
 def run_graph(inputs: dict, tenant_id: str, customer_id: str):
-    """Run the LangGraph with LangSmith metadata."""
     run = get_current_run_tree()
     if run:
         run.add_metadata({
             "tenant_id": tenant_id,
             "customer_id": customer_id,
-            "request_id": inputs.get("request_id")
+            "request_id": inputs.get("request_id"),
+            "session_id": inputs.get("session_id"),
+            "case_id": inputs.get("case_id")
         })
         run.add_tags([
             f"tenant:{tenant_id}",
@@ -65,25 +70,35 @@ def metrics():
 @app.post("/chat")
 async def chat(request: ChatRequest):
     request_id = new_request_id()
-
-    # ---- Metrics: start ----
     ACTIVE_REQUESTS.inc()
     start_time = time.time()
-    # ------------------------
 
     log_event("request_received", request_id, data={
         "tenant_id": request.tenant_id,
         "customer_id": request.customer_id,
+        "session_id": request.session_id,
         "message": request.message
     })
 
+    # -------- Load tenant config --------
     try:
         tenant_config = load_tenant_config(request.tenant_id)
     except Exception as e:
         REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="error").inc()
         ACTIVE_REQUESTS.dec()
-        log_event("tenant_load_failed", request_id, data={"error": str(e)}, level="error")
         return {"error": f"Invalid tenant: {str(e)}"}
+
+    # -------- Load / create memory --------
+    session = memory_service.get_or_create_session(
+        customer_id=request.customer_id,
+        tenant_id=request.tenant_id,
+        session_id=request.session_id
+    )
+    case = memory_service.get_or_create_active_case(session)
+
+    # Append user message
+    memory_service.append_message(session, role="user", content=request.message)
+    memory_context = memory_service.to_state_context(session, case)
 
     inputs = {
         "messages": [HumanMessage(content=request.message)],
@@ -91,19 +106,22 @@ async def chat(request: ChatRequest):
         "tenant_id": request.tenant_id,
         "tenant_config": tenant_config.dict(),
         "request_id": request_id,
+        "session_id": session.session_id,
+        "case_id": case.case_id,
         "customer_context": {},
+        "memory_context": memory_context,
         "current_plan": None,
         "workflow_steps": [],
         "tool_results": {},
         "confidence": 0.0,
         "citations": [],
-        "memory_retrieved": [],
+        "memory_retrieved": memory_context.get("recent_messages", []),
         "risk_level": "low",
         "needs_escalation": False,
         "escalation_reason": "",
         "verification_passed": True,
         "verification_issues": [],
-        "missing_photos": False
+        "missing_photos": "photos" in (case.missing_inputs or [])
     }
 
     try:
@@ -116,11 +134,14 @@ async def chat(request: ChatRequest):
         latency = time.time() - start_time
         REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(latency)
 
-        # ---- Record outcome metrics ----
-        if result.get("blocked"):
+        blocked = result.get("blocked", False)
+        escalated = result.get("needs_escalation", False)
+
+        # Metrics
+        if blocked:
             BLOCK_COUNT.labels(tenant_id=request.tenant_id).inc()
             REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="blocked").inc()
-        elif result.get("needs_escalation"):
+        elif escalated:
             ESCALATION_COUNT.labels(
                 tenant_id=request.tenant_id,
                 reason=(result.get("escalation_reason") or "unknown")[:50]
@@ -128,80 +149,91 @@ async def chat(request: ChatRequest):
             REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
         else:
             REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="success").inc()
-        # --------------------------------
+
+        # -------- Prepare response text --------
+        if blocked:
+            response_text = result.get(
+                "error",
+                "I can only assist with Zepto-related customer support queries."
+            )
+        elif result.get("verification_passed") is False:
+            response_text = "I was unable to fully process your request due to an internal issue. A support agent will review this case shortly."
+            escalated = True
+        elif escalated:
+            response_text = "This request requires human assistance. A support agent will review your case shortly."
+        else:
+            messages = result.get("messages", [])
+            if not messages:
+                response_text = "I could not generate a response. Please try again."
+            else:
+                response_text = get_message_content(messages[-1])
+                if response_text.strip() == request.message.strip():
+                    response_text = "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments."
+                    blocked = True
+
+        # -------- Write memory back --------
+        plan = result.get("current_plan") or {}
+        tool_results = result.get("tool_results") or {}
+        citations = result.get("citations") or []
+
+        missing_inputs = plan.get("missing_inputs") or case.missing_inputs or []
+        photos_requested = case.photos_requested or ("photos" in missing_inputs)
+        issue_type = plan.get("intent") or case.issue_type
+
+        # try to persist order id from memory/plan/tools if present
+        order_id = case.order_id
+        if not order_id:
+            order_id = memory_context.get("active_order_id")
+
+        status = case.status
+        if blocked:
+            status = case.status
+        elif escalated:
+            status = "escalated"
+        elif "photos" in missing_inputs:
+            status = "waiting_customer"
+        else:
+            status = "open"
+
+        memory_service.append_message(session, role="assistant", content=response_text)
+
+        memory_service.update_case_from_result(
+            case,
+            order_id=order_id,
+            issue_type=issue_type,
+            missing_inputs=missing_inputs,
+            photos_requested=photos_requested,
+            tools_executed=list(tool_results.keys()),
+            tool_results_summary=tool_results,
+            policy_citations=citations,
+            escalated=escalated,
+            escalation_reason=result.get("escalation_reason"),
+            last_agent_action="responded",
+            status=status
+        )
 
         log_event("request_completed", request_id, data={
             "latency": round(latency, 3),
-            "escalated": result.get("needs_escalation", False),
-            "blocked": result.get("blocked", False),
+            "escalated": escalated,
+            "blocked": blocked,
+            "session_id": session.session_id,
+            "case_id": case.case_id,
             "confidence": result.get("confidence"),
-            "intent": (result.get("current_plan") or {}).get("intent")
+            "intent": issue_type
         })
-
-        # 1. Guardrails blocked
-        if result.get("blocked") is True:
-            return {
-                "response": result.get("error", "I can only assist with Zepto-related customer support queries."),
-                "escalated": False,
-                "blocked": True,
-                "confidence": 0.0,
-                "citations": [],
-                "request_id": request_id
-            }
-
-        # 2. Verification failed
-        if result.get("verification_passed") is False:
-            return {
-                "response": "I was unable to fully process your request due to an internal issue. A support agent will review this case shortly.",
-                "escalated": True,
-                "reason": result.get("escalation_reason", "Verification failed"),
-                "confidence": 0.0,
-                "citations": [],
-                "request_id": request_id
-            }
-
-        # 3. HITL escalation
-        if result.get("needs_escalation") is True:
-            return {
-                "response": "This request requires human assistance. A support agent will review your case shortly.",
-                "escalated": True,
-                "reason": result.get("escalation_reason", "Requires manual review"),
-                "confidence": result.get("confidence", 0.0),
-                "citations": result.get("citations", []),
-                "request_id": request_id
-            }
-
-        # 4. Normal response
-        messages = result.get("messages", [])
-        if not messages:
-            return {
-                "response": "I could not generate a response. Please try again.",
-                "escalated": False,
-                "confidence": 0.0,
-                "citations": [],
-                "request_id": request_id
-            }
-
-        last_msg = messages[-1]
-        response_text = get_message_content(last_msg)
-
-        if response_text.strip() == request.message.strip():
-            return {
-                "response": "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments.",
-                "escalated": False,
-                "blocked": True,
-                "confidence": 0.0,
-                "citations": [],
-                "request_id": request_id
-            }
 
         return {
             "response": response_text,
             "confidence": result.get("confidence", 0.0),
-            "citations": result.get("citations", []),
-            "escalated": False,
-            "tool_results": result.get("tool_results", {}),
-            "request_id": request_id
+            "citations": citations,
+            "escalated": escalated,
+            "blocked": blocked,
+            "reason": result.get("escalation_reason"),
+            "tool_results": tool_results,
+            "request_id": request_id,
+            "session_id": session.session_id,
+            "case_id": case.case_id,
+            "missing_inputs": missing_inputs
         }
 
     except Exception as e:
@@ -210,7 +242,8 @@ async def chat(request: ChatRequest):
         return {
             "error": str(e),
             "escalated": False,
-            "request_id": request_id
+            "request_id": request_id,
+            "session_id": session.session_id if session else None
         }
     finally:
         ACTIVE_REQUESTS.dec()
