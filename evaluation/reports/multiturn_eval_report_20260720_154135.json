@@ -1,0 +1,162 @@
+{
+  "summary": {
+    "total": 4,
+    "passed": 3,
+    "failed": 1,
+    "pass_rate": 75.0
+  },
+  "results": [
+    {
+      "id": "multiturn_damaged_photos_1",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 1,
+          "message": "My order #12345 is damaged. I want to return it.",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "PASS",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "17a4eb91-62ed-4e36-a7ed-3284a36fee6f",
+          "case_id": "41d8109b-6f5a-4a55-bad4-5812115b5df2",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Thank you for reaching out regarding your order #12345. We appreciate your patience and understanding as we address this issue.\n\nAccording to our records, your order has been delivered, and damage was reported at the tim"
+        },
+        {
+          "turn": 2,
+          "message": "I have uploaded the photos just now",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "17a4eb91-62ed-4e36-a7ed-3284a36fee6f",
+          "case_id": "41d8109b-6f5a-4a55-bad4-5812115b5df2",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Thank you for uploading the photos. Could you please provide more details about what specific information or items in the photos you need assistance with? This will help me guide you effectively.\n\nIf you've already ensur"
+        }
+      ]
+    },
+    {
+      "id": "multiturn_order_id_then_return_1",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 1,
+          "message": "I want to return my order",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "9e64124c-df1c-4547-a84e-a6e6231f656d",
+          "case_id": "2dea1ef1-9d8f-4a51-8b62-8049225828f6",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Thank you for reaching out to us. To assist you better, could you please provide photos of the product(s) you wish to return? Additionally, could you confirm if your order was delivered today or within the exchange/refun"
+        },
+        {
+          "turn": 2,
+          "message": "Order id is 12345 and it is damaged",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "PASS",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "9e64124c-df1c-4547-a84e-a6e6231f656d",
+          "case_id": "2dea1ef1-9d8f-4a51-8b62-8049225828f6",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Thank you for bringing this to our attention. I've noted that your order ID 12345 has been marked as delivered, and we understand that the item was damaged upon delivery.\n\nAccording to our policies, if an item is substan"
+        }
+      ]
+    },
+    {
+      "id": "multiturn_high_value_1",
+      "passed": false,
+      "turns": [
+        {
+          "turn": 1,
+          "message": "I want a refund of 2500 for damaged order #12345",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "0bdb00e9-8ee7-4cab-9be6-464025bdbf8e",
+          "case_id": "2e107812-95d4-47af-a321-eca44fa964e8",
+          "escalated": true,
+          "blocked": false,
+          "response_preview": "This request requires human assistance. A support agent will review your case shortly."
+        },
+        {
+          "turn": 2,
+          "message": "Please process it quickly",
+          "passed": false,
+          "checks": {
+            "block": "PASS",
+            "escalate": "FAIL (expected True, got False)",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "0bdb00e9-8ee7-4cab-9be6-464025bdbf8e",
+          "case_id": "2e107812-95d4-47af-a321-eca44fa964e8",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Thank you for your understanding. We aim to process all requests as swiftly as possible while ensuring accuracy and compliance with our policies.\n\nTo assist you more effectively, could you please provide any relevant ord"
+        }
+      ]
+    },
+    {
+      "id": "multiturn_preference_1",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 1,
+          "message": "I didn\u2019t like the color of the product",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "e54c57e4-5e08-4d21-a7e8-d75303494ba2",
+          "case_id": "c02f20fd-892f-4f88-b6a7-d60858302176",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Thank you for reaching out to us. I understand your concern regarding the color of the product.\n\nAccording to our policies (12.1.5), while we strive to display colors accurately, slight variations may occur due to differ"
+        },
+        {
+          "turn": 2,
+          "message": "So can I return it?",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "e54c57e4-5e08-4d21-a7e8-d75303494ba2",
+          "case_id": "c02f20fd-892f-4f88-b6a7-d60858302176",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Certainly! Thank you for reaching out. To assist you better, could you please provide photos of the product as well as any relevant order details or receipts? This will help us in processing your request efficiently.\n\nAc"
+        }
+      ]
+    }
+  ]
+}
