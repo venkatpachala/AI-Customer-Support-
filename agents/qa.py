@@ -18,11 +18,12 @@ def qa_node(state: AgentState) -> Dict:
     # RAG retrieval
     from rag.retrieval import AdvancedRAGRetriever
     rag = AdvancedRAGRetriever()
+    
     docs = rag.retrieve(query, k=8, final_k=4)
 
     if docs:
         context = "\n\n".join([doc.page_content for doc in docs])
-        citations = [doc.metadata.get("citation", "N/A") for doc in docs]
+        citations = [doc.metadata.get("citation") for doc in docs]
         RAG_COUNT.labels(tenant_id=tenant_id, status="hit").inc()
     else:
         context = "No relevant policy information was found."
@@ -85,6 +86,9 @@ TOOL RESULTS
 CUSTOMER QUESTION
 ------------------------
 {query}
+------------------------
+If you use policy information, mention the citation naturally,
+for example: "As per Zepto Terms of Use, Page 14, Clause 7.7.3...
 
 Write a clear and professional reply:"""
 

@@ -1,6 +1,9 @@
 from typing import List
 from langchain_core.documents import Document
 from langchain_ollama import ChatOllama
+from typing import List
+from langchain_core.documents import Document
+from langchain_ollama import ChatOllama
 
 class SimpleReranker:
     def __init__(self):
@@ -43,9 +46,7 @@ Relevance score:"""
         # Sort by rerank score
         scored = sorted(scored, key=lambda x: x.metadata.get("rerank_score", 0), reverse=True)
 
-        return scored[:top_k]from typing import List
-from langchain_core.documents import Document
-from langchain_ollama import ChatOllama
+        return scored[:top_k]
 
 class SimpleReranker:
     def __init__(self):
