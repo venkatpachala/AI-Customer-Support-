@@ -55,18 +55,18 @@ graph TD
     classDef external fill:#34495e,stroke:#2c3e50,stroke-width:2px,color:white;
 
     %% Nodes
-    User([User / Client Request]) ::: client
-    API[AI Gateway FastAPI] ::: gateway
-    Guard[Guardrails PII / Prompt Injection] ::: guardrail
-    Supervisor[Supervisor Agent Intent & Risk] ::: agent
-    Planner[Planner Agent Structured Execution Plan] ::: agent
-    Engine[Execution Engine Tools / Parallel Processing] ::: execution
-    Shopify[(Shopify API)] ::: external
-    Stripe[(Stripe API)] ::: external
-    Verifier[Verifier Agent Soft vs Hard Issues] ::: agent
-    HITL{Human-in-the-Loop Escalate?} ::: guardrail
-    QA[QA Agent Policy & Grounded Response] ::: agent
-    Response([Final Output to User]) ::: client
+    User(["User / Client Request"]) ::: client
+    API["AI Gateway FastAPI"] ::: gateway
+    Guard["Guardrails PII / Prompt Injection"] ::: guardrail
+    Supervisor["Supervisor Agent Intent & Risk"] ::: agent
+    Planner["Planner Agent Structured Execution Plan"] ::: agent
+    Engine["Execution Engine Tools / Parallel Processing"] ::: execution
+    Shopify[("Shopify API")] ::: external
+    Stripe[("Stripe API")] ::: external
+    Verifier["Verifier Agent Soft vs Hard Issues"] ::: agent
+    HITL{"Human-in-the-Loop Escalate?"} ::: guardrail
+    QA["QA Agent Policy & Grounded Response"] ::: agent
+    Response(["Final Output to User"]) ::: client
 
     %% Edges
     User --> API
@@ -78,7 +78,7 @@ graph TD
     Engine <--> Stripe
     Engine --> Verifier
     Verifier --> HITL
-    HITL -- Yes --> HumanAgent([Human Agent Escalate])
+    HITL -- Yes --> HumanAgent(["Human Agent Escalate"])
     HITL -- No --> QA
     QA --> Response
 ```
