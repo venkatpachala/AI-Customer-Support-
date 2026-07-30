@@ -14,6 +14,8 @@ print("DEBUG: PINECONE_API_KEY loaded =", "YES" if os.getenv("PINECONE_API_KEY")
 print("DEBUG: LANGSMITH tracing =", os.getenv("LANGCHAIN_TRACING_V2"))
 
 from fastapi import FastAPI
+from tools.bootstrap import register_default_tools
+register_default_tools()
 from pydantic import BaseModel
 from orchestration.graph import compiled_graph
 from langchain_core.messages import HumanMessage
