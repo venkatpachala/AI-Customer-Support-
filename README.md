@@ -29,12 +29,14 @@ With a strong focus on enterprise requirements, it integrates **planning**, **to
 ## Key Features
 
 - **Multi-Agent Orchestration**: Powered by [LangGraph](https://python.langchain.com/docs/langgraph), orchestrating intent detection, planning, execution, verification, and QA agents.
+- **Semantic Routing & Policy Fast-Path**: Intelligent routing bypasses heavy tool-execution pipelines for generic FAQ/policy inquiries, utilizing RAG prefetching for rapid responses.
 - **Structured Planning**: Dynamic dependency resolution and missing-input detection for complex multi-step workflows.
 - **Resilient Tool Execution Engine**: Supports retries, timeouts, and parallel execution of external tools (e.g., Shopify, Stripe).
 - **Policy-Grounded Responses**: Retrieval-Augmented Generation (RAG) using company documents via Pinecone to ensure accurate answers.
-- **Enterprise Guardrails**: Built-in protections against Prompt Injections, out-of-scope queries, and PII leakage.
+- **Enterprise Guardrails & Security**: Built-in protections against Prompt Injections, out-of-scope queries, and PII leakage. Includes an **Output Hallucination Guard** to prevent fake logistics claims and enforces **verified customer checks** for sensitive, high-value actions.
 - **Human-in-the-Loop (HITL)**: Automatic escalations for high-risk, high-value, or unresolved edge cases.
 - **Multi-Tenant Configuration**: Easily adapt the agent's tone, approval thresholds, and toolsets per brand.
+- **Interactions Intelligence API**: Captures rich, metadata-tagged conversation histories to enable continuous evaluation and analytics.
 - **Full Observability & Telemetry**: Deep tracing via LangSmith, structured JSON logging, and Prometheus/Grafana integration.
 - **Automated Evaluation**: Golden set regression testing to ensure continuous improvement and zero regressions.
 
@@ -53,12 +55,14 @@ graph TD
     classDef agent fill:#9b59b6,stroke:#8e44ad,stroke-width:2px,color:white;
     classDef execution fill:#f1c40f,stroke:#f39c12,stroke-width:2px,color:black;
     classDef external fill:#34495e,stroke:#2c3e50,stroke-width:2px,color:white;
+    classDef memory fill:#16a085,stroke:#1abc9c,stroke-width:2px,color:white;
 
     %% Nodes
     User(["User / Client Request"])
     API["AI Gateway FastAPI"]
-    Guard["Guardrails PII / Prompt Injection"]
-    Supervisor["Supervisor Agent Intent & Risk"]
+    PolicyCache[("Policy Cache (Fast Path)")]
+    Guard["Input Guardrails PII / Injection"]
+    Supervisor["Supervisor Agent Intent, Risk & RAG"]
     Planner["Planner Agent Structured Execution Plan"]
     Engine["Execution Engine Tools / Parallel Processing"]
     Shopify[("Shopify API")]
@@ -66,27 +70,38 @@ graph TD
     Verifier["Verifier Agent Soft vs Hard Issues"]
     HITL{"Human-in-the-Loop Escalate?"}
     QA["QA Agent Policy & Grounded Response"]
+    OutputGuard["Output Hallucination Guard"]
     Response(["Final Output to User"])
     HumanAgent(["Human Agent Escalate"])
 
     %% Edges
     User --> API
-    API --> Guard
+    API --> PolicyCache
+    PolicyCache -- "Cache Hit" --> Response
+    PolicyCache -- "Cache Miss" --> Guard
     Guard --> Supervisor
-    Supervisor --> Planner
+    
+    %% Routing
+    Supervisor -- "Action Path" --> Planner
+    Supervisor -- "Policy Fast Path" --> HITL
+    
     Planner --> Engine
     Engine <--> Shopify
     Engine <--> Stripe
     Engine --> Verifier
     Verifier --> HITL
-    HITL -- Yes --> HumanAgent
-    HITL -- No --> QA
-    QA --> Response
+    
+    HITL -- "Yes" --> HumanAgent
+    HITL -- "No" --> QA
+    
+    QA --> OutputGuard
+    OutputGuard --> Response
 
     %% Assign Classes
     class User,Response client;
     class API gateway;
-    class Guard,HITL guardrail;
+    class PolicyCache memory;
+    class Guard,HITL,OutputGuard guardrail;
     class Supervisor,Planner,Verifier,QA agent;
     class Engine execution;
     class Shopify,Stripe external;
@@ -94,16 +109,19 @@ graph TD
 
 ### Core Components
 
-1. **AI Gateway (`gateway/`)**: A FastAPI-based REST API that handles incoming user requests, manages websockets for streaming, and authenticates clients.
+1. **AI Gateway (`gateway/`)**: A FastAPI-based REST API that handles incoming user requests, policy caching, authentication, verification checks, and final output guardrails.
 2. **Orchestration (`orchestration/`)**: The LangGraph DAG definition (`graph.py`). Contains specific node implementations:
-   - `supervisor.py`: Detects intent and assigns tasks.
+   - `supervisor.py`: Detects intent, assesses risk, and fetches context.
+   - `routing.py`: Directs traffic between execution action paths and policy fast paths.
    - `planner.py`: Breaks down tasks into a structured JSON plan.
    - `execution.py`: Executes tool calls safely.
    - `verifier.py`: Verifies if the executed tools resolved the user query.
    - `hitl.py`: Manages escalation flows.
 3. **Tools (`tools/`)**: Integrations with external SaaS (e.g., Shopify, Stripe) and internal databases.
 4. **Agents (`agents/`)**: Specialized sub-agents (e.g., `qa.py` for synthesizing answers).
-5. **RAG (`rag/`)**: Document chunking, embedding generation, and Pinecone vector store integration.
+5. **RAG (`rag/`)**: Document chunking, embedding generation, Pinecone vector store integration, and policy caching.
+6. **Security & Guardrails (`security/`)**: Guards against PII leaks, prompt injection, and output hallucinations (e.g., preventing fake logistics tracking IDs).
+7. **Interactions Intelligence (`interactions/`)**: Centralized tracking for conversation histories, intents, and metadata to power continuous improvements.
 
 ---
 
