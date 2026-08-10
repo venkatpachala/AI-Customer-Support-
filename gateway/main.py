@@ -1,6 +1,6 @@
 import os
 import time
-from typing import Optional
+from typing import Optional, List
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -12,10 +12,12 @@ os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT", "d2c-support-ag
 print("DEBUG: OPENAI_API_KEY loaded =", "YES" if os.getenv("OPENAI_API_KEY") else "NO")
 print("DEBUG: PINECONE_API_KEY loaded =", "YES" if os.getenv("PINECONE_API_KEY") else "NO")
 print("DEBUG: LANGSMITH tracing =", os.getenv("LANGCHAIN_TRACING_V2"))
+print("DEBUG: TOOLS_MODE =", os.getenv("TOOLS_MODE", "mock"))
 
 from fastapi import FastAPI
 from tools.bootstrap import register_default_tools
 register_default_tools()
+
 from pydantic import BaseModel
 from orchestration.graph import compiled_graph
 from langchain_core.messages import HumanMessage
@@ -44,6 +46,24 @@ class ChatRequest(BaseModel):
     customer_id: str = "default"
     tenant_id: str = "zepto"
     session_id: Optional[str] = None
+
+
+def detect_photos_received(message: str) -> bool:
+    msg = (message or "").lower()
+    triggers = [
+        "uploaded the photo",
+        "uploaded photos",
+        "uploaded the photos",
+        "shared the photo",
+        "shared photos",
+        "shared the photos",
+        "attached photo",
+        "attached photos",
+        "here are the photos",
+        "photo uploaded",
+        "photos uploaded",
+    ]
+    return any(t in msg for t in triggers)
 
 
 @traceable(name="d2c_chat_request")
@@ -98,8 +118,57 @@ async def chat(request: ChatRequest):
     )
     case = memory_service.get_or_create_active_case(session)
 
+    # -------- Sticky escalation short-circuit --------
+    if case.status == "escalated":
+        memory_service.append_message(session, role="user", content=request.message)
+        response_text = (
+            "This case has already been escalated to a human support agent. "
+            "They will review it and get back to you shortly."
+        )
+        memory_service.append_message(session, role="assistant", content=response_text)
+
+        latency = time.time() - start_time
+        try:
+            REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(latency)
+            ESCALATION_COUNT.labels(
+                tenant_id=request.tenant_id,
+                reason=(case.escalation_reason or "already_escalated")[:50]
+            ).inc()
+            REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
+        except Exception:
+            pass
+
+        ACTIVE_REQUESTS.dec()
+        return {
+            "response": response_text,
+            "confidence": 1.0,
+            "citations": case.policy_citations or [],
+            "escalated": True,
+            "blocked": False,
+            "reason": case.escalation_reason or "Case already escalated",
+            "tool_results": {},
+            "request_id": request_id,
+            "session_id": session.session_id,
+            "case_id": case.case_id,
+            "missing_inputs": case.missing_inputs or [],
+        }
+
     # Append user message
     memory_service.append_message(session, role="user", content=request.message)
+
+    # Photo received detection on follow-up
+    photos_received = case.photos_received
+    missing_inputs: List[str] = list(case.missing_inputs or [])
+    if detect_photos_received(request.message):
+        photos_received = True
+        missing_inputs = [m for m in missing_inputs if m != "photos"]
+        case = memory_service.update_case_from_result(
+            case,
+            photos_received=True,
+            missing_inputs=missing_inputs,
+            status="open" if case.status == "waiting_customer" else case.status,
+        )
+
     memory_context = memory_service.to_state_context(session, case)
 
     inputs = {
@@ -123,7 +192,7 @@ async def chat(request: ChatRequest):
         "escalation_reason": "",
         "verification_passed": True,
         "verification_issues": [],
-        "missing_photos": "photos" in (case.missing_inputs or [])
+        "missing_photos": ("photos" in (case.missing_inputs or [])) and not case.photos_received,
     }
 
     try:
@@ -134,23 +203,29 @@ async def chat(request: ChatRequest):
         )
 
         latency = time.time() - start_time
-        REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(latency)
+        try:
+            REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(latency)
+        except Exception:
+            pass
 
-        blocked = result.get("blocked", False)
-        escalated = result.get("needs_escalation", False)
+        blocked = bool(result.get("blocked", False))
+        escalated = bool(result.get("needs_escalation", False))
 
         # Metrics
-        if blocked:
-            BLOCK_COUNT.labels(tenant_id=request.tenant_id).inc()
-            REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="blocked").inc()
-        elif escalated:
-            ESCALATION_COUNT.labels(
-                tenant_id=request.tenant_id,
-                reason=(result.get("escalation_reason") or "unknown")[:50]
-            ).inc()
-            REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
-        else:
-            REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="success").inc()
+        try:
+            if blocked:
+                BLOCK_COUNT.labels(tenant_id=request.tenant_id).inc()
+                REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="blocked").inc()
+            elif escalated:
+                ESCALATION_COUNT.labels(
+                    tenant_id=request.tenant_id,
+                    reason=(result.get("escalation_reason") or "unknown")[:50]
+                ).inc()
+                REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
+            else:
+                REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="success").inc()
+        except Exception:
+            pass
 
         # -------- Prepare response text --------
         if blocked:
@@ -159,10 +234,17 @@ async def chat(request: ChatRequest):
                 "I can only assist with Zepto-related customer support queries."
             )
         elif result.get("verification_passed") is False:
-            response_text = "I was unable to fully process your request due to an internal issue. A support agent will review this case shortly."
+            # Only escalate on true hard verification failure
+            response_text = (
+                "I was unable to fully process your request due to an internal issue. "
+                "A support agent will review this case shortly."
+            )
             escalated = True
         elif escalated:
-            response_text = "This request requires human assistance. A support agent will review your case shortly."
+            response_text = (
+                "This request requires human assistance. "
+                "A support agent will review your case shortly."
+            )
         else:
             messages = result.get("messages", [])
             if not messages:
@@ -170,7 +252,10 @@ async def chat(request: ChatRequest):
             else:
                 response_text = get_message_content(messages[-1])
                 if response_text.strip() == request.message.strip():
-                    response_text = "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments."
+                    response_text = (
+                        "I can only assist with Zepto-related customer support queries "
+                        "such as orders, returns, refunds, delivery, and payments."
+                    )
                     blocked = True
 
         # -------- Write memory back --------
@@ -178,21 +263,35 @@ async def chat(request: ChatRequest):
         tool_results = result.get("tool_results") or {}
         citations = result.get("citations") or []
 
-        missing_inputs = plan.get("missing_inputs") or case.missing_inputs or []
-        photos_requested = case.photos_requested or ("photos" in missing_inputs)
+        plan_missing = list(plan.get("missing_inputs") or [])
+        missing_inputs = plan_missing or list(case.missing_inputs or [])
+
+        # if verifier/QA marked missing photos, keep it
+        if result.get("missing_photos") and "photos" not in missing_inputs and not photos_received:
+            missing_inputs.append("photos")
+
+        if photos_received:
+            missing_inputs = [m for m in missing_inputs if m != "photos"]
+
+        photos_requested = bool(
+            case.photos_requested
+            or ("photos" in missing_inputs)
+            or result.get("missing_photos", False)
+        )
+
         issue_type = plan.get("intent") or case.issue_type
 
-        # try to persist order id from memory/plan/tools if present
-        order_id = case.order_id
-        if not order_id:
-            order_id = memory_context.get("active_order_id")
+        order_id = (
+            result.get("resolved_order_id")
+            or case.order_id
+            or memory_context.get("active_order_id")
+        )
 
-        status = case.status
         if blocked:
             status = case.status
         elif escalated:
             status = "escalated"
-        elif "photos" in missing_inputs:
+        elif "photos" in missing_inputs and not photos_received:
             status = "waiting_customer"
         else:
             status = "open"
@@ -205,11 +304,12 @@ async def chat(request: ChatRequest):
             issue_type=issue_type,
             missing_inputs=missing_inputs,
             photos_requested=photos_requested,
+            photos_received=photos_received,
             tools_executed=list(tool_results.keys()),
             tool_results_summary=tool_results,
             policy_citations=citations,
             escalated=escalated,
-            escalation_reason=result.get("escalation_reason"),
+            escalation_reason=result.get("escalation_reason") if escalated else case.escalation_reason,
             last_agent_action="responded",
             status=status
         )
@@ -221,7 +321,9 @@ async def chat(request: ChatRequest):
             "session_id": session.session_id,
             "case_id": case.case_id,
             "confidence": result.get("confidence"),
-            "intent": issue_type
+            "intent": issue_type,
+            "missing_inputs": missing_inputs,
+            "status": status,
         })
 
         return {
@@ -230,7 +332,7 @@ async def chat(request: ChatRequest):
             "citations": citations,
             "escalated": escalated,
             "blocked": blocked,
-            "reason": result.get("escalation_reason"),
+            "reason": result.get("escalation_reason") if escalated else None,
             "tool_results": tool_results,
             "request_id": request_id,
             "session_id": session.session_id,
@@ -239,7 +341,10 @@ async def chat(request: ChatRequest):
         }
 
     except Exception as e:
-        REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="error").inc()
+        try:
+            REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="error").inc()
+        except Exception:
+            pass
         log_event("request_failed", request_id, data={"error": str(e)}, level="error")
         return {
             "error": str(e),

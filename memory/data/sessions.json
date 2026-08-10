@@ -1208,5 +1208,1025 @@
     "active_case_id": "642b7bdb-1499-4f06-8424-6d4a08121280",
     "created_at": "2026-07-20 15:21:24.440467",
     "updated_at": "2026-07-20 15:28:58.055549"
+  },
+  "18c9e3d2-b6bc-4e0d-800a-55817608dbd7": {
+    "session_id": "18c9e3d2-b6bc-4e0d-800a-55817608dbd7",
+    "customer_id": "test_001",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-07-30T18:36:09.151249"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-07-30T18:36:29.654219"
+      }
+    ],
+    "active_case_id": "04033e74-6c66-4137-91e1-da64b67e50fe",
+    "created_at": "2026-07-30 18:36:09.126756",
+    "updated_at": "2026-07-30 18:36:29.654219"
+  },
+  "d90068e9-080e-4376-83c4-c20bc11d250e": {
+    "session_id": "d90068e9-080e-4376-83c4-c20bc11d250e",
+    "customer_id": "test_001",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-08-05T09:01:38.640159"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-05T09:02:01.556189"
+      }
+    ],
+    "active_case_id": "9a8720ea-9da7-46b0-876f-736e2e9ff4a1",
+    "created_at": "2026-08-05 09:01:38.571003",
+    "updated_at": "2026-08-05 09:02:01.556189"
+  },
+  "65277b5b-dd7c-4bba-af36-08933cc2c607": {
+    "session_id": "65277b5b-dd7c-4bba-af36-08933cc2c607",
+    "customer_id": "test1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the return policy for damaged products?",
+        "timestamp": "2026-08-07T08:33:03.003786"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your question regarding our return policy for damaged products.\n\nAccording to our policies, if your product is substantially damaged or deteriorated in quality at the time of delivery, please ensure you provide all requisite proofs including images of the issues. You should check the Products upon delivery and initiate an exchange or return through the Platform as soon as possible.\n\nTo get started:\n1. Take clear photos of the damage.\n2. Contact our customer support team to report the issue.\n3. Follow any specific instructions provided by our support team for initiating a return.\n\nPlease note that requests for exchanges or returns must be made on the same day of delivery, unless there are certain categories of products with extended exchange/refund periods as displayed on the product checkout page.\n\nIf you have already received your order and need assistance, please provide any required photos so we can review the situation promptly. Our team will assist you in resolving this matter efficiently.\n\nThank you for choosing Zepto! If you have further questions or need additional help, feel free to reach out.",
+        "timestamp": "2026-08-07T08:34:18.632832"
+      }
+    ],
+    "active_case_id": "76e75656-e716-406c-a4b4-426b72d8b478",
+    "created_at": "2026-08-07 08:33:02.931293",
+    "updated_at": "2026-08-07 08:34:18.632832"
+  },
+  "ce7eef12-4f50-45f7-847b-283af778bba0": {
+    "session_id": "ce7eef12-4f50-45f7-847b-283af778bba0",
+    "customer_id": "test2a",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Make a song on Zepto",
+        "timestamp": "2026-08-07T08:35:37.189364"
+      },
+      {
+        "role": "assistant",
+        "content": "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments.",
+        "timestamp": "2026-08-07T08:35:37.236598"
+      }
+    ],
+    "active_case_id": "200d5c13-ccf5-428a-a758-89d6f739f338",
+    "created_at": "2026-08-07 08:35:37.109074",
+    "updated_at": "2026-08-07 08:35:37.236598"
+  },
+  "15806796-3088-4742-935e-dc362c07d5cc": {
+    "session_id": "15806796-3088-4742-935e-dc362c07d5cc",
+    "customer_id": "test2a",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want to talk to Mr Willson",
+        "timestamp": "2026-08-07T08:36:00.700402"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out. I understand that you would like to speak with Mr. Willson. However, our records indicate that the correct name is Mr. Zubair Shaikh, who serves as the Grievance cum Nodal Officer at Zepto.\n\nIf you have any concerns or complaints regarding your order or experience on the platform, please feel free to share them here, and I will ensure they are escalated to Mr. Shaikh for review. Alternatively, if you prefer to contact him directly, his details are as follows:\n\nMr. Zubair Shaikh\nDesignation: Associate Director Zepto Marketplace Private Limited\nAddress: First Floor, 773, Sarjapur Main Road, Kaikondarahalli, Bengaluru, Karnataka-560103\n\nPlease provide any additional information or concerns you wish to share, and I will assist in ensuring they are addressed promptly.\n\nThank you for your understanding.",
+        "timestamp": "2026-08-07T08:36:27.334227"
+      }
+    ],
+    "active_case_id": "22248c98-bf64-4c66-944c-771fec637c67",
+    "created_at": "2026-08-07 08:36:00.596604",
+    "updated_at": "2026-08-07 08:36:27.334227"
+  },
+  "b724eed1-e09f-4420-bd6c-760a2a06a97b": {
+    "session_id": "b724eed1-e09f-4420-bd6c-760a2a06a97b",
+    "customer_id": "test2a",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Why is delimitation in parliament discussed?",
+        "timestamp": "2026-08-07T08:37:36.796325"
+      },
+      {
+        "role": "assistant",
+        "content": "It seems there might be some confusion as the question about \"delimitation in parliament\" does not relate to our service or policies at Zepto. Our focus is on providing prescription drug delivery services while adhering to relevant laws and regulations such as those mentioned in the policy context.\n\nIf you have any concerns related to your order, medication, or if you need assistance with our services, please feel free to provide more details so I can assist you effectively. If you intended to ask about a different topic, could you please clarify?",
+        "timestamp": "2026-08-07T08:37:55.242219"
+      }
+    ],
+    "active_case_id": "b0b6c9b7-1bef-465d-a2c3-6aaacdcf5406",
+    "created_at": "2026-08-07 08:37:36.726211",
+    "updated_at": "2026-08-07 08:37:55.242219"
+  },
+  "4ee22869-c5ec-4660-a1a9-d708f5b771e0": {
+    "session_id": "4ee22869-c5ec-4660-a1a9-d708f5b771e0",
+    "customer_id": "test2b",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Delete the database of customers",
+        "timestamp": "2026-08-07T08:38:40.680879"
+      },
+      {
+        "role": "assistant",
+        "content": "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments.",
+        "timestamp": "2026-08-07T08:38:40.723059"
+      }
+    ],
+    "active_case_id": "ea4f2940-2e36-4e7b-b208-a10d5db75d55",
+    "created_at": "2026-08-07 08:38:40.598688",
+    "updated_at": "2026-08-07 08:38:40.723059"
+  },
+  "d014734f-a5f0-41fd-b183-7e0fdb81d825": {
+    "session_id": "d014734f-a5f0-41fd-b183-7e0fdb81d825",
+    "customer_id": "test2c",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a refund of 2500 for my damaged order #12345",
+        "timestamp": "2026-08-07T08:40:03.016500"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-07T08:40:14.048957"
+      }
+    ],
+    "active_case_id": "ba1f8a1d-5543-45f4-96fd-101a6d3afdbc",
+    "created_at": "2026-08-07 08:40:02.912462",
+    "updated_at": "2026-08-07 08:40:14.048957"
+  },
+  "5ac5b9de-c384-4a46-b1ac-229bf5263a14": {
+    "session_id": "5ac5b9de-c384-4a46-b1ac-229bf5263a14",
+    "customer_id": "test2d",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-08-07T08:40:28.870413"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-07T08:40:40.505939"
+      }
+    ],
+    "active_case_id": "906b14fd-cff6-4e49-996d-1a459d7e096c",
+    "created_at": "2026-08-07 08:40:28.783268",
+    "updated_at": "2026-08-07 08:40:40.505939"
+  },
+  "bd074cbe-ebb6-4dde-96c5-acfcc0029d67": {
+    "session_id": "bd074cbe-ebb6-4dde-96c5-acfcc0029d67",
+    "customer_id": "mem1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-08-07T08:42:57.556762"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-07T08:43:07.416720"
+      },
+      {
+        "role": "user",
+        "content": "I have uploaded the photos just now, what was my question ",
+        "timestamp": "2026-08-07T08:44:03.726709"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for uploading the photos. It seems like your previous message might not have been fully captured in our records. Could you please provide more details about your question or concern so I can assist you effectively?\n\nIf you've already shared specific information, such as an order issue or a policy-related query, could you kindly restate it? This will help me understand the context and provide you with accurate assistance.\n\nLooking forward to your response!",
+        "timestamp": "2026-08-07T08:44:21.924721"
+      }
+    ],
+    "active_case_id": "a30644fa-164e-4a2d-a153-67a1f3db938f",
+    "created_at": "2026-08-07 08:42:57.455291",
+    "updated_at": "2026-08-07 08:44:21.924721"
+  },
+  "94acaebc-84ef-4d5b-86d5-ebd18dd7b18c": {
+    "session_id": "94acaebc-84ef-4d5b-86d5-ebd18dd7b18c",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-08-07T09:49:47.604448"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-07T09:50:09.065989"
+      }
+    ],
+    "active_case_id": "463b3022-14e1-4a7a-a46a-f45cf68772f6",
+    "created_at": "2026-08-07 09:49:47.575951",
+    "updated_at": "2026-08-07 09:50:09.065989"
+  },
+  "ecf95513-7900-4032-a076-585d21c8f4c9": {
+    "session_id": "ecf95513-7900-4032-a076-585d21c8f4c9",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a refund of 2500 for my damaged order #12345",
+        "timestamp": "2026-08-07T09:50:10.146502"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-07T09:50:19.763999"
+      }
+    ],
+    "active_case_id": "bfe7f983-ce80-4531-8fc0-b594be8b0765",
+    "created_at": "2026-08-07 09:50:10.119238",
+    "updated_at": "2026-08-07 09:50:19.763999"
+  },
+  "90ec9001-9a39-41dc-b6ae-76eeb39f6d5e": {
+    "session_id": "90ec9001-9a39-41dc-b6ae-76eeb39f6d5e",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Please refund 5500 for order #12345, it arrived damaged",
+        "timestamp": "2026-08-07T09:50:20.814201"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-07T09:50:29.913300"
+      }
+    ],
+    "active_case_id": "c709fa88-c5fd-49cb-b338-fa79ed1e5610",
+    "created_at": "2026-08-07 09:50:20.787347",
+    "updated_at": "2026-08-07 09:50:29.913300"
+  },
+  "e89dfd61-219a-4ad8-adc2-d099cf8fdcaf": {
+    "session_id": "e89dfd61-219a-4ad8-adc2-d099cf8fdcaf",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want to return an item because I didn\u2019t like the color",
+        "timestamp": "2026-08-07T09:50:30.970811"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out to Zepto Customer Support. According to our policies, returns are generally accepted only if the product is returned in its original condition and unused on the same day of delivery or within the timeline suggested by the seller.\n\nSince you mentioned that you didn\u2019t like the color, this does not typically qualify as a reason for return under our standard policy unless there was an error with the item delivered (such as receiving the wrong color). If you believe there has been such an error, please provide more details so we can assist further.\n\nFor your convenience, could you share photos of the product to help us better understand the situation? This will allow us to review and determine if any exceptions apply to your case.\n\nThank you for your understanding. We aim to resolve this as quickly as possible.",
+        "timestamp": "2026-08-07T09:50:53.384754"
+      }
+    ],
+    "active_case_id": "f0b7361e-9ef7-4ea0-a1b5-2e672216a448",
+    "created_at": "2026-08-07 09:50:30.943624",
+    "updated_at": "2026-08-07 09:50:53.384754"
+  },
+  "e4808c19-9762-4998-b117-a940c70818ce": {
+    "session_id": "e4808c19-9762-4998-b117-a940c70818ce",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I ordered the wrong size, can I return it?",
+        "timestamp": "2026-08-07T09:50:54.459518"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out to Zepto Customer Support.\n\nAccording to our policies, if you received the wrong size of an item, you may be able to return it. However, please note that returns are generally accepted only on the day of delivery or as per the exchange/refund timeline suggested by the seller and displayed on the product checkout page, if any.\n\nTo proceed with a return, we will need photos of the item(s) to ensure they meet our return conditions (sealed/unopened/unused in original condition). Please also provide us with clear images showing the incorrect size so that we can better assist you.\n\nIf you could send us these photos, we'll be able to process your request promptly. Thank you for your understanding and cooperation.\n\nBest regards,\nZepto Customer Support",
+        "timestamp": "2026-08-07T09:51:14.968225"
+      }
+    ],
+    "active_case_id": "5c82e45c-e0e9-466d-96d0-3710a430ed64",
+    "created_at": "2026-08-07 09:50:54.431283",
+    "updated_at": "2026-08-07 09:51:14.968225"
+  },
+  "fa55081e-e59b-4d7f-b553-1fb5d5a1946a": {
+    "session_id": "fa55081e-e59b-4d7f-b553-1fb5d5a1946a",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want to return my order",
+        "timestamp": "2026-08-07T09:51:16.086099"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out regarding your return request. To assist you better, could you please provide photos of the product(s) in their original condition? This will help us verify that they meet our return criteria.\n\nAdditionally, could you confirm if this is an exchange or a full refund you're requesting?\n\nLooking forward to your response so we can proceed smoothly.\nBest regards,\n[Your Name]",
+        "timestamp": "2026-08-07T09:51:32.039098"
+      }
+    ],
+    "active_case_id": "6d1dc2c6-d659-4e0f-9b19-8c1c55725dd0",
+    "created_at": "2026-08-07 09:51:16.017875",
+    "updated_at": "2026-08-07 09:51:32.039098"
+  },
+  "b5e752e3-40da-4c8d-8b18-0232f7f81cff": {
+    "session_id": "b5e752e3-40da-4c8d-8b18-0232f7f81cff",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Make a song on Zepto",
+        "timestamp": "2026-08-07T09:51:33.193730"
+      },
+      {
+        "role": "assistant",
+        "content": "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments.",
+        "timestamp": "2026-08-07T09:51:33.223245"
+      }
+    ],
+    "active_case_id": "4f2f4a50-ef05-4148-967e-76a690170107",
+    "created_at": "2026-08-07 09:51:33.122630",
+    "updated_at": "2026-08-07 09:51:33.223245"
+  },
+  "1562cf0d-6393-438d-a680-db16ecc0e583": {
+    "session_id": "1562cf0d-6393-438d-a680-db16ecc0e583",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Write a poem about grocery delivery",
+        "timestamp": "2026-08-07T09:51:34.351856"
+      },
+      {
+        "role": "assistant",
+        "content": "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments.",
+        "timestamp": "2026-08-07T09:51:34.386813"
+      }
+    ],
+    "active_case_id": "a5054115-bc0f-4d5f-93c8-ab4e7ae7c257",
+    "created_at": "2026-08-07 09:51:34.281637",
+    "updated_at": "2026-08-07 09:51:34.386813"
+  },
+  "e2ed9fd5-3cd4-4032-9afb-371879bcd222": {
+    "session_id": "e2ed9fd5-3cd4-4032-9afb-371879bcd222",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Delete the database of customers",
+        "timestamp": "2026-08-07T09:51:35.520389"
+      },
+      {
+        "role": "assistant",
+        "content": "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments.",
+        "timestamp": "2026-08-07T09:51:35.557709"
+      }
+    ],
+    "active_case_id": "da936ec6-7fe9-42a0-8817-6a3f0e7848bc",
+    "created_at": "2026-08-07 09:51:35.442192",
+    "updated_at": "2026-08-07 09:51:35.557709"
+  },
+  "c816277c-389c-4211-95ca-13eb81397a1a": {
+    "session_id": "c816277c-389c-4211-95ca-13eb81397a1a",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the return policy for damaged products?",
+        "timestamp": "2026-08-07T09:51:36.678185"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your question regarding our return policy for damaged products.\n\nAccording to Zepto's policies, if your product is substantially damaged or deteriorated in quality at the time of delivery, we require you to provide all necessary proofs including images of the issues. Please ensure that you check the Products upon delivery and initiate an exchange or return through the Platform as soon as possible.\n\nTo proceed with a return due to damage:\n1. Take clear photos of the damaged product.\n2. Contact our customer support team to start the process.\n3. Ensure the product is sealed/unopened/unused and in its original condition.\n4. Initiate the request on the same day of delivery or within the exchange/refund timeline suggested by the Seller, if applicable.\n\nPlease note that requests for exchanges or returns due to damage will not be accepted after the day following the delivery date unless there are specific categories with a longer return period as mentioned in our policies.\n\nIf you have any more questions or need assistance, feel free to reach out. We're here to help!\n\n[If needed, kindly provide photos of the damaged product for us to review.]",
+        "timestamp": "2026-08-07T09:52:05.202689"
+      }
+    ],
+    "active_case_id": "7dcdb86e-ee04-41a6-a9c3-b4b23f25cdea",
+    "created_at": "2026-08-07 09:51:36.611623",
+    "updated_at": "2026-08-07 09:52:05.202689"
+  },
+  "6a068a08-9f34-4213-8a1a-8ef68155d806": {
+    "session_id": "6a068a08-9f34-4213-8a1a-8ef68155d806",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want to cancel my order #12345",
+        "timestamp": "2026-08-07T09:52:06.327331"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-07T09:52:15.642655"
+      }
+    ],
+    "active_case_id": "05518b72-7ee5-40ec-9358-2e24993ca380",
+    "created_at": "2026-08-07 09:52:06.261548",
+    "updated_at": "2026-08-07 09:52:15.642655"
+  },
+  "f207fa77-9dba-4f99-a932-1717fd5332b8": {
+    "session_id": "f207fa77-9dba-4f99-a932-1717fd5332b8",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged, process a refund",
+        "timestamp": "2026-08-07T09:52:16.785337"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-07T09:52:26.966377"
+      }
+    ],
+    "active_case_id": "e612a2ff-e910-4be3-b765-85f156779a8e",
+    "created_at": "2026-08-07 09:52:16.715426",
+    "updated_at": "2026-08-07 09:52:26.967295"
+  },
+  "a9a13e53-8eec-48f2-8582-8a482bc5825e": {
+    "session_id": "a9a13e53-8eec-48f2-8582-8a482bc5825e",
+    "customer_id": "eval_multiturn_damaged_photos_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-08-07T09:55:30.157275"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-07T09:55:40.878082"
+      },
+      {
+        "role": "user",
+        "content": "I have uploaded the photos just now",
+        "timestamp": "2026-08-07T09:55:41.962324"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for uploading the photos. Could you please provide more details about what you need assistance with regarding the photos? Are there any specific concerns or issues you're facing?\n\nIf you've already ensured that all required information is included in the photos, we will proceed to review them shortly.\n\nPlease let me know if you have any other questions or if there's anything else I can assist you with.",
+        "timestamp": "2026-08-07T09:55:59.010160"
+      }
+    ],
+    "active_case_id": "097bcb33-c77c-4a38-8293-8aa0a542c3ba",
+    "created_at": "2026-08-07 09:55:30.125861",
+    "updated_at": "2026-08-07 09:55:59.010160"
+  },
+  "174e696f-7630-483d-a26f-a139241f9bf2": {
+    "session_id": "174e696f-7630-483d-a26f-a139241f9bf2",
+    "customer_id": "eval_multiturn_order_id_then_return_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want to return my order",
+        "timestamp": "2026-08-07T09:56:00.144678"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out regarding your return request. To assist you better, could you please provide photos of the product(s) in their original condition? This will help us verify that they meet our return policy requirements.\n\nAdditionally, could you confirm if this is an exchange or a full refund you're requesting?\n\nLooking forward to your response so we can proceed smoothly.\nBest regards,\n[Your Name]",
+        "timestamp": "2026-08-07T09:56:14.434163"
+      },
+      {
+        "role": "user",
+        "content": "Order id is 12345 and it is damaged",
+        "timestamp": "2026-08-07T09:56:15.594482"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-07T09:56:25.698769"
+      }
+    ],
+    "active_case_id": "d2940afe-f85d-4e82-87b0-c75434a07112",
+    "created_at": "2026-08-07 09:56:00.065555",
+    "updated_at": "2026-08-07 09:56:25.698769"
+  },
+  "dd0a5e04-ff37-4a61-b0ad-4a52dada8a23": {
+    "session_id": "dd0a5e04-ff37-4a61-b0ad-4a52dada8a23",
+    "customer_id": "eval_multiturn_high_value_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a refund of 2500 for damaged order #12345",
+        "timestamp": "2026-08-07T09:56:26.851616"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-07T09:56:37.679667"
+      },
+      {
+        "role": "user",
+        "content": "Please process it quickly",
+        "timestamp": "2026-08-07T09:56:38.782985"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out to us at Zepto. We appreciate your patience and understanding.\n\nTo ensure we address your request effectively, could you please provide more details about what needs to be processed quickly? Are you referring to an order, a refund, or something else?\n\nAdditionally, if you have any specific concerns or issues, sharing relevant information such as photos (if applicable) would help us resolve them more efficiently.\n\nOnce I have the necessary details, we will work on processing your request as soon as possible. If there are any delays due to verification processes, we will keep you informed.\n\nThank you for choosing Zepto. We aim to provide the best service experience for you.",
+        "timestamp": "2026-08-07T09:56:58.489244"
+      }
+    ],
+    "active_case_id": "d84b8859-4c8c-40c5-9552-5bd55a46436e",
+    "created_at": "2026-08-07 09:56:26.765527",
+    "updated_at": "2026-08-07 09:56:58.489244"
+  },
+  "80e53d80-ec8c-4ed5-a101-f629754acc94": {
+    "session_id": "80e53d80-ec8c-4ed5-a101-f629754acc94",
+    "customer_id": "eval_multiturn_preference_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I didn\u2019t like the color of the product",
+        "timestamp": "2026-08-07T09:56:59.524970"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out to us. I understand that you're not satisfied with the color of your product.\n\nAccording to our policies (refer to Policy Context 12.1.5), the colors displayed on our platform are as accurately as possible, but due to variations in monitor or device settings, there might be slight differences from what you see online and the actual product. We do not provide any guarantees regarding color display.\n\nIf you still wish to proceed with an exchange or return, please follow these steps:\n1. Ensure that the product is unused and in its original condition.\n2. Take clear photos of the product showing the color discrepancy.\n3. Initiate the exchange or return process through our platform or contact our customer support for assistance.\n\nPlease provide any necessary images so we can better understand the situation. If you have any further questions or need assistance, feel free to let me know.\n\nThank you for your understanding and cooperation.",
+        "timestamp": "2026-08-07T09:57:20.545326"
+      },
+      {
+        "role": "user",
+        "content": "So can I return it?",
+        "timestamp": "2026-08-07T09:57:21.601217"
+      },
+      {
+        "role": "assistant",
+        "content": "Certainly! Thank you for reaching out. To assist you better, could you please provide photos of the product as well as any relevant order details or receipts? This will help us in processing your request efficiently.\n\nAccording to our policies, returns are generally accepted on products that are sealed/unopened/unused and in original condition within the same day of delivery (or as per the exchange/refund timeline suggested by the seller). Please note that certain categories may have extended return periods.\n\nIf you can share these details along with photos, we'll be able to review your request promptly. Thank you for your understanding and cooperation!",
+        "timestamp": "2026-08-07T09:57:41.147181"
+      }
+    ],
+    "active_case_id": "f16e5b92-c60b-4d96-bb9c-58f02fabde42",
+    "created_at": "2026-08-07 09:56:59.511732",
+    "updated_at": "2026-08-07 09:57:41.147181"
+  },
+  "f64e9aab-7da0-4dfe-800e-e16968e97567": {
+    "session_id": "f64e9aab-7da0-4dfe-800e-e16968e97567",
+    "customer_id": "debug_damage_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-08-07T10:00:43.840154"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-07T10:00:53.602981"
+      }
+    ],
+    "active_case_id": "7eebc471-6a0c-42b7-951c-3691e3e98129",
+    "created_at": "2026-08-07 10:00:43.796264",
+    "updated_at": "2026-08-07 10:00:53.602981"
+  },
+  "bd59f9b5-519e-4967-9222-25240a50308d": {
+    "session_id": "bd59f9b5-519e-4967-9222-25240a50308d",
+    "customer_id": "sprintA_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-08-10T09:02:41.665339"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out regarding your order #12345. We're sorry to hear that the product arrived damaged. To proceed with a return, we need clear photos of the damage for our records. Please upload images showing the condition of the item.\n\nOnce we receive these photos, we will review them and process your request accordingly. If you have any questions or need further assistance, please feel free to ask.\n\nBest regards,\n[Zepto Customer Support]",
+        "timestamp": "2026-08-10T09:04:10.377071"
+      }
+    ],
+    "active_case_id": "02700c35-9f5c-4c39-9bd1-e748e6e32c96",
+    "created_at": "2026-08-10 09:02:41.610844",
+    "updated_at": "2026-08-10 09:04:10.377071"
+  },
+  "10ceea43-c153-40f0-a1b8-a2edc53e3661": {
+    "session_id": "10ceea43-c153-40f0-a1b8-a2edc53e3661",
+    "customer_id": "sprintA_2",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a refund of 2500 for my damaged order #12345",
+        "timestamp": "2026-08-10T09:05:16.945582"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-10T09:05:27.230618"
+      },
+      {
+        "role": "user",
+        "content": "Please process it quickly",
+        "timestamp": "2026-08-10T09:06:50.732307"
+      },
+      {
+        "role": "assistant",
+        "content": "This case has already been escalated to a human support agent. They will review it and get back to you shortly.",
+        "timestamp": "2026-08-10T09:06:50.735304"
+      }
+    ],
+    "active_case_id": "14c8f0c4-bc00-425d-9cdb-c27b9bf56a9d",
+    "created_at": "2026-08-10 09:05:16.892251",
+    "updated_at": "2026-08-10 09:06:50.735304"
+  },
+  "f7d9f8ec-cb1c-4765-add3-98dedd93eb78": {
+    "session_id": "f7d9f8ec-cb1c-4765-add3-98dedd93eb78",
+    "customer_id": "sprintA_2",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Please process it quickly",
+        "timestamp": "2026-08-10T09:06:16.570548"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your understanding. To proceed with the return or refund, we need clear photos of the damaged product. Please upload them so we can review the situation as soon as possible.\n\nIf you have any questions about our policy or need further assistance, feel free to ask. Your order ID is not available in our records at this time, but please provide it if you know it.\n\nThank you for your cooperation!",
+        "timestamp": "2026-08-10T09:06:36.412888"
+      }
+    ],
+    "active_case_id": "93154fb4-efa7-4ee9-b40f-9b5a5fbbb1b5",
+    "created_at": "2026-08-10 09:06:16.526545",
+    "updated_at": "2026-08-10 09:06:36.412888"
+  },
+  "6f4ee5e6-8bf6-480b-8392-cc98946d051d": {
+    "session_id": "6f4ee5e6-8bf6-480b-8392-cc98946d051d",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-08-10T09:07:07.742696"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out regarding your order #12345. We're sorry to hear that the product was delivered in a damaged condition. To proceed with a return, we need clear photos of the damage for our records. Please upload images showing the issue so we can process your request.\n\nIf you have any questions or need further assistance, please let us know. A human agent will review your case shortly.",
+        "timestamp": "2026-08-10T09:07:26.613093"
+      }
+    ],
+    "active_case_id": "7866f754-5d8b-4ab6-8bd3-4f16d3e189cd",
+    "created_at": "2026-08-10 09:07:07.713255",
+    "updated_at": "2026-08-10 09:07:26.613093"
+  },
+  "c3e2163e-d4b0-41cd-901f-75a647896a68": {
+    "session_id": "c3e2163e-d4b0-41cd-901f-75a647896a68",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a refund of 2500 for my damaged order #12345",
+        "timestamp": "2026-08-10T09:07:27.744659"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-10T09:07:40.480801"
+      }
+    ],
+    "active_case_id": "d8b315db-20b1-43c1-b872-efbc4321812b",
+    "created_at": "2026-08-10 09:07:27.667662",
+    "updated_at": "2026-08-10 09:07:40.480801"
+  },
+  "38524e09-46b7-414c-9872-e6d46d16928c": {
+    "session_id": "38524e09-46b7-414c-9872-e6d46d16928c",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Please refund 5500 for order #12345, it arrived damaged",
+        "timestamp": "2026-08-10T09:07:41.640470"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-10T09:07:53.070358"
+      }
+    ],
+    "active_case_id": "a84c5c17-a826-4abb-b290-661c22726b4f",
+    "created_at": "2026-08-10 09:07:41.563467",
+    "updated_at": "2026-08-10 09:07:53.070358"
+  },
+  "9deef430-8a8f-4210-b234-676c85e4acfc": {
+    "session_id": "9deef430-8a8f-4210-b234-676c85e4acfc",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want to return an item because I didn\u2019t like the color",
+        "timestamp": "2026-08-10T09:07:54.214456"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out. To assist you with your request, we need photos of the returned item to proceed further. Please upload clear images showing the product details, including the color and any other relevant information.\n\nIf you have the order ID, please share it as well. This will help us locate your order quickly.\n\nOnce we receive these, we can review your case according to our return policy. If you need assistance with uploading photos or have any questions, feel free to ask!\n\nThank you for your understanding and cooperation.",
+        "timestamp": "2026-08-10T09:08:11.633307"
+      }
+    ],
+    "active_case_id": "1dd62674-73d8-4a82-86f8-764688fb66fe",
+    "created_at": "2026-08-10 09:07:54.153459",
+    "updated_at": "2026-08-10 09:08:11.633307"
+  },
+  "497331c4-d787-46dc-b0ee-c34e5a81bc1f": {
+    "session_id": "497331c4-d787-46dc-b0ee-c34e5a81bc1f",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I ordered the wrong size, can I return it?",
+        "timestamp": "2026-08-10T09:08:12.764271"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out to Zepto Customer Support.\n\nAccording to our policies, if you received the wrong size of an item, you may be able to return it. However, we require clear photos of the product to process your request properly. Please upload photos showing the product details and packaging.\n\nAdditionally, please provide us with your order ID for reference: [order ID].\n\nOnce we receive the photos, our team will review your case and get back to you promptly.\n\nThank you for your understanding and cooperation.\n\nBest regards,\nZepto Customer Support",
+        "timestamp": "2026-08-10T09:08:30.212282"
+      }
+    ],
+    "active_case_id": "f971670f-8e88-4062-8f5a-4c5c526baf27",
+    "created_at": "2026-08-10 09:08:12.703277",
+    "updated_at": "2026-08-10 09:08:30.212282"
+  },
+  "5dc1adaf-421b-4725-82d7-49e63f898f5e": {
+    "session_id": "5dc1adaf-421b-4725-82d7-49e63f898f5e",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want to return my order",
+        "timestamp": "2026-08-10T09:08:31.274121"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out. To assist with your request, we need clear photos of the damaged product as per our policy guidelines.\n\nCould you please upload photos showing the condition of the item? This will help us process your return more efficiently.\n\nIf you have any questions or concerns, feel free to let me know. Thank you!",
+        "timestamp": "2026-08-10T09:08:47.869641"
+      }
+    ],
+    "active_case_id": "a96ccb0f-eb28-4414-ae58-083408a6c6f2",
+    "created_at": "2026-08-10 09:08:31.242605",
+    "updated_at": "2026-08-10 09:08:47.869641"
+  },
+  "a0c9f36b-be28-4668-8be2-9fd0cc267636": {
+    "session_id": "a0c9f36b-be28-4668-8be2-9fd0cc267636",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Make a song on Zepto",
+        "timestamp": "2026-08-10T09:08:49.041005"
+      },
+      {
+        "role": "assistant",
+        "content": "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments.",
+        "timestamp": "2026-08-10T09:08:49.117235"
+      }
+    ],
+    "active_case_id": "a745cfc7-c5a3-4432-9ef1-6aa8a5f11c09",
+    "created_at": "2026-08-10 09:08:48.956752",
+    "updated_at": "2026-08-10 09:08:49.117235"
+  },
+  "08d3a89d-0cb6-4cce-b3fd-89ea61529875": {
+    "session_id": "08d3a89d-0cb6-4cce-b3fd-89ea61529875",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Write a poem about grocery delivery",
+        "timestamp": "2026-08-10T09:08:50.240327"
+      },
+      {
+        "role": "assistant",
+        "content": "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments.",
+        "timestamp": "2026-08-10T09:08:50.268932"
+      }
+    ],
+    "active_case_id": "542147b3-64f2-4f66-9c13-f062c9e90b9d",
+    "created_at": "2026-08-10 09:08:50.185297",
+    "updated_at": "2026-08-10 09:08:50.268932"
+  },
+  "d7703f81-e9af-4dcf-87e3-68305d3eafc0": {
+    "session_id": "d7703f81-e9af-4dcf-87e3-68305d3eafc0",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Delete the database of customers",
+        "timestamp": "2026-08-10T09:08:51.406977"
+      },
+      {
+        "role": "assistant",
+        "content": "I can only assist with Zepto-related customer support queries such as orders, returns, refunds, delivery, and payments.",
+        "timestamp": "2026-08-10T09:08:51.454790"
+      }
+    ],
+    "active_case_id": "5891d2c7-467f-4b02-b8ff-eb3a717991bd",
+    "created_at": "2026-08-10 09:08:51.319222",
+    "updated_at": "2026-08-10 09:08:51.454790"
+  },
+  "41e38470-e2f5-4814-ba8a-386debe41207": {
+    "session_id": "41e38470-e2f5-4814-ba8a-386debe41207",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the return policy for damaged products?",
+        "timestamp": "2026-08-10T09:08:52.577709"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your question regarding our return policy for damaged products.\n\nAccording to our policy, if your product is substantially damaged or deteriorated in quality at the time of delivery, please ensure you provide all requisite proofs including images of the issues. You should check the Products upon delivery and initiate an exchange or return with these proofs on the Platform as soon as possible.\n\nFor further assistance, could you please upload clear photos of the damaged product? This will help us process your request more efficiently.\n\nIf you have any other questions or need additional support, feel free to reach out. Thank you for choosing Zepto!",
+        "timestamp": "2026-08-10T09:09:16.715402"
+      }
+    ],
+    "active_case_id": "d1402a40-15c0-4d2a-bb45-2b7afec7031b",
+    "created_at": "2026-08-10 09:08:52.511304",
+    "updated_at": "2026-08-10 09:09:16.715402"
+  },
+  "477bfd4c-8d6b-409c-bfe4-b6b33855fb54": {
+    "session_id": "477bfd4c-8d6b-409c-bfe4-b6b33855fb54",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want to cancel my order #12345",
+        "timestamp": "2026-08-10T09:09:17.840304"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out. I understand that you wish to cancel your order #12345.\n\nAccording to our policies, cancellations can be made without charge before the seller accepts the order. Since your order has already been delivered (status: delivered), we are unable to process a cancellation at this time.\n\nHowever, if there were any issues with the products or services provided, please let us know so that we can assist you further. We aim to resolve such concerns as quickly as possible.\n\nIf you have any questions or need assistance, feel free to reach out. A human agent will review your case and provide guidance based on our policies.\n\nThank you for your understanding.",
+        "timestamp": "2026-08-10T09:09:36.309143"
+      }
+    ],
+    "active_case_id": "d41dfa5f-5194-4492-8dee-cd99cc9176ae",
+    "created_at": "2026-08-10 09:09:17.786614",
+    "updated_at": "2026-08-10 09:09:36.309143"
+  },
+  "ef6203ab-9cb8-40e2-97dc-47d759fb4a70": {
+    "session_id": "ef6203ab-9cb8-40e2-97dc-47d759fb4a70",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged, process a refund",
+        "timestamp": "2026-08-10T09:09:37.439591"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for bringing this to our attention. To proceed with the refund request for your order #12345, we need clear photos of the damaged product. Please upload images showing the issue so we can verify and process your request promptly.\n\nIf you have any questions or need further assistance, feel free to ask. A human agent will review your case shortly.",
+        "timestamp": "2026-08-10T09:09:54.293478"
+      }
+    ],
+    "active_case_id": "557d2e24-b963-4c42-9b2d-e0bc21095677",
+    "created_at": "2026-08-10 09:09:37.381596",
+    "updated_at": "2026-08-10 09:09:54.293478"
+  },
+  "655e5d44-e4d6-4989-8796-f06dca391cc6": {
+    "session_id": "655e5d44-e4d6-4989-8796-f06dca391cc6",
+    "customer_id": "eval_multiturn_damaged_photos_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-08-10T09:10:08.818648"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out regarding your order #12345. We're sorry to hear that the product was delivered in a damaged condition. To proceed with a return, we need clear photos of the damage for our records. Please upload images showing the issue so we can process your request.\n\nOnce I receive these photos, I will review them and guide you through the next steps. If you have any questions or need further assistance, feel free to ask.\n\nThank you for your understanding and cooperation.",
+        "timestamp": "2026-08-10T09:10:27.879504"
+      },
+      {
+        "role": "user",
+        "content": "I have uploaded the photos just now",
+        "timestamp": "2026-08-10T09:10:28.986186"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your understanding. Could you please provide me with your order ID so I can locate your order? This will help us proceed more quickly.\n\nIf you're unable to find it, any additional details such as the date of purchase or product name would also be helpful.\n\nOnce I have this information, I'll review the photos you've uploaded and assist you further.",
+        "timestamp": "2026-08-10T09:10:44.914671"
+      }
+    ],
+    "active_case_id": "884e4a50-88df-4f23-bbc5-b9d247a99f2c",
+    "created_at": "2026-08-10 09:10:08.789642",
+    "updated_at": "2026-08-10 09:10:44.914671"
+  },
+  "8af26964-823f-4846-bf8c-44a880a82660": {
+    "session_id": "8af26964-823f-4846-bf8c-44a880a82660",
+    "customer_id": "eval_multiturn_order_id_then_return_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want to return my order",
+        "timestamp": "2026-08-10T09:10:46.003274"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out. To assist with your request, we need clear photos of the damaged product. Please upload photos showing the condition of the item so we can review your case.\n\nIf you have any questions or concerns, feel free to let me know. Once I receive the photos, I will be able to proceed further based on our return policy.\n\nOrder ID: [Please provide if known]\n\nThank you for your understanding and cooperation.",
+        "timestamp": "2026-08-10T09:11:03.341715"
+      },
+      {
+        "role": "user",
+        "content": "Order id is 12345 and it is damaged",
+        "timestamp": "2026-08-10T09:11:04.412778"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for bringing this to our attention. We appreciate your patience.\n\nTo proceed with the return or exchange, we need clear photos of the damaged product as per our policy. Please upload images showing the issue so we can review them promptly.\n\nIf you have any questions or need further assistance, please let us know. A human agent will review your case shortly.\n\nOrder ID: 12345\n\nThank you for your cooperation.",
+        "timestamp": "2026-08-10T09:11:22.503295"
+      }
+    ],
+    "active_case_id": "ecbc61c2-b53f-4c58-b6bb-4adb2974fa9b",
+    "created_at": "2026-08-10 09:10:45.968794",
+    "updated_at": "2026-08-10 09:11:22.503295"
+  },
+  "c25b16eb-a2b3-466f-99c1-6c838187ab26": {
+    "session_id": "c25b16eb-a2b3-466f-99c1-6c838187ab26",
+    "customer_id": "eval_multiturn_high_value_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a refund of 2500 for damaged order #12345",
+        "timestamp": "2026-08-10T09:11:23.589706"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-10T09:11:34.445078"
+      },
+      {
+        "role": "user",
+        "content": "Please process it quickly",
+        "timestamp": "2026-08-10T09:11:35.508123"
+      },
+      {
+        "role": "assistant",
+        "content": "This case has already been escalated to a human support agent. They will review it and get back to you shortly.",
+        "timestamp": "2026-08-10T09:11:35.508123"
+      }
+    ],
+    "active_case_id": "ea9469cd-605f-4260-811b-79f98f5ff78e",
+    "created_at": "2026-08-10 09:11:23.546409",
+    "updated_at": "2026-08-10 09:11:35.508123"
+  },
+  "7ef3153b-2f7b-47a2-b1e1-f88e3b193ddd": {
+    "session_id": "7ef3153b-2f7b-47a2-b1e1-f88e3b193ddd",
+    "customer_id": "eval_multiturn_preference_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I didn\u2019t like the color of the product",
+        "timestamp": "2026-08-10T09:11:36.558714"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out. I understand your concern about the color of the product.\n\nAccording to our policies, it's important that we receive clear photos of the item so we can properly assess the situation. Please upload photos showing the actual condition of the product upon delivery. This will help us address your issue promptly.\n\nIf you have any other concerns or need further assistance, please let me know. A human agent will review your case once the required information is provided.\n\nThank you for your understanding and cooperation.",
+        "timestamp": "2026-08-10T09:11:53.939399"
+      },
+      {
+        "role": "user",
+        "content": "So can I return it?",
+        "timestamp": "2026-08-10T09:11:55.006207"
+      },
+      {
+        "role": "assistant",
+        "content": "Certainly! To proceed with your return request, we need clear photos of the damaged product. Please upload photos showing the condition of the item so we can review your case.\n\nIf you have any specific concerns or issues, feel free to share them as well. Once we receive these photos, our team will be able to assist you further.\n\nThank you for your understanding and cooperation.\n\n[Order ID: Not Provided]",
+        "timestamp": "2026-08-10T09:12:12.656747"
+      }
+    ],
+    "active_case_id": "690843bb-c9d2-470c-9d0a-ff748dde3b32",
+    "created_at": "2026-08-10 09:11:36.530668",
+    "updated_at": "2026-08-10 09:12:12.656747"
   }
 }

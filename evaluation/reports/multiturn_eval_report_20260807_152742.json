@@ -1,0 +1,162 @@
+{
+  "summary": {
+    "total": 4,
+    "passed": 1,
+    "failed": 3,
+    "pass_rate": 25.0
+  },
+  "results": [
+    {
+      "id": "multiturn_damaged_photos_1",
+      "passed": false,
+      "turns": [
+        {
+          "turn": 1,
+          "message": "My order #12345 is damaged. I want to return it.",
+          "passed": false,
+          "checks": {
+            "block": "PASS",
+            "escalate": "FAIL (expected False, got True)",
+            "ask_for_photos": "FAIL (did not ask for photos)",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "a9a13e53-8eec-48f2-8582-8a482bc5825e",
+          "case_id": "097bcb33-c77c-4a38-8293-8aa0a542c3ba",
+          "escalated": true,
+          "blocked": false,
+          "response_preview": "This request requires human assistance. A support agent will review your case shortly."
+        },
+        {
+          "turn": 2,
+          "message": "I have uploaded the photos just now",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "a9a13e53-8eec-48f2-8582-8a482bc5825e",
+          "case_id": "097bcb33-c77c-4a38-8293-8aa0a542c3ba",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Thank you for uploading the photos. Could you please provide more details about what you need assistance with regarding the photos? Are there any specific concerns or issues you're facing?\n\nIf you've already ensured that"
+        }
+      ]
+    },
+    {
+      "id": "multiturn_order_id_then_return_1",
+      "passed": false,
+      "turns": [
+        {
+          "turn": 1,
+          "message": "I want to return my order",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "174e696f-7630-483d-a26f-a139241f9bf2",
+          "case_id": "d2940afe-f85d-4e82-87b0-c75434a07112",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Thank you for reaching out regarding your return request. To assist you better, could you please provide photos of the product(s) in their original condition? This will help us verify that they meet our return policy req"
+        },
+        {
+          "turn": 2,
+          "message": "Order id is 12345 and it is damaged",
+          "passed": false,
+          "checks": {
+            "block": "PASS",
+            "escalate": "FAIL (expected False, got True)",
+            "ask_for_photos": "FAIL (did not ask for photos)",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "174e696f-7630-483d-a26f-a139241f9bf2",
+          "case_id": "d2940afe-f85d-4e82-87b0-c75434a07112",
+          "escalated": true,
+          "blocked": false,
+          "response_preview": "This request requires human assistance. A support agent will review your case shortly."
+        }
+      ]
+    },
+    {
+      "id": "multiturn_high_value_1",
+      "passed": false,
+      "turns": [
+        {
+          "turn": 1,
+          "message": "I want a refund of 2500 for damaged order #12345",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "dd0a5e04-ff37-4a61-b0ad-4a52dada8a23",
+          "case_id": "d84b8859-4c8c-40c5-9552-5bd55a46436e",
+          "escalated": true,
+          "blocked": false,
+          "response_preview": "This request requires human assistance. A support agent will review your case shortly."
+        },
+        {
+          "turn": 2,
+          "message": "Please process it quickly",
+          "passed": false,
+          "checks": {
+            "block": "PASS",
+            "escalate": "FAIL (expected True, got False)",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "dd0a5e04-ff37-4a61-b0ad-4a52dada8a23",
+          "case_id": "d84b8859-4c8c-40c5-9552-5bd55a46436e",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Thank you for reaching out to us at Zepto. We appreciate your patience and understanding.\n\nTo ensure we address your request effectively, could you please provide more details about what needs to be processed quickly? Ar"
+        }
+      ]
+    },
+    {
+      "id": "multiturn_preference_1",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 1,
+          "message": "I didn\u2019t like the color of the product",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "80e53d80-ec8c-4ed5-a101-f629754acc94",
+          "case_id": "f16e5b92-c60b-4d96-bb9c-58f02fabde42",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Thank you for reaching out to us. I understand that you're not satisfied with the color of your product.\n\nAccording to our policies (refer to Policy Context 12.1.5), the colors displayed on our platform are as accurately"
+        },
+        {
+          "turn": 2,
+          "message": "So can I return it?",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "80e53d80-ec8c-4ed5-a101-f629754acc94",
+          "case_id": "f16e5b92-c60b-4d96-bb9c-58f02fabde42",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Certainly! Thank you for reaching out. To assist you better, could you please provide photos of the product as well as any relevant order details or receipts? This will help us in processing your request efficiently.\n\nAc"
+        }
+      ]
+    }
+  ]
+}

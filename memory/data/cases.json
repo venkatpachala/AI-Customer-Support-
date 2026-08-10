@@ -1758,5 +1758,1589 @@
     "last_agent_action": "responded",
     "created_at": "2026-07-20 15:21:24.441467",
     "updated_at": "2026-07-20 15:28:58.057967"
+  },
+  "04033e74-6c66-4137-91e1-da64b67e50fe": {
+    "case_id": "04033e74-6c66-4137-91e1-da64b67e50fe",
+    "session_id": "18c9e3d2-b6bc-4e0d-800a-55817608dbd7",
+    "customer_id": "test_001",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "error",
+        "error": "Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+        "error_code": "authentication_error",
+        "retryable": false,
+        "attempts": 1,
+        "latency_ms": 480.6,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "data": null
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-07-30 18:36:09.134008",
+    "updated_at": "2026-07-30 18:36:29.662716"
+  },
+  "9a8720ea-9da7-46b0-876f-736e2e9ff4a1": {
+    "case_id": "9a8720ea-9da7-46b0-876f-736e2e9ff4a1",
+    "session_id": "d90068e9-080e-4376-83c4-c20bc11d250e",
+    "customer_id": "test_001",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "error",
+        "error": "Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+        "error_code": "authentication_error",
+        "retryable": false,
+        "attempts": 1,
+        "latency_ms": 736.78,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "data": null
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-05 09:01:38.599649",
+    "updated_at": "2026-08-05 09:02:01.610237"
+  },
+  "76e75656-e716-406c-a4b4-426b72d8b478": {
+    "case_id": "76e75656-e716-406c-a4b4-426b72d8b478",
+    "session_id": "65277b5b-dd7c-4bba-af36-08933cc2c607",
+    "customer_id": "test1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "general",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 15, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 15"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 08:33:02.957790",
+    "updated_at": "2026-08-07 08:34:18.646058"
+  },
+  "200d5c13-ccf5-428a-a758-89d6f739f338": {
+    "case_id": "200d5c13-ccf5-428a-a758-89d6f739f338",
+    "session_id": "ce7eef12-4f50-45f7-847b-283af778bba0",
+    "customer_id": "test2a",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 08:35:37.141073",
+    "updated_at": "2026-08-07 08:35:37.258666"
+  },
+  "22248c98-bf64-4c66-944c-771fec637c67": {
+    "case_id": "22248c98-bf64-4c66-944c-771fec637c67",
+    "session_id": "15806796-3088-4742-935e-dc362c07d5cc",
+    "customer_id": "test2a",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "general",
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 22.0",
+      "Zepto Terms of Use, Page 26.0",
+      "Zepto Terms of Use, Page 12.0",
+      "Zepto Terms of Use, Page 4"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 08:36:00.634672",
+    "updated_at": "2026-08-07 08:36:27.360830"
+  },
+  "b0b6c9b7-1bef-465d-a2c3-6aaacdcf5406": {
+    "case_id": "b0b6c9b7-1bef-465d-a2c3-6aaacdcf5406",
+    "session_id": "b724eed1-e09f-4420-bd6c-760a2a06a97b",
+    "customer_id": "test2a",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "general",
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 12.0",
+      "Zepto_Terms_of_Use.pdf, Page 19.0",
+      "Zepto Terms of Use, Page 13",
+      "Zepto Terms of Use, Page 13"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 08:37:36.748216",
+    "updated_at": "2026-08-07 08:37:55.263277"
+  },
+  "ea4f2940-2e36-4e7b-b208-a10d5db75d55": {
+    "case_id": "ea4f2940-2e36-4e7b-b208-a10d5db75d55",
+    "session_id": "4ee22869-c5ec-4660-a1a9-d708f5b771e0",
+    "customer_id": "test2b",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 08:38:40.626298",
+    "updated_at": "2026-08-07 08:38:40.749109"
+  },
+  "ba1f8a1d-5543-45f4-96fd-101a6d3afdbc": {
+    "case_id": "ba1f8a1d-5543-45f4-96fd-101a6d3afdbc",
+    "session_id": "d014734f-a5f0-41fd-b183-7e0fdb81d825",
+    "customer_id": "test2c",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "refund",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "error",
+        "error": "Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+        "error_code": "authentication_error",
+        "retryable": false,
+        "attempts": 1,
+        "latency_ms": 511.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "data": null
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 08:40:02.954442",
+    "updated_at": "2026-08-07 08:40:14.078976"
+  },
+  "906b14fd-cff6-4e49-996d-1a459d7e096c": {
+    "case_id": "906b14fd-cff6-4e49-996d-1a459d7e096c",
+    "session_id": "5ac5b9de-c384-4a46-b1ac-229bf5263a14",
+    "customer_id": "test2d",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "error",
+        "error": "Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+        "error_code": "authentication_error",
+        "retryable": false,
+        "attempts": 1,
+        "latency_ms": 660.96,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "data": null
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 08:40:28.809273",
+    "updated_at": "2026-08-07 08:40:40.534328"
+  },
+  "a30644fa-164e-4a2d-a153-67a1f3db938f": {
+    "case_id": "a30644fa-164e-4a2d-a153-67a1f3db938f",
+    "session_id": "bd074cbe-ebb6-4dde-96c5-acfcc0029d67",
+    "customer_id": "mem1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 12",
+      "Zepto Terms of Use, Page 20.0, Clause 10.5",
+      "Zepto Terms of Use, Page 10",
+      "Zepto Terms of Use, Page 12"
+    ],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 08:42:57.484829",
+    "updated_at": "2026-08-07 08:44:21.949449"
+  },
+  "463b3022-14e1-4a7a-a46a-f45cf68772f6": {
+    "case_id": "463b3022-14e1-4a7a-a46a-f45cf68772f6",
+    "session_id": "94acaebc-84ef-4d5b-86d5-ebd18dd7b18c",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "error",
+        "error": "Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+        "error_code": "authentication_error",
+        "retryable": false,
+        "attempts": 1,
+        "latency_ms": 679.74,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "data": null
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:49:47.586438",
+    "updated_at": "2026-08-07 09:50:09.077077"
+  },
+  "bfe7f983-ce80-4531-8fc0-b594be8b0765": {
+    "case_id": "bfe7f983-ce80-4531-8fc0-b594be8b0765",
+    "session_id": "ecf95513-7900-4032-a076-585d21c8f4c9",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "refund",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "error",
+        "error": "Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+        "error_code": "authentication_error",
+        "retryable": false,
+        "attempts": 1,
+        "latency_ms": 420.62,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "data": null
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:50:10.128503",
+    "updated_at": "2026-08-07 09:50:19.771993"
+  },
+  "c709fa88-c5fd-49cb-b338-fa79ed1e5610": {
+    "case_id": "c709fa88-c5fd-49cb-b338-fa79ed1e5610",
+    "session_id": "90ec9001-9a39-41dc-b6ae-76eeb39f6d5e",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "refund",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "error",
+        "error": "Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+        "error_code": "authentication_error",
+        "retryable": false,
+        "attempts": 1,
+        "latency_ms": 448.25,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "data": null
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:50:20.796303",
+    "updated_at": "2026-08-07 09:50:29.930523"
+  },
+  "f0b7361e-9ef7-4ea0-a1b5-2e672216a448": {
+    "case_id": "f0b7361e-9ef7-4ea0-a1b5-2e672216a448",
+    "session_id": "e89dfd61-219a-4ad8-adc2-d099cf8fdcaf",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15",
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "Zepto_Terms_of_Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 15, Clause 7.7.10"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:50:30.953315",
+    "updated_at": "2026-08-07 09:50:53.398543"
+  },
+  "5c82e45c-e0e9-466d-96d0-3710a430ed64": {
+    "case_id": "5c82e45c-e0e9-466d-96d0-3710a430ed64",
+    "session_id": "e4808c19-9762-4998-b117-a940c70818ce",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15",
+      "Zepto Terms of Use, Page 15, Clause 7.7.10",
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "Zepto_Terms_of_Use.pdf, Page 14.0"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:50:54.431283",
+    "updated_at": "2026-08-07 09:51:14.987244"
+  },
+  "6d1dc2c6-d659-4e0f-9b19-8c1c55725dd0": {
+    "case_id": "6d1dc2c6-d659-4e0f-9b19-8c1c55725dd0",
+    "session_id": "fa55081e-e59b-4d7f-b553-1fb5d5a1946a",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto_Terms_of_Use.pdf, Page 15.0",
+      "Zepto Terms of Use, Page 10, Clause 7.6.2"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:51:16.041685",
+    "updated_at": "2026-08-07 09:51:32.067235"
+  },
+  "4f2f4a50-ef05-4148-967e-76a690170107": {
+    "case_id": "4f2f4a50-ef05-4148-967e-76a690170107",
+    "session_id": "b5e752e3-40da-4c8d-8b18-0232f7f81cff",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:51:33.148207",
+    "updated_at": "2026-08-07 09:51:33.241540"
+  },
+  "a5054115-bc0f-4d5f-93c8-ab4e7ae7c257": {
+    "case_id": "a5054115-bc0f-4d5f-93c8-ab4e7ae7c257",
+    "session_id": "1562cf0d-6393-438d-a680-db16ecc0e583",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:51:34.304862",
+    "updated_at": "2026-08-07 09:51:34.406448"
+  },
+  "da936ec6-7fe9-42a0-8817-6a3f0e7848bc": {
+    "case_id": "da936ec6-7fe9-42a0-8817-6a3f0e7848bc",
+    "session_id": "e2ed9fd5-3cd4-4032-9afb-371879bcd222",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:51:35.468057",
+    "updated_at": "2026-08-07 09:51:35.573173"
+  },
+  "7dcdb86e-ee04-41a6-a9c3-b4b23f25cdea": {
+    "case_id": "7dcdb86e-ee04-41a6-a9c3-b4b23f25cdea",
+    "session_id": "c816277c-389c-4211-95ca-13eb81397a1a",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "general",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 15, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 15"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:51:36.639014",
+    "updated_at": "2026-08-07 09:52:05.216050"
+  },
+  "05518b72-7ee5-40ec-9358-2e24993ca380": {
+    "case_id": "05518b72-7ee5-40ec-9358-2e24993ca380",
+    "session_id": "6a068a08-9f34-4213-8a1a-8ef68155d806",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "cancel",
+    "status": "escalated",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "error",
+        "error": "Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+        "error_code": "authentication_error",
+        "retryable": false,
+        "attempts": 1,
+        "latency_ms": 378.76,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "data": null
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:52:06.281680",
+    "updated_at": "2026-08-07 09:52:15.661898"
+  },
+  "e612a2ff-e910-4be3-b765-85f156779a8e": {
+    "case_id": "e612a2ff-e910-4be3-b765-85f156779a8e",
+    "session_id": "f207fa77-9dba-4f99-a932-1717fd5332b8",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return|refund",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "error",
+        "error": "Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+        "error_code": "authentication_error",
+        "retryable": false,
+        "attempts": 1,
+        "latency_ms": 469.08,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "data": null
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:52:16.737338",
+    "updated_at": "2026-08-07 09:52:26.991450"
+  },
+  "097bcb33-c77c-4a38-8293-8aa0a542c3ba": {
+    "case_id": "097bcb33-c77c-4a38-8293-8aa0a542c3ba",
+    "session_id": "a9a13e53-8eec-48f2-8582-8a482bc5825e",
+    "customer_id": "eval_multiturn_damaged_photos_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "open",
+    "missing_inputs": [
+      "order_id"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 12",
+      "Zepto Terms of Use, Page 36.0",
+      "Zepto Terms of Use, Page 18.0",
+      "Zepto Terms of Use, Page 10"
+    ],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:55:30.137230",
+    "updated_at": "2026-08-07 09:55:59.036117"
+  },
+  "d2940afe-f85d-4e82-87b0-c75434a07112": {
+    "case_id": "d2940afe-f85d-4e82-87b0-c75434a07112",
+    "session_id": "174e696f-7630-483d-a26f-a139241f9bf2",
+    "customer_id": "eval_multiturn_order_id_then_return_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "error",
+        "error": "Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+        "error_code": "authentication_error",
+        "retryable": false,
+        "attempts": 1,
+        "latency_ms": 363.27,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "data": null
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:56:00.101014",
+    "updated_at": "2026-08-07 09:56:25.726386"
+  },
+  "d84b8859-4c8c-40c5-9552-5bd55a46436e": {
+    "case_id": "d84b8859-4c8c-40c5-9552-5bd55a46436e",
+    "session_id": "dd0a5e04-ff37-4a61-b0ad-4a52dada8a23",
+    "customer_id": "eval_multiturn_high_value_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 16.0, Clause 8.3",
+      "Zepto Terms of Use, Page 16.0",
+      "Zepto Terms of Use, Page 18, Clause 9.6",
+      "Zepto Terms of Use, Page 33, Clause 6.1"
+    ],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:56:26.796907",
+    "updated_at": "2026-08-07 09:56:58.491359"
+  },
+  "f16e5b92-c60b-4d96-bb9c-58f02fabde42": {
+    "case_id": "f16e5b92-c60b-4d96-bb9c-58f02fabde42",
+    "session_id": "80e53d80-ec8c-4ed5-a101-f629754acc94",
+    "customer_id": "eval_multiturn_preference_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15",
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto_Terms_of_Use.pdf, Page 14.0"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 09:56:59.513731",
+    "updated_at": "2026-08-07 09:57:41.153112"
+  },
+  "7eebc471-6a0c-42b7-951c-3691e3e98129": {
+    "case_id": "7eebc471-6a0c-42b7-951c-3691e3e98129",
+    "session_id": "f64e9aab-7da0-4dfe-800e-e16968e97567",
+    "customer_id": "debug_damage_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "error",
+        "error": "Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+        "error_code": "authentication_error",
+        "retryable": false,
+        "attempts": 1,
+        "latency_ms": 484.13,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "data": null
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "Execution verification failed: Tool 'shopify_get_order' failed: Unauthorized: {\"errors\":\"[API] Invalid API key or access token (unrecognized login or wrong password)\"}",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-07 10:00:43.801495",
+    "updated_at": "2026-08-07 10:00:53.625533"
+  },
+  "02700c35-9f5c-4c39-9bd1-e748e6e32c96": {
+    "case_id": "02700c35-9f5c-4c39-9bd1-e748e6e32c96",
+    "session_id": "bd59f9b5-519e-4967-9222-25240a50308d",
+    "customer_id": "sprintA_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "Zepto Terms of Use, Page 15",
+      "Zepto Terms of Use, Page 10, Clause 7.6.2"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:02:41.630843",
+    "updated_at": "2026-08-10 09:04:10.400750"
+  },
+  "14c8f0c4-bc00-425d-9cdb-c27b9bf56a9d": {
+    "case_id": "14c8f0c4-bc00-425d-9cdb-c27b9bf56a9d",
+    "session_id": "10ceea43-c153-40f0-a1b8-a2edc53e3661",
+    "customer_id": "sprintA_2",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "refund",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "High value refund of \u20b92500 requires manual approval (limit: \u20b92000.0)",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:05:16.918326",
+    "updated_at": "2026-08-10 09:05:27.256286"
+  },
+  "93154fb4-efa7-4ee9-b40f-9b5a5fbbb1b5": {
+    "case_id": "93154fb4-efa7-4ee9-b40f-9b5a5fbbb1b5",
+    "session_id": "f7d9f8ec-cb1c-4765-add3-98dedd93eb78",
+    "customer_id": "sprintA_2",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 16.0, Clause 8.3",
+      "Zepto Terms of Use, Page 16.0",
+      "Zepto Terms of Use, Page 18, Clause 9.6",
+      "Zepto Terms of Use, Page 33, Clause 6.1"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:06:16.531547",
+    "updated_at": "2026-08-10 09:06:36.448894"
+  },
+  "7866f754-5d8b-4ab6-8bd3-4f16d3e189cd": {
+    "case_id": "7866f754-5d8b-4ab6-8bd3-4f16d3e189cd",
+    "session_id": "6f4ee5e6-8bf6-480b-8392-cc98946d051d",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "Zepto Terms of Use, Page 15",
+      "Zepto Terms of Use, Page 10, Clause 7.6.2"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:07:07.730085",
+    "updated_at": "2026-08-10 09:07:26.636093"
+  },
+  "d8b315db-20b1-43c1-b872-efbc4321812b": {
+    "case_id": "d8b315db-20b1-43c1-b872-efbc4321812b",
+    "session_id": "c3e2163e-d4b0-41cd-901f-75a647896a68",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "refund",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "High value refund of \u20b92500 requires manual approval (limit: \u20b92000.0)",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:07:27.698656",
+    "updated_at": "2026-08-10 09:07:40.515805"
+  },
+  "a84c5c17-a826-4abb-b290-661c22726b4f": {
+    "case_id": "a84c5c17-a826-4abb-b290-661c22726b4f",
+    "session_id": "38524e09-46b7-414c-9872-e6d46d16928c",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "refund",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 1.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "High value refund of \u20b95500 requires manual approval (limit: \u20b92000.0)",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:07:41.591476",
+    "updated_at": "2026-08-10 09:07:53.111361"
+  },
+  "1dd62674-73d8-4a82-86f8-764688fb66fe": {
+    "case_id": "1dd62674-73d8-4a82-86f8-764688fb66fe",
+    "session_id": "9deef430-8a8f-4210-b234-676c85e4acfc",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15",
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "Zepto_Terms_of_Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 15, Clause 7.7.10"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:07:54.172464",
+    "updated_at": "2026-08-10 09:08:11.665305"
+  },
+  "f971670f-8e88-4062-8f5a-4c5c526baf27": {
+    "case_id": "f971670f-8e88-4062-8f5a-4c5c526baf27",
+    "session_id": "497331c4-d787-46dc-b0ee-c34e5a81bc1f",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15",
+      "Zepto Terms of Use, Page 15, Clause 7.7.10",
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "Zepto_Terms_of_Use.pdf, Page 14.0"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:08:12.722268",
+    "updated_at": "2026-08-10 09:08:30.225028"
+  },
+  "a96ccb0f-eb28-4414-ae58-083408a6c6f2": {
+    "case_id": "a96ccb0f-eb28-4414-ae58-083408a6c6f2",
+    "session_id": "5dc1adaf-421b-4725-82d7-49e63f898f5e",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto_Terms_of_Use.pdf, Page 15.0",
+      "Zepto Terms of Use, Page 10, Clause 7.6.2"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:08:31.254124",
+    "updated_at": "2026-08-10 09:08:47.914649"
+  },
+  "a745cfc7-c5a3-4432-9ef1-6aa8a5f11c09": {
+    "case_id": "a745cfc7-c5a3-4432-9ef1-6aa8a5f11c09",
+    "session_id": "a0c9f36b-be28-4668-8be2-9fd0cc267636",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:08:48.974964",
+    "updated_at": "2026-08-10 09:08:49.141501"
+  },
+  "542147b3-64f2-4f66-9c13-f062c9e90b9d": {
+    "case_id": "542147b3-64f2-4f66-9c13-f062c9e90b9d",
+    "session_id": "08d3a89d-0cb6-4cce-b3fd-89ea61529875",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:08:50.191412",
+    "updated_at": "2026-08-10 09:08:50.286581"
+  },
+  "5891d2c7-467f-4b02-b8ff-eb3a717991bd": {
+    "case_id": "5891d2c7-467f-4b02-b8ff-eb3a717991bd",
+    "session_id": "d7703f81-e9af-4dcf-87e3-68305d3eafc0",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:08:51.344299",
+    "updated_at": "2026-08-10 09:08:51.480280"
+  },
+  "d1402a40-15c0-4d2a-bb45-2b7afec7031b": {
+    "case_id": "d1402a40-15c0-4d2a-bb45-2b7afec7031b",
+    "session_id": "41e38470-e2f5-4814-ba8a-386debe41207",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "general",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 15, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 15"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:08:52.534592",
+    "updated_at": "2026-08-10 09:09:16.747683"
+  },
+  "d41dfa5f-5194-4492-8dee-cd99cc9176ae": {
+    "case_id": "d41dfa5f-5194-4492-8dee-cd99cc9176ae",
+    "session_id": "477bfd4c-8d6b-409c-bfe4-b6b33855fb54",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "cancel",
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 16.0",
+      "Zepto Terms of Use, Page 16, Clause 8.2",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0",
+      "Zepto Terms of Use, Page 12"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:09:17.805462",
+    "updated_at": "2026-08-10 09:09:36.335143"
+  },
+  "557d2e24-b963-4c42-9b2d-e0bc21095677": {
+    "case_id": "557d2e24-b963-4c42-9b2d-e0bc21095677",
+    "session_id": "ef6203ab-9cb8-40e2-97dc-47d759fb4a70",
+    "customer_id": "eval_user",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return|refund",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 16",
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 19, Clause 9.8"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:09:37.400600",
+    "updated_at": "2026-08-10 09:09:54.326704"
+  },
+  "884e4a50-88df-4f23-bbc5-b9d247a99f2c": {
+    "case_id": "884e4a50-88df-4f23-bbc5-b9d247a99f2c",
+    "session_id": "655e5d44-e4d6-4989-8796-f06dca391cc6",
+    "customer_id": "eval_multiturn_damaged_photos_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "open",
+    "missing_inputs": [
+      "order_id"
+    ],
+    "photos_requested": true,
+    "photos_received": true,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 12",
+      "Zepto Terms of Use, Page 36.0",
+      "Zepto Terms of Use, Page 18.0",
+      "Zepto Terms of Use, Page 10"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:10:08.799642",
+    "updated_at": "2026-08-10 09:10:44.929109"
+  },
+  "ecbc61c2-b53f-4c58-b6bb-4adb2974fa9b": {
+    "case_id": "ecbc61c2-b53f-4c58-b6bb-4adb2974fa9b",
+    "session_id": "8af26964-823f-4846-bf8c-44a880a82660",
+    "customer_id": "eval_multiturn_order_id_then_return_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 10.0, Clause 7.5",
+      "Zepto Terms of Use, Page 11",
+      "Zepto Terms of Use, Page 18"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:10:45.980387",
+    "updated_at": "2026-08-10 09:11:22.519100"
+  },
+  "ea9469cd-605f-4260-811b-79f98f5ff78e": {
+    "case_id": "ea9469cd-605f-4260-811b-79f98f5ff78e",
+    "session_id": "c25b16eb-a2b3-466f-99c1-6c838187ab26",
+    "customer_id": "eval_multiturn_high_value_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "refund",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "High value refund of \u20b92500 requires manual approval (limit: \u20b92000.0)",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:11:23.560409",
+    "updated_at": "2026-08-10 09:11:34.462335"
+  },
+  "690843bb-c9d2-470c-9d0a-ff748dde3b32": {
+    "case_id": "690843bb-c9d2-470c-9d0a-ff748dde3b32",
+    "session_id": "7ef3153b-2f7b-47a2-b1e1-f88e3b193ddd",
+    "customer_id": "eval_multiturn_preference_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15",
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto_Terms_of_Use.pdf, Page 14.0"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:11:36.544713",
+    "updated_at": "2026-08-10 09:12:12.669013"
   }
 }
