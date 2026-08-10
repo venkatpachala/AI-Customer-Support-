@@ -2288,5 +2288,65 @@
     "active_case_id": "2f5eb22b-667f-4ad9-9c01-fa37b544063e",
     "created_at": "2026-08-10 09:32:35.938537",
     "updated_at": "2026-08-10 09:32:55.418591"
+  },
+  "6127dfee-3e53-447e-8b0e-43b92f441115": {
+    "session_id": "6127dfee-3e53-447e-8b0e-43b92f441115",
+    "customer_id": "sec_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a refund of 2500 for my damaged order #12345",
+        "timestamp": "2026-08-10T09:46:53.561471"
+      },
+      {
+        "role": "assistant",
+        "content": "For security, high-value refund or account-sensitive requests require customer verification. Please verify your account or contact support so an agent can assist securely.",
+        "timestamp": "2026-08-10T09:46:53.584189"
+      }
+    ],
+    "active_case_id": "48d2952e-fbea-4eb5-b559-0866eb7e96bc",
+    "created_at": "2026-08-10 09:46:53.512597",
+    "updated_at": "2026-08-10 09:46:53.584189"
+  },
+  "3988c1ca-0ca6-4a76-947f-95be0cce8e5a": {
+    "session_id": "3988c1ca-0ca6-4a76-947f-95be0cce8e5a",
+    "customer_id": "sec_2",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a refund of 2500 for my damaged order #12345",
+        "timestamp": "2026-08-10T09:47:29.597675"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-10T09:47:48.233076"
+      }
+    ],
+    "active_case_id": "57029be6-c346-4173-8c5a-d3f913046513",
+    "created_at": "2026-08-10 09:47:29.549431",
+    "updated_at": "2026-08-10 09:47:48.233076"
+  },
+  "d082ee49-62bf-414b-912c-9844860c931b": {
+    "session_id": "d082ee49-62bf-414b-912c-9844860c931b",
+    "customer_id": "sec_3",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-08-10T09:48:03.946843"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out regarding your order #12345. We're sorry to hear that the item was damaged upon delivery. To proceed with a return, we need clear photos of the damage to process your request according to our policies.\n\nPlease upload photos showing the condition of the product. Once received, we will review them and guide you through the next steps. If you have any questions or need further assistance, feel free to ask.\n\nThank you for your understanding and cooperation.",
+        "timestamp": "2026-08-10T09:48:29.884081"
+      }
+    ],
+    "active_case_id": "8ece3c59-5a36-498e-b4c1-729214f64abc",
+    "created_at": "2026-08-10 09:48:03.872839",
+    "updated_at": "2026-08-10 09:48:29.884081"
   }
 }

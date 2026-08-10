@@ -50,6 +50,7 @@ class ChatRequest(BaseModel):
     customer_id: str = "default"
     tenant_id: str = "zepto"
     session_id: Optional[str] = None
+    verified_customer: bool = False
 
 
 def extract_order_id(text: str) -> Optional[str]:
@@ -82,6 +83,28 @@ def detect_photos_received(message: str) -> bool:
     return any(t in msg for t in triggers)
 
 
+def requires_verified_customer(message: str, tenant_config: dict) -> bool:
+    """
+    High-value actions require verified customer.
+    """
+    msg = (message or "").lower()
+
+    amount = 0
+    m = re.search(
+        r'(?:refund|amount|pay|paid|worth|value)\s*(?:of|is|for)?\s*(?:₹|rs\.?|inr)?\s*(\d{3,6})',
+        msg,
+    )
+    if not m:
+        m = re.search(r'(?:₹|rs\.?|inr)\s*(\d{3,6})', msg)
+    if m:
+        amount = int(m.group(1))
+
+    approval = (tenant_config or {}).get("approval", {})
+    high_value_limit = float(approval.get("high_value_refund_limit", 2000))
+
+    return amount >= high_value_limit
+
+
 @traceable(name="d2c_chat_request")
 def run_graph(inputs: dict, tenant_id: str, customer_id: str):
     run = get_current_run_tree()
@@ -104,6 +127,7 @@ def run_graph(inputs: dict, tenant_id: str, customer_id: str):
 def metrics():
     return metrics_endpoint()
 
+
 @app.get("/interactions/recent")
 def get_recent_interactions(
     limit: int = Query(20, ge=1, le=200),
@@ -122,6 +146,7 @@ def get_recent_interactions(
         "items": [r.dict() for r in records],
     }
 
+
 @app.get("/interactions/conversation/{conversation_id}")
 def get_conversation_interactions(conversation_id: str):
     records = interaction_service.store.list_by_conversation(conversation_id)
@@ -130,6 +155,7 @@ def get_conversation_interactions(conversation_id: str):
         "count": len(records),
         "items": [r.dict() for r in records],
     }
+
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
@@ -141,12 +167,14 @@ async def chat(request: ChatRequest):
         "tenant_id": request.tenant_id,
         "customer_id": request.customer_id,
         "session_id": request.session_id,
-        "message": request.message
+        "message": request.message,
+        "verified_customer": request.verified_customer,
     })
 
     # -------- Load tenant config --------
     try:
         tenant_config = load_tenant_config(request.tenant_id)
+        tenant_config_dict = tenant_config.dict() if hasattr(tenant_config, "dict") else tenant_config
     except Exception as e:
         REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="error").inc()
         ACTIVE_REQUESTS.dec()
@@ -160,7 +188,7 @@ async def chat(request: ChatRequest):
     )
     case = memory_service.get_or_create_active_case(session)
 
-    # -------- Sticky escalation short-circuit --------
+    # -------- Sticky escalation short-circuit (FIRST) --------
     if case.status == "escalated":
         memory_service.append_message(session, role="user", content=request.message)
         response_text = (
@@ -225,6 +253,86 @@ async def chat(request: ChatRequest):
             "missing_inputs": case.missing_inputs or [],
         }
 
+    # -------- Sensitive action verification --------
+    if requires_verified_customer(request.message, tenant_config_dict) and not request.verified_customer:
+        response_text = (
+            "For security, high-value refund or account-sensitive requests require customer verification. "
+            "Please verify your account or contact support so an agent can assist securely."
+        )
+
+        memory_service.append_message(session, role="user", content=request.message)
+        memory_service.append_message(session, role="assistant", content=response_text)
+
+        latency = time.time() - start_time
+        try:
+            REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(latency)
+            ESCALATION_COUNT.labels(
+                tenant_id=request.tenant_id,
+                reason="unverified_sensitive_action"[:50]
+            ).inc()
+            REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
+        except Exception:
+            pass
+
+        order_id = case.order_id or extract_order_id(request.message)
+
+        # Mark case escalated so follow-ups stay sticky
+        try:
+            memory_service.update_case_from_result(
+                case,
+                order_id=order_id,
+                issue_type="refund",
+                escalated=True,
+                escalation_reason="Unverified customer attempted sensitive/high-value action",
+                status="escalated",
+                last_agent_action="verification_required",
+            )
+        except Exception:
+            pass
+
+        try:
+            interaction_service.log_chat_turn(
+                conversation_id=session.session_id,
+                case_id=case.case_id,
+                tenant_id=request.tenant_id,
+                customer_id=request.customer_id,
+                message=request.message,
+                response=response_text,
+                intent="refund",
+                risk_level="high",
+                order_id=order_id,
+                missing_inputs=case.missing_inputs or [],
+                photos_requested=bool(getattr(case, "photos_requested", False)),
+                photos_received=bool(getattr(case, "photos_received", False)),
+                tool_results={},
+                escalated=True,
+                blocked=False,
+                escalation_reason="Unverified customer attempted sensitive/high-value action",
+                citations=[],
+                confidence=1.0,
+                latency_ms=round(latency * 1000.0, 2),
+                status="escalated",
+                request_id=request_id,
+                metadata={"reason": "unverified_sensitive_action"},
+            )
+        except Exception as e:
+            log_event("interaction_log_failed", request_id, data={"error": str(e)}, level="warning")
+
+        ACTIVE_REQUESTS.dec()
+        return {
+            "response": response_text,
+            "confidence": 1.0,
+            "citations": [],
+            "escalated": True,
+            "blocked": False,
+            "reason": "Unverified customer attempted sensitive/high-value action",
+            "tool_results": {},
+            "request_id": request_id,
+            "session_id": session.session_id,
+            "case_id": case.case_id,
+            "missing_inputs": case.missing_inputs or [],
+        }
+
     # Append user message
     memory_service.append_message(session, role="user", content=request.message)
 
@@ -247,11 +355,13 @@ async def chat(request: ChatRequest):
         "messages": [HumanMessage(content=request.message)],
         "customer_id": request.customer_id,
         "tenant_id": request.tenant_id,
-        "tenant_config": tenant_config.dict(),
+        "tenant_config": tenant_config_dict,
         "request_id": request_id,
         "session_id": session.session_id,
         "case_id": case.case_id,
-        "customer_context": {},
+        "customer_context": {
+            "verified_customer": request.verified_customer,
+        },
         "memory_context": memory_context,
         "current_plan": None,
         "workflow_steps": [],
@@ -328,6 +438,7 @@ async def chat(request: ChatRequest):
                         "such as orders, returns, refunds, delivery, and payments."
                     )
                     blocked = True
+
         # -------- Output hallucination guard --------
         guard = apply_output_guard(
             response_text,
@@ -366,7 +477,6 @@ async def chat(request: ChatRequest):
 
         issue_type = plan.get("intent") or case.issue_type
 
-        # Robust order_id resolution for memory + interaction intelligence
         order_id = (
             result.get("resolved_order_id")
             or case.order_id
@@ -428,6 +538,7 @@ async def chat(request: ChatRequest):
                 metadata={
                     "tools_mode": os.getenv("TOOLS_MODE", "mock"),
                     "verification_passed": result.get("verification_passed", True),
+                    "verified_customer": request.verified_customer,
                 },
             )
         except Exception as e:
