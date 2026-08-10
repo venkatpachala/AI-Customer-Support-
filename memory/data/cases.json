@@ -3442,5 +3442,55 @@
     "last_agent_action": "responded",
     "created_at": "2026-08-10 09:26:29.072241",
     "updated_at": "2026-08-10 09:26:49.381606"
+  },
+  "2f5eb22b-667f-4ad9-9c01-fa37b544063e": {
+    "case_id": "2f5eb22b-667f-4ad9-9c01-fa37b544063e",
+    "session_id": "dfe06972-999a-487b-9c18-3fa488b170b8",
+    "customer_id": "orderfix_2",
+    "tenant_id": "zepto",
+    "order_id": "12345",
+    "issue_type": "refund",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "High value refund of \u20b92500 requires manual approval (limit: \u20b92000.0)",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:32:35.960283",
+    "updated_at": "2026-08-10 09:32:55.439460"
   }
 }

@@ -15,7 +15,7 @@ print("DEBUG: PINECONE_API_KEY loaded =", "YES" if os.getenv("PINECONE_API_KEY")
 print("DEBUG: LANGSMITH tracing =", os.getenv("LANGCHAIN_TRACING_V2"))
 print("DEBUG: TOOLS_MODE =", os.getenv("TOOLS_MODE", "mock"))
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from tools.bootstrap import register_default_tools
 register_default_tools()
 
@@ -103,6 +103,32 @@ def run_graph(inputs: dict, tenant_id: str, customer_id: str):
 def metrics():
     return metrics_endpoint()
 
+@app.get("/interactions/recent")
+def get_recent_interactions(
+    limit: int = Query(20, ge=1, le=200),
+    tenant_id: Optional[str] = None,
+    customer_id: Optional[str] = None,
+    escalated: Optional[bool] = None,
+):
+    records = interaction_service.get_recent(
+        limit=limit,
+        tenant_id=tenant_id,
+        customer_id=customer_id,
+        escalated=escalated,
+    )
+    return {
+        "count": len(records),
+        "items": [r.dict() for r in records],
+    }
+
+@app.get("/interactions/conversation/{conversation_id}")
+def get_conversation_interactions(conversation_id: str):
+    records = interaction_service.store.list_by_conversation(conversation_id)
+    return {
+        "conversation_id": conversation_id,
+        "count": len(records),
+        "items": [r.dict() for r in records],
+    }
 
 @app.post("/chat")
 async def chat(request: ChatRequest):

@@ -79,3 +79,19 @@ class InteractionService:
         )
         self.store.append(record)
         return record
+
+    def get_recent(
+        self,
+        limit: int = 20,
+        tenant_id: Optional[str] = None,
+        customer_id: Optional[str] = None,
+        escalated: Optional[bool] = None,
+    ) -> List[InteractionRecord]:
+        rows = self.store.list_recent(limit=max(limit * 5, 50))  # over-fetch then filter
+        if tenant_id:
+            rows = [r for r in rows if r.tenant_id == tenant_id]
+        if customer_id:
+            rows = [r for r in rows if r.customer_id == customer_id]
+        if escalated is not None:
+            rows = [r for r in rows if r.escalated == escalated]
+        return rows[-limit:]
