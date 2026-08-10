@@ -2868,5 +2868,460 @@
     "active_case_id": "fdd3b4f1-86a8-4c69-ad67-c7ca6b9e84b2",
     "created_at": "2026-08-10 12:26:41.578929",
     "updated_at": "2026-08-10 12:27:18.397277"
+  },
+  "737d37f4-d14c-4e07-8181-083467157cf3": {
+    "session_id": "737d37f4-d14c-4e07-8181-083467157cf3",
+    "customer_id": "latency_policy",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the return policy for damaged products?",
+        "timestamp": "2026-08-10T12:35:51.704266"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your question regarding our return policy for damaged products.\n\nAccording to our policy, if your product is substantially damaged or deteriorated in quality at the time of delivery, you are required to provide all requisite proofs including images of the issues. Please upload clear photos of the damaged product so we can proceed with your request.\n\nOnce you have uploaded the necessary photos, please check your order details and ensure that the item was received as described. If there is a discrepancy, our customer support team will review it promptly.\n\nIf you need assistance or have any further questions, feel free to reach out. Thank you for choosing Zepto!",
+        "timestamp": "2026-08-10T12:36:29.621752"
+      }
+    ],
+    "active_case_id": "7c58b6df-a3f5-4b39-9daa-d2799efe0edc",
+    "created_at": "2026-08-10 12:35:51.656032",
+    "updated_at": "2026-08-10 12:36:29.621752"
+  },
+  "9f1f219c-3c90-45dc-8591-1a01ad51d36d": {
+    "session_id": "9f1f219c-3c90-45dc-8591-1a01ad51d36d",
+    "customer_id": "latency_return",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-08-10T12:37:12.963029"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out regarding your order #12345. We're sorry to hear that the item was delivered in a damaged condition. To proceed with a return, we need clear photos of the damage. Please upload images showing the issue so we can process your request.\n\nOnce you've provided the photos, our team will review them and take the necessary steps to resolve this for you. If you have any questions or need further assistance, please feel free to ask.\n\nThank you for your understanding and cooperation.",
+        "timestamp": "2026-08-10T12:37:30.800868"
+      }
+    ],
+    "active_case_id": "67afeec1-771e-4686-9500-0bc1474c2ca4",
+    "created_at": "2026-08-10 12:37:12.872282",
+    "updated_at": "2026-08-10 12:37:30.800868"
+  },
+  "fe240404-8fbc-4120-b2ab-cd44de85a4e1": {
+    "session_id": "fe240404-8fbc-4120-b2ab-cd44de85a4e1",
+    "customer_id": "latency_policy_2",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the return policy for damaged products?",
+        "timestamp": "2026-08-10T12:40:26.713854"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your question regarding our return policy for damaged products.\n\nAccording to our policies, if your product is substantially damaged or deteriorated in quality at the time of delivery, please ensure you provide all requisite proofs including images of the issues. You should check the Products upon delivery and initiate an exchange or return with these proofs through our platform as soon as possible.\n\nTo proceed, we kindly request clear photos of the damaged product. Please upload them so we can review your case promptly.\n\nIf you have any further questions or need assistance, feel free to reach out. A human agent will review your case if needed.\n\nThank you for your understanding and cooperation.",
+        "timestamp": "2026-08-10T12:40:53.767560"
+      }
+    ],
+    "active_case_id": "a9dd4b53-9678-46b8-ace2-920208415483",
+    "created_at": "2026-08-10 12:40:26.614781",
+    "updated_at": "2026-08-10 12:40:53.767560"
+  },
+  "a421378b-aa24-4805-9617-b1ac5f38a76b": {
+    "session_id": "a421378b-aa24-4805-9617-b1ac5f38a76b",
+    "customer_id": "latency_policy_2",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the return policy for damaged products?",
+        "timestamp": "2026-08-10T12:44:32.968557"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your question regarding our return policy for damaged products. According to our policy, if your product is substantially damaged or deteriorated in quality at the time of delivery, please follow these steps:\n\n1. **Check Upon Delivery:** Inspect the product immediately upon receipt.\n2. **Provide Proof:** Capture clear images of any issues you observe and keep them ready.\n3. **Initiate Return/Exchange:** Contact our customer support team to initiate an exchange or return process through the platform.\n\nPlease ensure that the products are sealed/unopened/unused and in their original condition for eligible returns/exchanges, as per the day of delivery or within the timeline suggested by the seller (if applicable).\n\nIf you need assistance with this process or have any specific issues, feel free to share more details or photos so we can guide you further. A human agent will review your case if necessary.\n\nThank you for choosing Zepto!",
+        "timestamp": "2026-08-10T12:45:00.768211"
+      }
+    ],
+    "active_case_id": "5cddd790-40e4-4175-9555-da0ddeba0b74",
+    "created_at": "2026-08-10 12:44:32.879446",
+    "updated_at": "2026-08-10 12:45:00.768211"
+  },
+  "0aa404fe-b4d1-4afd-8a15-c5d64ed0b588": {
+    "session_id": "0aa404fe-b4d1-4afd-8a15-c5d64ed0b588",
+    "customer_id": "t_policy_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the return policy for damaged products?",
+        "timestamp": "2026-08-10T12:49:53.901695"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your question regarding our return policy for damaged products. According to our policies, if your product is substantially damaged or deteriorated in quality at the time of delivery, please follow these steps:\n\n1. **Check Upon Delivery:** Inspect the product immediately upon receipt.\n2. **Provide Proof:** Capture clear images of any issues you observe.\n3. **Initiate Return/Exchange:** Contact our customer support team to initiate an exchange or return process through the platform.\n\nPlease ensure that the products are sealed/unopened and in their original condition if you wish to proceed with a return on the same day of delivery. For exchanges, they should be unused and in original condition as well.\n\nIf you need assistance or have any issues during this process, feel free to reach out to our customer support team for further guidance.\n\nThank you for your understanding and cooperation.",
+        "timestamp": "2026-08-10T12:50:09.742217"
+      }
+    ],
+    "active_case_id": "29b1aa16-1b12-4ea8-8460-8812f2ebc8f9",
+    "created_at": "2026-08-10 12:49:53.819221",
+    "updated_at": "2026-08-10 12:50:09.742217"
+  },
+  "23224ae5-d919-4371-8d17-87c3d68b61ad": {
+    "session_id": "23224ae5-d919-4371-8d17-87c3d68b61ad",
+    "customer_id": "t_policy_2",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the refund policy?",
+        "timestamp": "2026-08-10T12:51:01.287713"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your inquiry regarding our refund policy. According to Zepto's terms, if you opt to return Products, upon verification of the Products and related documents, we will process the refund as early as practically possible, but no later than seven (7) business days from the date of verifying and confirming your refund request.\n\nFor prepaid orders, the refund amount will be credited back to your source account. However, please note that refunds may take additional time due to processing times by your financial institution or payment gateway service provider.\n\nIf you have any specific items or further questions about this policy, feel free to provide more details, and I'll be happy to assist you further.",
+        "timestamp": "2026-08-10T12:51:13.555179"
+      }
+    ],
+    "active_case_id": "42539976-2c1f-462d-875c-54fa23b541ce",
+    "created_at": "2026-08-10 12:51:01.182508",
+    "updated_at": "2026-08-10 12:51:13.555179"
+  },
+  "85228974-4d71-4d89-aa4d-e9aef0b417d9": {
+    "session_id": "85228974-4d71-4d89-aa4d-e9aef0b417d9",
+    "customer_id": "t_policy_3",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "How long do refunds take?",
+        "timestamp": "2026-08-10T12:51:17.375163"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your question.\n\nRefunds typically take 7 business days from the date we verify and confirm your request. Please ensure that any required photos of the damaged product are uploaded so we can process your return efficiently. Once all necessary information is provided, we will proceed with verifying your order and processing the refund as per our policies.\n\nIf you have already uploaded the required photos, please allow up to 7 business days for the verification process. If you need further assistance or have additional questions, feel free to ask.\n\nThank you for your understanding.",
+        "timestamp": "2026-08-10T12:51:35.433449"
+      }
+    ],
+    "active_case_id": "1136e860-b9a8-467c-ae5e-fb9775eb23fa",
+    "created_at": "2026-08-10 12:51:17.277941",
+    "updated_at": "2026-08-10 12:51:35.433449"
+  },
+  "07429284-ec36-4cc0-8475-4d13ebc7275d": {
+    "session_id": "07429284-ec36-4cc0-8475-4d13ebc7275d",
+    "customer_id": "t_policy_4",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the cancellation policy?",
+        "timestamp": "2026-08-10T12:51:41.211866"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your question regarding our cancellation policy. According to Zepto's terms, you may cancel an order without charge at any time before the Seller accepts the order. Once the order has been accepted by the Seller, cancellations are not permitted.\n\nIf we need to cancel your order due to reasons such as shortage or unavailability of certain products, force majeure events, nonavailability of services, unforeseen circumstances, delivery-related issues, or concerns regarding fraudulent activity or non-compliance with our terms, we will inform you and ensure that no charges are applied. You will also receive a refund for any payment already made, as early as practically possible.\n\nFor detailed cancellation policies and other important information, please review the issuer's or Platform\u2019s terms and conditions which apply alongside these Terms. If you have specific concerns or require further assistance, feel free to provide more details, and we'll be happy to help.\n\nThank you for your understanding.",
+        "timestamp": "2026-08-10T12:51:54.353663"
+      }
+    ],
+    "active_case_id": "2d10123b-9aeb-4564-b85c-9c9b2a4625a5",
+    "created_at": "2026-08-10 12:51:41.121338",
+    "updated_at": "2026-08-10 12:51:54.353663"
+  },
+  "42ea5cc3-05b2-4ce5-a40d-b7fe839b26d1": {
+    "session_id": "42ea5cc3-05b2-4ce5-a40d-b7fe839b26d1",
+    "customer_id": "t_action_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-08-10T12:52:43.591727"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out regarding your order #12345. We're sorry to hear that the product was delivered in a damaged condition. To proceed with a return, we need clear photos of the damage for our records. Please upload images showing the issue so we can process your request.\n\nOnce you've provided the photos, we'll review them and take the necessary steps to resolve this for you. If you have any questions or need further assistance, please feel free to ask.\n\nThank you for your understanding and cooperation.",
+        "timestamp": "2026-08-10T12:53:02.112690"
+      }
+    ],
+    "active_case_id": "ae4e5735-6887-4a2b-aa6b-35851f00ddab",
+    "created_at": "2026-08-10 12:52:43.504620",
+    "updated_at": "2026-08-10 12:53:02.112690"
+  },
+  "3a08716e-1af5-47b8-aedc-6f42f482e519": {
+    "session_id": "3a08716e-1af5-47b8-aedc-6f42f482e519",
+    "customer_id": "t_ver_2",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a refund of 2500 for order #12345",
+        "timestamp": "2026-08-10T12:53:25.009139"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-10T12:53:34.958577"
+      }
+    ],
+    "active_case_id": "be53ec23-6b4d-4824-8877-0c0ab425c751",
+    "created_at": "2026-08-10 12:53:24.924174",
+    "updated_at": "2026-08-10 12:53:34.958577"
+  },
+  "3b444fa6-051d-42fa-b460-7a9b6512df58": {
+    "session_id": "3b444fa6-051d-42fa-b460-7a9b6512df58",
+    "customer_id": "cache_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the return policy for damaged products?",
+        "timestamp": "2026-08-10T13:12:34.351183"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your question regarding our return policy for damaged products. According to our policies, if your product is substantially damaged or deteriorated in quality at the time of delivery, please follow these steps:\n\n1. **Check Upon Delivery:** Inspect the product immediately upon receipt.\n2. **Provide Proof:** Capture clear images of any issues you observe.\n3. **Initiate Return/Exchange:** Contact our customer support team to initiate an exchange or return process through the platform.\n\nPlease ensure that the products are sealed/unopened and in their original condition on the same day of delivery, as per the timeline suggested by the seller or displayed on the product checkout page if applicable.\n\nIf you need assistance with this process or have any further questions, feel free to reach out. We're here to help!\n\nBest regards,\n[Zepto Customer Support]",
+        "timestamp": "2026-08-10T13:13:11.132787"
+      }
+    ],
+    "active_case_id": "3bb723f4-7754-455c-9aad-81b878683f6b",
+    "created_at": "2026-08-10 13:12:34.260197",
+    "updated_at": "2026-08-10 13:13:11.132787"
+  },
+  "f508a438-9f35-417b-b842-31c65b1b5b40": {
+    "session_id": "f508a438-9f35-417b-b842-31c65b1b5b40",
+    "customer_id": "stream_2",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the refund policy?",
+        "timestamp": "2026-08-10T13:14:13.554401"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your inquiry regarding our refund policy. According to Zepto's terms, if you opt to return Products that are eligible for return as per these Terms, we will process the refund within seven (7) business days from the date of verifying and confirming your refund request.\n\nFor prepaid orders, the refund amount will be credited to your source account. However, please note that refunds may take some time to appear on your account statement due to processing times by your financial institution or payment gateway service provider.\n\nIn cases where a source account is not available for such transactions, the refund value will be credited to your Zepto Cash account in the form of a Zepto Gift Card. This is done due to the absence of a source account for such transactions.\n\nIf you have any further questions or need assistance with a specific return, please provide any necessary photos if requested and we'll be happy to help. If your case requires escalation, a human agent will review it promptly.\n\nThank you for choosing Zepto!",
+        "timestamp": "2026-08-10T13:14:30.530418"
+      }
+    ],
+    "active_case_id": "959e66ee-5a82-460f-8b6a-cb47bc7551cc",
+    "created_at": "2026-08-10 13:14:13.467640",
+    "updated_at": "2026-08-10 13:14:30.530418"
+  },
+  "9f2d8698-25b3-47bc-985b-5329e1304a76": {
+    "session_id": "9f2d8698-25b3-47bc-985b-5329e1304a76",
+    "customer_id": "qa_openai_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the return policy for damaged products?",
+        "timestamp": "2026-08-10T13:18:51.148062"
+      }
+    ],
+    "active_case_id": "ac952454-be59-4f96-9805-2b1ff8f06e75",
+    "created_at": "2026-08-10 13:18:51.066628",
+    "updated_at": "2026-08-10 13:18:51.148062"
+  },
+  "989f862a-f639-44c2-a3c0-f6d21af974ce": {
+    "session_id": "989f862a-f639-44c2-a3c0-f6d21af974ce",
+    "customer_id": "qa_openai_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the return policy for damaged products?",
+        "timestamp": "2026-08-10T13:22:08.333994"
+      },
+      {
+        "role": "assistant",
+        "content": "Our return policy for damaged products requires you to check the items upon delivery and provide proof, including images, of any substantial damage or deterioration in quality. You must initiate the return or exchange request on the day of delivery or within the timeline specified for the product. Requests made after the delivery day are generally not accepted unless a longer return period applies to the product category. Please share photos of the damaged product to proceed with your request.",
+        "timestamp": "2026-08-10T13:22:25.259264"
+      }
+    ],
+    "active_case_id": "335f1ae8-ce0b-47c1-8b1e-abb2fd5f54a4",
+    "created_at": "2026-08-10 13:22:08.223934",
+    "updated_at": "2026-08-10 13:22:25.259264"
+  },
+  "22840ad8-e034-4e08-9a10-40fb8c5915a0": {
+    "session_id": "22840ad8-e034-4e08-9a10-40fb8c5915a0",
+    "customer_id": "qa_openai_2",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the policy for medicines returning?",
+        "timestamp": "2026-08-10T17:59:10.270793"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out regarding our return policy for medicines. You can return a product under the following conditions:\n\n1. **Wrong Item Delivered**: If you received a medicine that differs from your order.\n2. **Damaged or Deteriorated Quality**: If the item is substantially damaged or has deteriorated in quality upon delivery.\n\nTo initiate a return, please provide the necessary proofs, including images of the product showing the issue. It\u2019s important to check the product upon delivery and start the return process on our platform.\n\nIf you have any further questions or need assistance, please let me know.",
+        "timestamp": "2026-08-10T17:59:27.372765"
+      }
+    ],
+    "active_case_id": "7152419f-d59e-4928-b29d-b87bb0589163",
+    "created_at": "2026-08-10 17:59:10.134083",
+    "updated_at": "2026-08-10 17:59:27.372765"
+  },
+  "5a4c811b-e307-4317-9cc3-b99de1bd8ea4": {
+    "session_id": "5a4c811b-e307-4317-9cc3-b99de1bd8ea4",
+    "customer_id": "qa_openai_2",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the policy for size difference product i reciveed? when can i get my amt back?",
+        "timestamp": "2026-08-10T18:06:37.422157"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your message. If you received a product with a size difference, you can initiate a return. Once we verify the product and the related documents, the refund for eligible items will be processed within seven (7) business days. \n\nPlease ensure that the return is initiated as soon as possible to facilitate this process. If you have any further questions or need assistance with the return, feel free to ask.",
+        "timestamp": "2026-08-10T18:06:52.949407"
+      }
+    ],
+    "active_case_id": "312d13a0-db0f-4ab5-bce7-7a1e451113d2",
+    "created_at": "2026-08-10 18:06:37.283586",
+    "updated_at": "2026-08-10 18:06:52.949407"
+  },
+  "04d55160-098b-43a5-9b49-5c128ab5a0e8": {
+    "session_id": "04d55160-098b-43a5-9b49-5c128ab5a0e8",
+    "customer_id": "qa_openai_2",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the policy for size difference product i reciveed? when can i get my amt back?",
+        "timestamp": "2026-08-10T18:10:31.325390"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out. If you received a product with a size difference, you can opt to return it. Once we verify the product and the related documents, the refund for eligible items will be processed within seven (7) business days. Please ensure that the return process is initiated as soon as possible to expedite your refund. If you have any further questions or need assistance with the return, feel free to ask.",
+        "timestamp": "2026-08-10T18:10:44.046286"
+      }
+    ],
+    "active_case_id": "557c2b85-9312-4541-a19b-a73b2eb84dcc",
+    "created_at": "2026-08-10 18:10:31.200633",
+    "updated_at": "2026-08-10 18:10:44.046286"
+  },
+  "f5f1f295-e0b0-4022-a233-bb7cdc461221": {
+    "session_id": "f5f1f295-e0b0-4022-a233-bb7cdc461221",
+    "customer_id": "qa_openai_3",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the policy for getting desired product with correct size?",
+        "timestamp": "2026-08-10T18:11:34.808348"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your inquiry regarding our product size policy. If you receive a product that is not the correct size, you may request an exchange or return, provided the product is sealed, unopened, unused, and in its original condition. This request must be made on the same day of delivery or within the exchange/refund timeline specified by the seller.\n\nIf you need further assistance or have specific products in mind, please let us know!",
+        "timestamp": "2026-08-10T18:11:39.859265"
+      }
+    ],
+    "active_case_id": "dc01eef3-1c15-4255-a9de-7548d1c56aee",
+    "created_at": "2026-08-10 18:11:34.692800",
+    "updated_at": "2026-08-10 18:11:39.859265"
+  },
+  "871db75b-fcf1-4cdc-9063-115cd5f39452": {
+    "session_id": "871db75b-fcf1-4cdc-9063-115cd5f39452",
+    "customer_id": "qa_openai_4",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the policy for getting expired item?",
+        "timestamp": "2026-08-10T18:12:28.870160"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out. If you have received an expired item, please contact our customer support team to report the issue. We will guide you through the process for resolution, which may include a return or exchange, depending on the circumstances. Please ensure to provide any necessary details about the item in question. If you have photos of the expired item, please share them to assist with your request.",
+        "timestamp": "2026-08-10T18:12:34.439758"
+      }
+    ],
+    "active_case_id": "3f26c78c-0a31-4d09-8393-fa6f44eb0f08",
+    "created_at": "2026-08-10 18:12:28.739483",
+    "updated_at": "2026-08-10 18:12:34.439758"
+  },
+  "00c6d0b1-361b-45c6-8817-a2c40dd1b7f5": {
+    "session_id": "00c6d0b1-361b-45c6-8817-a2c40dd1b7f5",
+    "customer_id": "qa_openai_5",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I ordered chicken meat today and i got expired meat ? What shld i do ?",
+        "timestamp": "2026-08-10T18:13:18.888363"
+      },
+      {
+        "role": "assistant",
+        "content": "I'm sorry to hear that you received expired chicken meat. To assist you further, please provide images of the product showing the expiration date and any other relevant details. This will help us process your request for an exchange or return. Thank you for your cooperation.",
+        "timestamp": "2026-08-10T18:13:27.589878"
+      },
+      {
+        "role": "user",
+        "content": "I have uploaded the image when shall i get my 200rs",
+        "timestamp": "2026-08-10T18:14:41.532557"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for your message. However, it appears we have not yet received the photos of the damaged product. Please upload clear photos so we can proceed with your return and refund request. Once we verify the images, the refund will be processed within seven business days. Thank you for your understanding.",
+        "timestamp": "2026-08-10T18:14:50.151168"
+      },
+      {
+        "role": "user",
+        "content": "What was the query i raised",
+        "timestamp": "2026-08-10T18:15:50.550015"
+      },
+      {
+        "role": "assistant",
+        "content": "It appears that there has been no prior communication regarding your query. If you have a specific concern or question, please let me know, and I will be happy to assist you.",
+        "timestamp": "2026-08-10T18:15:55.158786"
+      },
+      {
+        "role": "user",
+        "content": "Did it resolve my query ?",
+        "timestamp": "2026-08-10T18:16:43.038451"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out. I currently do not have any information regarding your previous query. If you could provide more details or specify your concern, I would be happy to assist you further.",
+        "timestamp": "2026-08-10T18:16:46.416262"
+      },
+      {
+        "role": "user",
+        "content": "Did it resolve my query ?",
+        "timestamp": "2026-08-10T18:16:53.491814"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out. I currently do not have any information regarding your previous query. If you could provide more details or specify your concern, I would be happy to assist you further.",
+        "timestamp": "2026-08-10T18:16:57.290999"
+      },
+      {
+        "role": "user",
+        "content": "I uplaoded regarding",
+        "timestamp": "2026-08-10T18:17:30.618059"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out. To proceed with your return or refund, we need clear photos of the damaged product. Please upload the photos at your earliest convenience. Once we receive them, we can assist you further.",
+        "timestamp": "2026-08-10T18:17:37.232438"
+      },
+      {
+        "role": "user",
+        "content": "What was the query i raised ",
+        "timestamp": "2026-08-10T18:18:18.265916"
+      },
+      {
+        "role": "assistant",
+        "content": "It appears that there hasn't been any prior communication regarding your query. If you have a specific issue or question, please let me know, and I'll be happy to assist you.",
+        "timestamp": "2026-08-10T18:18:22.589861"
+      }
+    ],
+    "active_case_id": "94c4b641-ffba-4858-a018-c85a1579043e",
+    "created_at": "2026-08-10 18:13:18.761504",
+    "updated_at": "2026-08-10 18:18:22.589861"
   }
 }

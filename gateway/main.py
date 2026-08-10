@@ -1,6 +1,7 @@
 import os
 import re
 import time
+import json
 from typing import Optional, List
 from dotenv import load_dotenv
 
@@ -16,6 +17,7 @@ print("DEBUG: LANGSMITH tracing =", os.getenv("LANGCHAIN_TRACING_V2"))
 print("DEBUG: TOOLS_MODE =", os.getenv("TOOLS_MODE", "mock"))
 
 from fastapi import FastAPI, Query
+from fastapi.responses import StreamingResponse
 from tools.bootstrap import register_default_tools
 register_default_tools()
 
@@ -36,6 +38,7 @@ from observability.metrics import (
 from memory.service import MemoryService
 from interactions.service import InteractionService
 from security.output_guard import apply_output_guard
+from rag.policy_cache import policy_cache
 
 from langsmith import traceable
 from langsmith.run_helpers import get_current_run_tree
@@ -84,9 +87,6 @@ def detect_photos_received(message: str) -> bool:
 
 
 def requires_verified_customer(message: str, tenant_config: dict) -> bool:
-    """
-    High-value actions require verified customer.
-    """
     msg = (message or "").lower()
 
     amount = 0
@@ -101,8 +101,36 @@ def requires_verified_customer(message: str, tenant_config: dict) -> bool:
 
     approval = (tenant_config or {}).get("approval", {})
     high_value_limit = float(approval.get("high_value_refund_limit", 2000))
-
     return amount >= high_value_limit
+
+
+def looks_like_policy_query(message: str) -> bool:
+    text = (message or "").lower()
+    policy_signals = [
+        "policy",
+        "return policy",
+        "refund policy",
+        "cancellation policy",
+        "what is the",
+        "how long does",
+        "how many days",
+        "do you accept returns",
+        "terms of use",
+    ]
+    hard_action_signals = [
+        "order #",
+        "order id",
+        "my order",
+        "refund of",
+        "i want a refund",
+        "cancel my order",
+        "arrived damaged",
+        "is damaged",
+        "received damaged",
+    ]
+    if any(k in text for k in hard_action_signals):
+        return False
+    return any(k in text for k in policy_signals)
 
 
 @traceable(name="d2c_chat_request")
@@ -179,6 +207,21 @@ async def chat(request: ChatRequest):
         REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="error").inc()
         ACTIVE_REQUESTS.dec()
         return {"error": f"Invalid tenant: {str(e)}"}
+
+    # -------- Policy cache short-circuit --------
+    if looks_like_policy_query(request.message):
+        cached = policy_cache.get(request.tenant_id, request.message)
+        if cached:
+            try:
+                REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="success").inc()
+                REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(time.time() - start_time)
+            except Exception:
+                pass
+            ACTIVE_REQUESTS.dec()
+            cached = dict(cached)
+            cached["request_id"] = request_id
+            cached["cached"] = True
+            return cached
 
     # -------- Load / create memory --------
     session = memory_service.get_or_create_session(
@@ -276,7 +319,6 @@ async def chat(request: ChatRequest):
 
         order_id = case.order_id or extract_order_id(request.message)
 
-        # Mark case escalated so follow-ups stay sticky
         try:
             memory_service.update_case_from_result(
                 case,
@@ -393,7 +435,6 @@ async def chat(request: ChatRequest):
         blocked = bool(result.get("blocked", False))
         escalated = bool(result.get("needs_escalation", False))
 
-        # Metrics
         try:
             if blocked:
                 BLOCK_COUNT.labels(tenant_id=request.tenant_id).inc()
@@ -475,7 +516,7 @@ async def chat(request: ChatRequest):
             or result.get("missing_photos", False)
         )
 
-        issue_type = plan.get("intent") or case.issue_type
+        issue_type = plan.get("intent") or result.get("intent") or case.issue_type
 
         order_id = (
             result.get("resolved_order_id")
@@ -510,6 +551,28 @@ async def chat(request: ChatRequest):
             last_agent_action="responded",
             status=status if status != "blocked" else case.status
         )
+
+        response_payload = {
+            "response": response_text,
+            "confidence": result.get("confidence", 0.0),
+            "citations": citations,
+            "escalated": escalated,
+            "blocked": blocked,
+            "reason": result.get("escalation_reason") if escalated else None,
+            "tool_results": tool_results,
+            "request_id": request_id,
+            "session_id": session.session_id,
+            "case_id": case.case_id,
+            "missing_inputs": missing_inputs,
+        }
+
+        # -------- Cache policy answers --------
+        if (
+            not escalated
+            and not blocked
+            and looks_like_policy_query(request.message)
+        ):
+            policy_cache.set(request.tenant_id, request.message, response_payload)
 
         # -------- Persist interaction intelligence --------
         try:
@@ -557,19 +620,7 @@ async def chat(request: ChatRequest):
             "order_id": order_id,
         })
 
-        return {
-            "response": response_text,
-            "confidence": result.get("confidence", 0.0),
-            "citations": citations,
-            "escalated": escalated,
-            "blocked": blocked,
-            "reason": result.get("escalation_reason") if escalated else None,
-            "tool_results": tool_results,
-            "request_id": request_id,
-            "session_id": session.session_id,
-            "case_id": case.case_id,
-            "missing_inputs": missing_inputs
-        }
+        return response_payload
 
     except Exception as e:
         try:
@@ -585,6 +636,43 @@ async def chat(request: ChatRequest):
         }
     finally:
         ACTIVE_REQUESTS.dec()
+
+
+@app.post("/chat/stream")
+async def chat_stream(request: ChatRequest):
+    """
+    Streams final response text.
+    Uses cache when available; otherwise runs full /chat then streams the result.
+    """
+    # Cache-first streaming for policy FAQs
+    if looks_like_policy_query(request.message):
+        cached = policy_cache.get(request.tenant_id, request.message)
+        if cached and cached.get("response"):
+            text = cached["response"]
+
+            async def cached_gen():
+                for word in text.split(" "):
+                    yield word + " "
+                yield "\n"
+
+            return StreamingResponse(cached_gen(), media_type="text/plain")
+
+    # Fallback: full chat then stream final text
+    result = await chat(request)
+    if isinstance(result, dict) and result.get("response"):
+        text = result["response"]
+
+        async def gen():
+            for word in text.split(" "):
+                yield word + " "
+            yield "\n"
+
+        return StreamingResponse(gen(), media_type="text/plain")
+
+    async def err_gen():
+        yield json.dumps(result)
+
+    return StreamingResponse(err_gen(), media_type="application/json")
 
 
 if __name__ == "__main__":

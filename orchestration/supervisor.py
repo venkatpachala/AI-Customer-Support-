@@ -7,11 +7,8 @@ from typing import Dict
 import json
 import re
 
-llm = ChatOllama(
-    model="qwen2.5:7b",
-    base_url="http://127.0.0.1:11434",
-    temperature=0
-)
+from common.llm import get_supervisor_llm
+llm = get_supervisor_llm()
 
 supervisor_prompt = ChatPromptTemplate.from_template(
     """You are a supervisor for Zepto customer support.
@@ -65,6 +62,31 @@ def supervisor_node(state: AgentState) -> Dict:
     })
 
     return {
+        "intent": intent,
         "risk_level": risk,
         "needs_escalation": needs_escalation
     }
+
+from concurrent.futures import ThreadPoolExecutor
+from typing import Dict, Any
+
+def supervisor_with_rag_node(state: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Run supervisor LLM and RAG prefetch in parallel, then merge.
+    """
+    from orchestration.supervisor import supervisor_node  # original logic function if split
+    from orchestration.rag_prefetch import rag_prefetch_node
+
+    # If supervisor_node currently contains full logic, extract pure functions
+    # or call the nodes' underlying logic here.
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        fut_sup = pool.submit(supervisor_node, state)
+        fut_rag = pool.submit(rag_prefetch_node, state)
+        sup_out = fut_sup.result() or {}
+        rag_out = fut_rag.result() or {}
+
+    merged = {}
+    merged.update(sup_out)
+    merged.update(rag_out)
+    return merged

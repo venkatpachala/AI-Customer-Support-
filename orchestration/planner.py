@@ -9,11 +9,8 @@ import uuid
 import json
 import re
 
-llm = ChatOllama(
-    model="qwen2.5:7b",
-    base_url="http://127.0.0.1:11434",
-    temperature=0
-)
+from common.llm import get_planner_llm
+llm = get_planner_llm()
 
 planner_prompt = ChatPromptTemplate.from_template(
     """You are an enterprise-grade planner for customer support.
@@ -151,7 +148,7 @@ def planner_node(state: AgentState) -> Dict:
     })
 
     return {
-        "current_plan": plan.dict(),
-        "workflow_steps": [step.dict() for step in plan.steps],
-        "needs_escalation": False
+    "current_plan": plan.dict(),
+    "workflow_steps": [step.dict() for step in plan.steps],
+    "needs_escalation": False, 
     }

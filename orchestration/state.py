@@ -20,3 +20,6 @@ class AgentState(Dict):
     tenant_id: str
     tenant_config: dict
     request_id: str
+    prefetched_docs: Optional[list] = None
+    prefetched_citations: Optional[list] = None
+    rag_prefetched: bool = False

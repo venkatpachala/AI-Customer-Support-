@@ -4360,5 +4360,598 @@
     "last_agent_action": "responded",
     "created_at": "2026-08-10 12:26:41.593149",
     "updated_at": "2026-08-10 12:27:18.419199"
+  },
+  "7c58b6df-a3f5-4b39-9daa-d2799efe0edc": {
+    "case_id": "7c58b6df-a3f5-4b39-9daa-d2799efe0edc",
+    "session_id": "737d37f4-d14c-4e07-8181-083467157cf3",
+    "customer_id": "latency_policy",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "general",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 15, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 15"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 12:35:51.665840",
+    "updated_at": "2026-08-10 12:36:29.642605"
+  },
+  "67afeec1-771e-4686-9500-0bc1474c2ca4": {
+    "case_id": "67afeec1-771e-4686-9500-0bc1474c2ca4",
+    "session_id": "9f1f219c-3c90-45dc-8591-1a01ad51d36d",
+    "customer_id": "latency_return",
+    "tenant_id": "zepto",
+    "order_id": "12345",
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.55,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "Zepto Terms of Use, Page 15",
+      "Zepto Terms of Use, Page 10, Clause 7.6.2"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 12:37:12.907621",
+    "updated_at": "2026-08-10 12:37:30.829833"
+  },
+  "a9dd4b53-9678-46b8-ace2-920208415483": {
+    "case_id": "a9dd4b53-9678-46b8-ace2-920208415483",
+    "session_id": "fe240404-8fbc-4120-b2ab-cd44de85a4e1",
+    "customer_id": "latency_policy_2",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "general",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 15, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 15"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 12:40:26.654137",
+    "updated_at": "2026-08-10 12:40:53.791708"
+  },
+  "5cddd790-40e4-4175-9555-da0ddeba0b74": {
+    "case_id": "5cddd790-40e4-4175-9555-da0ddeba0b74",
+    "session_id": "a421378b-aa24-4805-9617-b1ac5f38a76b",
+    "customer_id": "latency_policy_2",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 15, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 15"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 12:44:32.921574",
+    "updated_at": "2026-08-10 12:45:00.796212"
+  },
+  "29b1aa16-1b12-4ea8-8460-8812f2ebc8f9": {
+    "case_id": "29b1aa16-1b12-4ea8-8460-8812f2ebc8f9",
+    "session_id": "0aa404fe-b4d1-4afd-8a15-c5d64ed0b588",
+    "customer_id": "t_policy_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 15, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 15"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 12:49:53.849423",
+    "updated_at": "2026-08-10 12:50:09.760770"
+  },
+  "42539976-2c1f-462d-875c-54fa23b541ce": {
+    "case_id": "42539976-2c1f-462d-875c-54fa23b541ce",
+    "session_id": "23224ae5-d919-4371-8d17-87c3d68b61ad",
+    "customer_id": "t_policy_2",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 16, Clause 8.3",
+      "Zepto Terms of Use, Page 16, refund",
+      "Zepto_Terms_of_Use.pdf, Page 15.0",
+      "Zepto Terms of Use, Page 18"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 12:51:01.218030",
+    "updated_at": "2026-08-10 12:51:13.576455"
+  },
+  "1136e860-b9a8-467c-ae5e-fb9775eb23fa": {
+    "case_id": "1136e860-b9a8-467c-ae5e-fb9775eb23fa",
+    "session_id": "85228974-4d71-4d89-aa4d-e9aef0b417d9",
+    "customer_id": "t_policy_3",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "general",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 16",
+      "Zepto Terms of Use, Page 16, Clause 8.3",
+      "Zepto_Terms_of_Use.pdf, Page 15.0",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 12:51:17.319021",
+    "updated_at": "2026-08-10 12:51:35.453212"
+  },
+  "2d10123b-9aeb-4564-b85c-9c9b2a4625a5": {
+    "case_id": "2d10123b-9aeb-4564-b85c-9c9b2a4625a5",
+    "session_id": "07429284-ec36-4cc0-8475-4d13ebc7275d",
+    "customer_id": "t_policy_4",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 16.0, Clause 8.2",
+      "Zepto Terms of Use, Page 16.0",
+      "Zepto_Terms_of_Use.pdf, Page 15.0",
+      "Zepto Terms of Use, Page 2"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 12:51:41.156581",
+    "updated_at": "2026-08-10 12:51:54.371926"
+  },
+  "ae4e5735-6887-4a2b-aa6b-35851f00ddab": {
+    "case_id": "ae4e5735-6887-4a2b-aa6b-35851f00ddab",
+    "session_id": "42ea5cc3-05b2-4ce5-a40d-b7fe839b26d1",
+    "customer_id": "t_action_1",
+    "tenant_id": "zepto",
+    "order_id": "12345",
+    "issue_type": "return",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "Zepto Terms of Use, Page 15",
+      "Zepto Terms of Use, Page 10, Clause 7.6.2"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 12:52:43.535805",
+    "updated_at": "2026-08-10 12:53:02.139689"
+  },
+  "be53ec23-6b4d-4824-8877-0c0ab425c751": {
+    "case_id": "be53ec23-6b4d-4824-8877-0c0ab425c751",
+    "session_id": "3a08716e-1af5-47b8-aedc-6f42f482e519",
+    "customer_id": "t_ver_2",
+    "tenant_id": "zepto",
+    "order_id": "12345",
+    "issue_type": "refund",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "High value refund of \u20b92500 requires manual approval (limit: \u20b92000.0)",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 12:53:24.953798",
+    "updated_at": "2026-08-10 12:53:34.992377"
+  },
+  "3bb723f4-7754-455c-9aad-81b878683f6b": {
+    "case_id": "3bb723f4-7754-455c-9aad-81b878683f6b",
+    "session_id": "3b444fa6-051d-42fa-b460-7a9b6512df58",
+    "customer_id": "cache_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 15, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 15"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 13:12:34.286878",
+    "updated_at": "2026-08-10 13:13:11.156570"
+  },
+  "959e66ee-5a82-460f-8b6a-cb47bc7551cc": {
+    "case_id": "959e66ee-5a82-460f-8b6a-cb47bc7551cc",
+    "session_id": "f508a438-9f35-417b-b842-31c65b1b5b40",
+    "customer_id": "stream_2",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 16, Clause 8.3",
+      "Zepto Terms of Use, Page 16, refund",
+      "Zepto_Terms_of_Use.pdf, Page 15.0",
+      "Zepto Terms of Use, Page 18"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 13:14:13.496288",
+    "updated_at": "2026-08-10 13:14:30.554306"
+  },
+  "ac952454-be59-4f96-9805-2b1ff8f06e75": {
+    "case_id": "ac952454-be59-4f96-9805-2b1ff8f06e75",
+    "session_id": "9f2d8698-25b3-47bc-985b-5329e1304a76",
+    "customer_id": "qa_openai_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [],
+    "escalation_reason": null,
+    "last_agent_action": null,
+    "created_at": "2026-08-10 13:18:51.092492",
+    "updated_at": "2026-08-10 13:18:51.092492"
+  },
+  "335f1ae8-ce0b-47c1-8b1e-abb2fd5f54a4": {
+    "case_id": "335f1ae8-ce0b-47c1-8b1e-abb2fd5f54a4",
+    "session_id": "989f862a-f639-44c2-a3c0-f6d21af974ce",
+    "customer_id": "qa_openai_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "Zepto Terms of Use, Page 15, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 15"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 13:22:08.258791",
+    "updated_at": "2026-08-10 13:22:25.283100"
+  },
+  "7152419f-d59e-4928-b29d-b87bb0589163": {
+    "case_id": "7152419f-d59e-4928-b29d-b87bb0589163",
+    "session_id": "22840ad8-e034-4e08-9a10-40fb8c5915a0",
+    "customer_id": "qa_openai_2",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 7.7.10",
+      "Zepto Terms of Use, Page 18",
+      "Zepto_Terms_of_Use.pdf, Page 14.0"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 17:59:10.195164",
+    "updated_at": "2026-08-10 17:59:27.409478"
+  },
+  "312d13a0-db0f-4ab5-bce7-7a1e451113d2": {
+    "case_id": "312d13a0-db0f-4ab5-bce7-7a1e451113d2",
+    "session_id": "5a4c811b-e307-4317-9cc3-b99de1bd8ea4",
+    "customer_id": "qa_openai_2",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 16.0, Clause 8.3",
+      "Zepto_Terms_of_Use.pdf, Page 15.0",
+      "Zepto Terms of Use, Page 18"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 18:06:37.339833",
+    "updated_at": "2026-08-10 18:06:52.973049"
+  },
+  "557c2b85-9312-4541-a19b-a73b2eb84dcc": {
+    "case_id": "557c2b85-9312-4541-a19b-a73b2eb84dcc",
+    "session_id": "04d55160-098b-43a5-9b49-5c128ab5a0e8",
+    "customer_id": "qa_openai_2",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 16.0, Clause 8.3",
+      "Zepto_Terms_of_Use.pdf, Page 15.0",
+      "Zepto Terms of Use, Page 18"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 18:10:31.241567",
+    "updated_at": "2026-08-10 18:10:44.069641"
+  },
+  "dc01eef3-1c15-4255-a9de-7548d1c56aee": {
+    "case_id": "dc01eef3-1c15-4255-a9de-7548d1c56aee",
+    "session_id": "f5f1f295-e0b0-4022-a233-bb7cdc461221",
+    "customer_id": "qa_openai_3",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15",
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "Zepto Terms of Use, Page 18"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 18:11:34.733791",
+    "updated_at": "2026-08-10 18:11:39.914530"
+  },
+  "3f26c78c-0a31-4d09-8393-fa6f44eb0f08": {
+    "case_id": "3f26c78c-0a31-4d09-8393-fa6f44eb0f08",
+    "session_id": "871db75b-fcf1-4cdc-9063-115cd5f39452",
+    "customer_id": "qa_openai_4",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15",
+      "Zepto Terms of Use, Page 15.0, Clause 8.1.3",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 18:12:28.788107",
+    "updated_at": "2026-08-10 18:12:34.472777"
+  },
+  "94c4b641-ffba-4858-a018-c85a1579043e": {
+    "case_id": "94c4b641-ffba-4858-a018-c85a1579043e",
+    "session_id": "00c6d0b1-361b-45c6-8817-a2c40dd1b7f5",
+    "customer_id": "qa_openai_5",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return|refund|cancel|track|general",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 26.0",
+      "Zepto Terms of Use, Page 26.0, Clause 17.1.1",
+      "Zepto Terms of Use, Page 18"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 18:13:18.810462",
+    "updated_at": "2026-08-10 18:18:22.631306"
   }
 }

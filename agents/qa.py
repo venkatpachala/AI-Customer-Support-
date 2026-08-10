@@ -3,11 +3,11 @@ from pathlib import Path
 import pickle
 from typing import Dict, Any, List
 
-from langchain_ollama import ChatOllama
 from orchestration.state import AgentState
 from common.messages import get_last_user_message
 from observability.logging import log_event
 from observability.metrics import RAG_COUNT, NODE_LATENCY
+from common.llm import get_qa_llm
 
 _rag_instance = None
 
@@ -42,26 +42,53 @@ def qa_node(state: AgentState) -> Dict:
 
     query = get_last_user_message(state.get("messages", []))
     memory_context = state.get("memory_context") or {}
-    plan = state.get("current_plan") or {}
+    plan = state.get("current_plan") or {
+        "intent": state.get("intent", "policy"),
+        "missing_inputs": [],
+    }
 
-    # ---------------- RAG ----------------
-    rag = get_rag()
-    docs = rag.retrieve(query, k=8, final_k=4, use_hybrid=True)
+    # ---------------- RAG (prefer prefetched docs) ----------------
+    prefetched_docs = state.get("prefetched_docs") or []
+    prefetched_citations = state.get("prefetched_citations") or []
+    docs = []
+    used_prefetch = False
 
-    if docs:
-        context = "\n\n".join([doc.page_content for doc in docs])
-        citations = [doc.metadata.get("citation", "N/A") for doc in docs]
+    if prefetched_docs:
+        used_prefetch = True
+        context = "\n\n".join([d.get("page_content", "") for d in prefetched_docs])
+        citations = prefetched_citations or [
+            (d.get("metadata") or {}).get("citation", "N/A") for d in prefetched_docs
+        ]
+        docs = prefetched_docs
         try:
             RAG_COUNT.labels(tenant_id=tenant_id, status="hit").inc()
         except Exception:
             pass
+        log_event(
+            "qa_using_prefetched_docs",
+            request_id,
+            node="qa",
+            data={"docs": len(prefetched_docs)},
+        )
     else:
-        context = "No relevant policy information was found."
-        citations = []
-        try:
-            RAG_COUNT.labels(tenant_id=tenant_id, status="miss").inc()
-        except Exception:
-            pass
+        rag = get_rag()
+        retrieved = rag.retrieve(query, k=8, final_k=4, use_hybrid=True)
+        docs = retrieved or []
+
+        if docs:
+            context = "\n\n".join([doc.page_content for doc in docs])
+            citations = [doc.metadata.get("citation", "N/A") for doc in docs]
+            try:
+                RAG_COUNT.labels(tenant_id=tenant_id, status="hit").inc()
+            except Exception:
+                pass
+        else:
+            context = "No relevant policy information was found."
+            citations = []
+            try:
+                RAG_COUNT.labels(tenant_id=tenant_id, status="miss").inc()
+            except Exception:
+                pass
 
     # ---------------- Tools ----------------
     tool_results = state.get("tool_results") or {}
@@ -102,14 +129,15 @@ def qa_node(state: AgentState) -> Dict:
     photos_received = bool(memory_context.get("photos_received", False))
     case_status = memory_context.get("case_status") or "open"
 
-    # verifier flag is authoritative for current turn
     missing_photos = bool(
         state.get("missing_photos", False)
         or ("photos" in missing_inputs)
         or (photos_requested and not photos_received)
     )
 
-    needs_escalation = bool(state.get("needs_escalation", False) or case_status == "escalated")
+    needs_escalation = bool(
+        state.get("needs_escalation", False) or case_status == "escalated"
+    )
 
     # ---------------- Instructions ----------------
     extra_instruction = ""
@@ -189,12 +217,7 @@ CUSTOMER QUESTION
 
 Write a clear and professional reply:"""
 
-    llm = ChatOllama(
-        model="qwen2.5:7b",
-        base_url="http://127.0.0.1:11434",
-        temperature=0.1
-    )
-
+    llm = get_qa_llm(temperature=0.1)
     response = llm.invoke(prompt)
 
     duration = time.time() - start_time
@@ -205,13 +228,14 @@ Write a clear and professional reply:"""
 
     log_event("qa_completed", request_id, node="qa", data={
         "docs_retrieved": len(docs),
+        "used_prefetch": used_prefetch,
         "citations": citations,
         "missing_inputs": missing_inputs,
         "missing_photos": missing_photos,
         "active_order_id": active_order_id,
         "case_status": case_status,
         "needs_escalation": needs_escalation,
-        "duration": round(duration, 3)
+        "duration": round(duration, 3),
     })
 
     return {
