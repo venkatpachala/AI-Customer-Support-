@@ -2228,5 +2228,45 @@
     "active_case_id": "690843bb-c9d2-470c-9d0a-ff748dde3b32",
     "created_at": "2026-08-10 09:11:36.530668",
     "updated_at": "2026-08-10 09:12:12.656747"
+  },
+  "ded3a9de-084d-4ddc-bf5c-3306c3aa0686": {
+    "session_id": "ded3a9de-084d-4ddc-bf5c-3306c3aa0686",
+    "customer_id": "sprintA_2",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a refund of 2500 for my damaged order #12345",
+        "timestamp": "2026-08-10T09:20:03.677977"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-10T09:20:22.479710"
+      }
+    ],
+    "active_case_id": "73337dd8-0adc-4876-ae11-4b3f91a40df4",
+    "created_at": "2026-08-10 09:20:03.587134",
+    "updated_at": "2026-08-10 09:20:22.479710"
+  },
+  "e039e2d1-ae4a-4591-93b9-784e0f78afa6": {
+    "session_id": "e039e2d1-ae4a-4591-93b9-784e0f78afa6",
+    "customer_id": "orderfix_1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a refund of 2500 for my damaged order #12345",
+        "timestamp": "2026-08-10T09:26:29.101241"
+      },
+      {
+        "role": "assistant",
+        "content": "This request requires human assistance. A support agent will review your case shortly.",
+        "timestamp": "2026-08-10T09:26:49.367734"
+      }
+    ],
+    "active_case_id": "8063ee85-73ce-45eb-b924-0773dd4e2499",
+    "created_at": "2026-08-10 09:26:29.067248",
+    "updated_at": "2026-08-10 09:26:49.367734"
   }
 }

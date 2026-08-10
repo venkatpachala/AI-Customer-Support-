@@ -3342,5 +3342,105 @@
     "last_agent_action": "responded",
     "created_at": "2026-08-10 09:11:36.544713",
     "updated_at": "2026-08-10 09:12:12.669013"
+  },
+  "73337dd8-0adc-4876-ae11-4b3f91a40df4": {
+    "case_id": "73337dd8-0adc-4876-ae11-4b3f91a40df4",
+    "session_id": "ded3a9de-084d-4ddc-bf5c-3306c3aa0686",
+    "customer_id": "sprintA_2",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "refund",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "High value refund of \u20b92500 requires manual approval (limit: \u20b92000.0)",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:20:03.614989",
+    "updated_at": "2026-08-10 09:20:22.500184"
+  },
+  "8063ee85-73ce-45eb-b924-0773dd4e2499": {
+    "case_id": "8063ee85-73ce-45eb-b924-0773dd4e2499",
+    "session_id": "e039e2d1-ae4a-4591-93b9-784e0f78afa6",
+    "customer_id": "orderfix_1",
+    "tenant_id": "zepto",
+    "order_id": "12345",
+    "issue_type": "refund",
+    "status": "escalated",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "success",
+        "data": {
+          "order_id": "12345",
+          "order_number": "12345",
+          "status": "delivered",
+          "financial_status": "paid",
+          "fulfillment_status": "fulfilled",
+          "total_price": 500.0,
+          "currency": "INR",
+          "created_at": null,
+          "cancelled_at": null,
+          "line_items": [],
+          "customer": {},
+          "raw_name": "#12345",
+          "tags": "",
+          "note": "mock_fallback",
+          "fulfillments_count": 0,
+          "mock": true
+        },
+        "attempts": 1,
+        "latency_ms": 0.0,
+        "provider": "shopify",
+        "operation": "shopify_get_order",
+        "meta": {}
+      }
+    },
+    "policy_citations": [],
+    "escalation_reason": "High value refund of \u20b92500 requires manual approval (limit: \u20b92000.0)",
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 09:26:29.072241",
+    "updated_at": "2026-08-10 09:26:49.381606"
   }
 }

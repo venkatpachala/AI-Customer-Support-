@@ -1,4 +1,5 @@
 import os
+import re
 import time
 from typing import Optional, List
 from dotenv import load_dotenv
@@ -33,12 +34,14 @@ from observability.metrics import (
     metrics_endpoint
 )
 from memory.service import MemoryService
+from interactions.service import InteractionService
 
 from langsmith import traceable
 from langsmith.run_helpers import get_current_run_tree
 
 app = FastAPI(title="D2C AI Support Agent")
 memory_service = MemoryService()
+interaction_service = InteractionService()
 
 
 class ChatRequest(BaseModel):
@@ -46,6 +49,18 @@ class ChatRequest(BaseModel):
     customer_id: str = "default"
     tenant_id: str = "zepto"
     session_id: Optional[str] = None
+
+
+def extract_order_id(text: str) -> Optional[str]:
+    if not text:
+        return None
+    match = re.search(r'(?:order\s*#?|#)\s*(\d{5,})', text, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    match = re.search(r'\border\b.*?(\d{5,})', text, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    return None
 
 
 def detect_photos_received(message: str) -> bool:
@@ -137,6 +152,36 @@ async def chat(request: ChatRequest):
             REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
         except Exception:
             pass
+
+        resolved_order_id = case.order_id or extract_order_id(request.message)
+
+        try:
+            interaction_service.log_chat_turn(
+                conversation_id=session.session_id,
+                case_id=case.case_id,
+                tenant_id=request.tenant_id,
+                customer_id=request.customer_id,
+                message=request.message,
+                response=response_text,
+                intent=case.issue_type,
+                risk_level="high",
+                order_id=resolved_order_id,
+                missing_inputs=case.missing_inputs or [],
+                photos_requested=bool(case.photos_requested),
+                photos_received=bool(case.photos_received),
+                tool_results={},
+                escalated=True,
+                blocked=False,
+                escalation_reason=case.escalation_reason,
+                citations=case.policy_citations or [],
+                confidence=1.0,
+                latency_ms=round(latency * 1000.0, 2),
+                status="escalated",
+                request_id=request_id,
+                metadata={"short_circuit": "already_escalated"},
+            )
+        except Exception as e:
+            log_event("interaction_log_failed", request_id, data={"error": str(e)}, level="warning")
 
         ACTIVE_REQUESTS.dec()
         return {
@@ -234,7 +279,6 @@ async def chat(request: ChatRequest):
                 "I can only assist with Zepto-related customer support queries."
             )
         elif result.get("verification_passed") is False:
-            # Only escalate on true hard verification failure
             response_text = (
                 "I was unable to fully process your request due to an internal issue. "
                 "A support agent will review this case shortly."
@@ -266,7 +310,6 @@ async def chat(request: ChatRequest):
         plan_missing = list(plan.get("missing_inputs") or [])
         missing_inputs = plan_missing or list(case.missing_inputs or [])
 
-        # if verifier/QA marked missing photos, keep it
         if result.get("missing_photos") and "photos" not in missing_inputs and not photos_received:
             missing_inputs.append("photos")
 
@@ -281,14 +324,16 @@ async def chat(request: ChatRequest):
 
         issue_type = plan.get("intent") or case.issue_type
 
+        # Robust order_id resolution for memory + interaction intelligence
         order_id = (
             result.get("resolved_order_id")
             or case.order_id
             or memory_context.get("active_order_id")
+            or extract_order_id(request.message)
         )
 
         if blocked:
-            status = case.status
+            status = "blocked"
         elif escalated:
             status = "escalated"
         elif "photos" in missing_inputs and not photos_received:
@@ -311,8 +356,40 @@ async def chat(request: ChatRequest):
             escalated=escalated,
             escalation_reason=result.get("escalation_reason") if escalated else case.escalation_reason,
             last_agent_action="responded",
-            status=status
+            status=status if status != "blocked" else case.status
         )
+
+        # -------- Persist interaction intelligence --------
+        try:
+            interaction_service.log_chat_turn(
+                conversation_id=session.session_id,
+                case_id=case.case_id,
+                tenant_id=request.tenant_id,
+                customer_id=request.customer_id,
+                message=request.message,
+                response=response_text,
+                intent=issue_type,
+                risk_level=result.get("risk_level"),
+                order_id=order_id,
+                missing_inputs=missing_inputs,
+                photos_requested=photos_requested,
+                photos_received=photos_received,
+                tool_results=tool_results,
+                escalated=escalated,
+                blocked=blocked,
+                escalation_reason=result.get("escalation_reason") if escalated else None,
+                citations=citations,
+                confidence=float(result.get("confidence") or 0.0),
+                latency_ms=round(latency * 1000.0, 2),
+                status=status,
+                request_id=request_id,
+                metadata={
+                    "tools_mode": os.getenv("TOOLS_MODE", "mock"),
+                    "verification_passed": result.get("verification_passed", True),
+                },
+            )
+        except Exception as e:
+            log_event("interaction_log_failed", request_id, data={"error": str(e)}, level="warning")
 
         log_event("request_completed", request_id, data={
             "latency": round(latency, 3),
@@ -324,6 +401,7 @@ async def chat(request: ChatRequest):
             "intent": issue_type,
             "missing_inputs": missing_inputs,
             "status": status,
+            "order_id": order_id,
         })
 
         return {
