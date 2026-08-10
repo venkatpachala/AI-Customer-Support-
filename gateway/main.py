@@ -35,6 +35,7 @@ from observability.metrics import (
 )
 from memory.service import MemoryService
 from interactions.service import InteractionService
+from security.output_guard import apply_output_guard
 
 from langsmith import traceable
 from langsmith.run_helpers import get_current_run_tree
@@ -327,6 +328,21 @@ async def chat(request: ChatRequest):
                         "such as orders, returns, refunds, delivery, and payments."
                     )
                     blocked = True
+        # -------- Output hallucination guard --------
+        guard = apply_output_guard(
+            response_text,
+            tool_results=result.get("tool_results") or {},
+            escalated=escalated,
+            blocked=blocked,
+        )
+        if guard.get("flagged"):
+            response_text = guard["text"]
+            log_event(
+                "output_guard_flagged",
+                request_id,
+                data={"reasons": guard.get("reasons", [])},
+                level="warning",
+            )
 
         # -------- Write memory back --------
         plan = result.get("current_plan") or {}
