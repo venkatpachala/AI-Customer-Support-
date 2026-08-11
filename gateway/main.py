@@ -54,6 +54,7 @@ class ChatRequest(BaseModel):
     tenant_id: str = "zepto"
     session_id: Optional[str] = None
     verified_customer: bool = False
+    contact: Optional[str] = None
 
 
 def extract_order_id(text: str) -> Optional[str]:

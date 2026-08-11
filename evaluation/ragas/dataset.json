@@ -1,0 +1,314 @@
+[
+  {
+    "id": "policy_product_scope_1",
+    "question": "What types of products can users purchase through Zepto?",
+    "answerable": true,
+    "gold_clause": "2.2",
+    "gold_page": 3,
+    "gold_evidence": "consumer goods such as grocery, apparel, electronics, health and wellness, café products, Pet care"
+  },
+  {
+    "id": "policy_service_area_1",
+    "question": "Does Zepto provide its services in every area and city in India?",
+    "answerable": true,
+    "gold_clause": "2.3",
+    "gold_page": 3,
+    "gold_evidence": "Zepto reserves the right to provide the services in any area or city in India"
+  },
+  {
+    "id": "policy_minimum_age_1",
+    "question": "What is the minimum age required to use Zepto?",
+    "answerable": true,
+    "gold_clause": "3.1",
+    "gold_page": 4,
+    "gold_evidence": "Products and services are not available to minors under the age of 18"
+  },
+  {
+    "id": "policy_payment_failure_funds_1",
+    "question": "What happens if a payment fails because I do not have sufficient funds in my bank account?",
+    "answerable": true,
+    "gold_clause": "5.4",
+    "gold_page": 7,
+    "gold_evidence": "Insufficient funds in Your bank account"
+  },
+  {
+    "id": "policy_payment_failure_details_1",
+    "question": "What happens if I provide incorrect payment details?",
+    "answerable": true,
+    "gold_clause": "5.4",
+    "gold_page": 7,
+    "gold_evidence": "You have not provided correct Payment Details"
+  },
+  {
+    "id": "policy_gift_card_usage_1",
+    "question": "Can Zepto Gift Cards be used to purchase products on the Platform?",
+    "answerable": true,
+    "gold_clause": "5.6",
+    "gold_page": 7,
+    "gold_evidence": "You can use Zepto Gift Cards for purchases on the Platform"
+  },
+  {
+    "id": "policy_product_pricing_1",
+    "question": "Who determines the prices of products sold on Zepto?",
+    "answerable": true,
+    "gold_clause": "6.1",
+    "gold_page": 8,
+    "gold_evidence": "prices for Products and services listed by Sellers are determined entirely by the Sellers"
+  },
+  {
+    "id": "policy_checkout_charges_1",
+    "question": "Where can I see the charges and fees that will be applied to my order?",
+    "answerable": true,
+    "gold_clause": "6.2",
+    "gold_page": 8,
+    "gold_evidence": "charges, fees, and costs including delivery fee displayed at the checkout page"
+  },
+  {
+    "id": "policy_delivery_eta_1",
+    "question": "Does Zepto guarantee that every order will arrive within 10 minutes?",
+    "answerable": true,
+    "gold_clause": "7.1",
+    "gold_page": 9,
+    "gold_evidence": "Zepto endeavors to deliver orders within a 10-minute ETA, but actual delivery time may exceed this estimate"
+  },
+  {
+    "id": "policy_wrong_address_1",
+    "question": "Who is responsible if an order is not delivered because I entered an incorrect address?",
+    "answerable": true,
+    "gold_clause": "7.3",
+    "gold_page": 9,
+    "gold_evidence": "sole responsibility to ensure that the delivery address is complete and accurate"
+  },
+  {
+    "id": "policy_cod_nonpayment_1",
+    "question": "What happens if I do not make the full payment for a cash-on-delivery order?",
+    "answerable": true,
+    "gold_clause": "7.5",
+    "gold_page": 10,
+    "gold_evidence": "Seller or delivery service provider may refuse delivery and Zepto shall treat such order as canceled"
+  },
+  {
+    "id": "policy_cod_delivery_fee_1",
+    "question": "Do I have to pay delivery fees if my cash-on-delivery order is canceled because I did not make the payment?",
+    "answerable": true,
+    "gold_clause": "7.5",
+    "gold_page": 10,
+    "gold_evidence": "You agree to pay the delivery fee or any other fees for such canceled order"
+  },
+  {
+    "id": "policy_alcohol_id_1",
+    "question": "Do I need to provide identification or age proof when ordering alcohol or tobacco products?",
+    "answerable": true,
+    "gold_clause": "7.6.1",
+    "gold_page": 10,
+    "gold_evidence": "Zepto and/or Sellers may request identification and age proof documents"
+  },
+  {
+    "id": "policy_alcohol_recipient_1",
+    "question": "Can someone else receive my alcohol order on my behalf?",
+    "answerable": true,
+    "gold_clause": "7.6.1",
+    "gold_page": 10,
+    "gold_evidence": "shall be delivered only to the person from whose account the order has been placed"
+  },
+  {
+    "id": "policy_alcohol_eligibility_1",
+    "question": "What age requirement applies when ordering alcoholic beverages or tobacco products?",
+    "answerable": true,
+    "gold_clause": "7.6.2",
+    "gold_page": 11,
+    "gold_evidence": "comply with all eligibility criteria under applicable law including legal age"
+  },
+  {
+    "id": "policy_alcohol_public_address_1",
+    "question": "Can I use a public place as the delivery address for an alcohol or tobacco order?",
+    "answerable": true,
+    "gold_clause": "7.6.3",
+    "gold_page": 11,
+    "gold_evidence": "not provide the address of any public place including educational institution, hospital, and religious places"
+  },
+  {
+    "id": "policy_pharmacy_responsibility_1",
+    "question": "Who is responsible for verifying and dispensing pharmaceutical products?",
+    "answerable": true,
+    "gold_clause": "7.7.1",
+    "gold_page": 11,
+    "gold_evidence": "Pharmacy are solely responsible for the verification and dispensing of Pharmaceutical Products"
+  },
+  {
+    "id": "policy_pharmacy_order_acceptance_1",
+    "question": "Who decides whether a pharmaceutical order is accepted?",
+    "answerable": true,
+    "gold_clause": "7.7.2",
+    "gold_page": 12,
+    "gold_evidence": "acceptance of Your offer will be determined by the respective Pharmacy"
+  },
+  {
+    "id": "policy_prescription_required_1",
+    "question": "Do I need a prescription to purchase prescription drugs through Zepto?",
+    "answerable": true,
+    "gold_clause": "7.7.3",
+    "gold_page": 12,
+    "gold_evidence": "Users may purchase certain Pharmaceutical Products referred to as Prescription Drugs provided they submit a prescription"
+  },
+  {
+    "id": "policy_prescription_cancel_1",
+    "question": "Can a pharmacy cancel a prescription order if there are discrepancies in the prescription?",
+    "answerable": true,
+    "gold_clause": "7.7.3",
+    "gold_page": 12,
+    "gold_evidence": "Pharmacy reserves the right to cancel the order immediately"
+  },
+  {
+    "id": "policy_prescription_delivery_1",
+    "question": "Who collects prescription medicines from the pharmacy on my behalf?",
+    "answerable": true,
+    "gold_clause": "7.7.4",
+    "gold_page": 13,
+    "gold_evidence": "individual who shall act in the capacity of Your agent and collect the Prescription Drugs"
+  },
+  {
+    "id": "policy_prescription_reuse_1",
+    "question": "Can I reuse a prescription that has already been fulfilled?",
+    "answerable": true,
+    "gold_clause": "7.7.5",
+    "gold_page": 13,
+    "gold_evidence": "Users agree and undertake not to reuse prescriptions that have already been fulfilled"
+  },
+  {
+    "id": "policy_medicine_substitution_1",
+    "question": "When can a prescribed medicine be substituted with an equivalent generic drug?",
+    "answerable": true,
+    "gold_clause": "7.7.6",
+    "gold_page": 13,
+    "gold_evidence": "only be processed if the prescribing physician has expressly authorized the dispensing of an equivalent generic drug"
+  },
+  {
+    "id": "policy_medical_emergency_1",
+    "question": "What should users do in a medical emergency according to the Terms?",
+    "answerable": true,
+    "gold_clause": "7.7.9",
+    "gold_page": 14,
+    "gold_evidence": "immediately seek professional medical assistance from their nearest healthcare provider"
+  },
+  {
+    "id": "policy_prescription_records_1",
+    "question": "Can Zepto and the pharmacy retain prescription and transaction records?",
+    "answerable": true,
+    "gold_clause": "7.7.10",
+    "gold_page": 15,
+    "gold_evidence": "may retain records of prescriptions and transaction details"
+  },
+  {
+    "id": "policy_return_wrong_item_1",
+    "question": "Can I return a product if I received the wrong item?",
+    "answerable": true,
+    "gold_clause": "8.1.1.1",
+    "gold_page": 15,
+    "gold_evidence": "wrong item being delivered other than what You had ordered"
+  },
+  {
+    "id": "policy_return_damaged_1",
+    "question": "Can I return a product that was substantially damaged or deteriorated when delivered?",
+    "answerable": true,
+    "gold_clause": "8.1.1.2",
+    "gold_page": 15,
+    "gold_evidence": "Items substantially damaged or deteriorated in quality at the time of delivery"
+  },
+  {
+    "id": "policy_return_proof_1",
+    "question": "What proof do I need to provide for a damaged or problematic product return?",
+    "answerable": true,
+    "gold_clause": "8.1.1.2",
+    "gold_page": 15,
+    "gold_evidence": "all the requisite proofs including but not limited to images of Products having issues"
+  },
+  {
+    "id": "policy_return_timing_1",
+    "question": "How soon do I need to request a return for an eligible unopened product?",
+    "answerable": true,
+    "gold_clause": "8.1.3",
+    "gold_page": 15,
+    "gold_evidence": "on the same day of delivery or as per the exchange/refund timeline suggested by Seller"
+  },
+  {
+    "id": "policy_return_seller_approval_1",
+    "question": "Does the seller have to accept a return request before it can be processed?",
+    "answerable": true,
+    "gold_clause": "8.1.3",
+    "gold_page": 15,
+    "gold_evidence": "request for exchange or return shall only be processed if the relevant Seller accepts such request"
+  },
+  {
+    "id": "policy_digital_refund_1",
+    "question": "Can I return or get a refund for a digital product such as a gift card or voucher?",
+    "answerable": true,
+    "gold_clause": "8.1.4",
+    "gold_page": 15,
+    "gold_evidence": "For digital products, including gift cards and vouchers, no returns or refunds are permitted"
+  },
+  {
+    "id": "policy_cancel_before_acceptance_1",
+    "question": "Can I cancel my order before the seller accepts it?",
+    "answerable": true,
+    "gold_clause": "8.2",
+    "gold_page": 16,
+    "gold_evidence": "You may cancel an order without charge at any time before the Seller accepts the order"
+  },
+  {
+    "id": "policy_cancel_unavailable_1",
+    "question": "Can Zepto cancel an order if a product is unavailable?",
+    "answerable": true,
+    "gold_clause": "8.2",
+    "gold_page": 16,
+    "gold_evidence": "order may be canceled for reasons including shortage or unavailability of certain Products"
+  },
+  {
+    "id": "policy_refund_timeline_1",
+    "question": "How long does an eligible return refund take to be processed?",
+    "answerable": true,
+    "gold_clause": "8.3",
+    "gold_page": 16,
+    "gold_evidence": "processed within a period of seven business days from the date of verifying and confirming the refund request"
+  },
+  {
+    "id": "policy_prepaid_refund_1",
+    "question": "Where is the refund for a prepaid order credited?",
+    "answerable": true,
+    "gold_clause": "8.3",
+    "gold_page": 16,
+    "gold_evidence": "refund amount of prepaid orders will be credited to the source account"
+  },
+  {
+    "id": "policy_cod_refund_1",
+    "question": "How is a refund for a cash-on-delivery order credited?",
+    "answerable": true,
+    "gold_clause": "8.3",
+    "gold_page": 16,
+    "gold_evidence": "credited to the User's Zepto Cash account in the form of a Zepto Gift Card"
+  },
+  {
+    "id": "policy_order_support_1",
+    "question": "Where should I go for help with a Zepto order or refund issue?",
+    "answerable": true,
+    "gold_clause": "9.8",
+    "gold_page": 19,
+    "gold_evidence": "click on the Get Help section on the App"
+  },
+  {
+    "id": "policy_grievance_contact_1",
+    "question": "How can I contact Zepto about an order-related issue?",
+    "answerable": true,
+    "gold_clause": "17.1.1",
+    "gold_page": 26,
+    "gold_evidence": "reach out via chat support on the App for real time basis resolution"
+  },
+  {
+    "id": "policy_grievance_timeline_1",
+    "question": "How long does Zepto have to resolve a grievance after it is submitted?",
+    "answerable": true,
+    "gold_clause": "17.2",
+    "gold_page": 27,
+    "gold_evidence": "acknowledge within 48 hours and endeavour to redress at the earliest and no later than 30 days"
+  }
+]

@@ -121,13 +121,23 @@ def qa_node(state: AgentState) -> Dict:
         or state.get("resolved_order_id")
     )
     missing_inputs = _as_list(
-        memory_context.get("missing_inputs")
+        state.get("missing_inputs")
+        or memory_context.get("missing_inputs")
         or plan.get("missing_inputs")
         or []
     )
     photos_requested = bool(memory_context.get("photos_requested", False))
     photos_received = bool(memory_context.get("photos_received", False))
     case_status = memory_context.get("case_status") or "open"
+
+    auth_level = (
+        state.get("auth_level")
+        or memory_context.get("auth_level")
+        or "anonymous"
+    )
+    needs_identity = bool(state.get("needs_identity", False))
+    identity_challenge = state.get("identity_challenge") or {}
+    identity_result = state.get("identity_result") or {}
 
     missing_photos = bool(
         state.get("missing_photos", False)
@@ -149,6 +159,24 @@ This case requires human assistance.
 Tell the customer that a support agent will review the case shortly.
 Do not promise refund completion, return labels, or timelines.
 Do not ask for more tools to be run.
+"""
+    elif needs_identity:
+        challenge_msg = identity_challenge.get("message") or (
+            "Please share your Order ID and the phone number or email used while placing the order."
+        )
+        identity_error = identity_result.get("error") or identity_result.get("error_code")
+        extra_instruction = f"""
+IMPORTANT:
+Order ownership verification is required before proceeding with this request.
+Do NOT process refund/return/cancel actions yet.
+Do NOT invent order details.
+Ask clearly for any missing ownership details.
+
+Challenge message to convey:
+{challenge_msg}
+
+Identity error (if any): {identity_error}
+Missing inputs: {missing_inputs}
 """
     elif missing_photos and not photos_received:
         order_ref = active_order_id or "your order"
@@ -181,13 +209,16 @@ STRICT RULES:
 1. Only use POLICY CONTEXT, TOOL RESULTS, and MEMORY.
 2. Never invent return labels, addresses, refund amounts, pickup slots, or timelines.
 3. Do not re-ask for information already present in memory.
-4. If photos are required and not received, ask for photos clearly.
-5. If case is escalated, tell the user a human agent will review it.
-6. If tools failed due to system issues, still help with policy guidance and next required customer action.
-7. Keep responses concise and operational.
+4. If ownership verification is required, ask for Order ID and phone/email used on the order.
+5. If photos are required and not received, ask for photos clearly.
+6. If case is escalated, tell the user a human agent will review it.
+7. If tools failed due to system issues, still help with policy guidance and next required customer action.
+8. Keep responses concise and operational.
 
 MEMORY:
 - active_order_id: {active_order_id}
+- auth_level: {auth_level}
+- needs_identity: {needs_identity}
 - missing_inputs: {missing_inputs}
 - photos_requested: {photos_requested}
 - photos_received: {photos_received}
@@ -233,6 +264,8 @@ Write a clear and professional reply:"""
         "missing_inputs": missing_inputs,
         "missing_photos": missing_photos,
         "active_order_id": active_order_id,
+        "auth_level": auth_level,
+        "needs_identity": needs_identity,
         "case_status": case_status,
         "needs_escalation": needs_escalation,
         "duration": round(duration, 3),
@@ -243,4 +276,6 @@ Write a clear and professional reply:"""
         "citations": citations,
         "confidence": 0.9 if docs else 0.55,
         "missing_photos": missing_photos,
+        "auth_level": auth_level,
+        "needs_identity": needs_identity,
     }

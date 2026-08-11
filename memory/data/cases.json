@@ -4953,5 +4953,189 @@
     "last_agent_action": "responded",
     "created_at": "2026-08-10 18:13:18.810462",
     "updated_at": "2026-08-10 18:18:22.631306"
+  },
+  "196cff58-7298-4216-857b-444c0a3a4604": {
+    "case_id": "196cff58-7298-4216-857b-444c0a3a4604",
+    "session_id": "dd4dba30-b7d3-4c2b-81df-42b582349df0",
+    "customer_id": "id_test_1",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15",
+      "Zepto_Terms_of_Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 15, Clause 7.7.10"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 18:52:41.419511",
+    "updated_at": "2026-08-10 18:52:56.081193"
+  },
+  "c52ef7a8-b3f6-4bfd-9a2c-0e4ded8c43b4": {
+    "case_id": "c52ef7a8-b3f6-4bfd-9a2c-0e4ded8c43b4",
+    "session_id": "d118d601-7323-4133-ae1f-5806a4903e96",
+    "customer_id": "id_test_2",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "general",
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto Terms of Use, Page 15, Clause 8.1.2",
+      "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0",
+      "Zepto Terms of Use, Page 15"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 18:53:28.856024",
+    "updated_at": "2026-08-10 18:53:35.219638"
+  },
+  "b28149d8-7cf9-4b09-977e-5f2a7b7914bc": {
+    "case_id": "b28149d8-7cf9-4b09-977e-5f2a7b7914bc",
+    "session_id": "5a71043c-6803-454e-bd6a-e425223b0205",
+    "customer_id": "id_test_3",
+    "tenant_id": "zepto",
+    "order_id": "12345",
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 18:53:52.017516",
+    "updated_at": "2026-08-10 18:53:52.141682"
+  },
+  "56be439c-844f-416a-8a89-440d58b65fa7": {
+    "case_id": "56be439c-844f-416a-8a89-440d58b65fa7",
+    "session_id": "52195584-16e9-48ea-9a81-2a1a44732e5e",
+    "customer_id": "id_test_4",
+    "tenant_id": "zepto",
+    "order_id": "12345",
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 18:54:03.738157",
+    "updated_at": "2026-08-10 18:54:03.870586"
+  },
+  "4e1d13a6-e98f-4a60-863a-f91b9e2e8069": {
+    "case_id": "4e1d13a6-e98f-4a60-863a-f91b9e2e8069",
+    "session_id": "a0f9657c-1327-41ad-a965-36f0b93cae69",
+    "customer_id": "id_test_3b",
+    "tenant_id": "zepto",
+    "order_id": "12345",
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 18:57:49.527964",
+    "updated_at": "2026-08-10 18:57:50.024430"
+  },
+  "6cec8cd6-f5e3-4a64-905e-e9886e1f7142": {
+    "case_id": "6cec8cd6-f5e3-4a64-905e-e9886e1f7142",
+    "session_id": "382e0abc-535b-4109-92cf-199c02cb33ed",
+    "customer_id": "debug_3",
+    "tenant_id": "zepto",
+    "order_id": "12345",
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-10 18:58:53.292015",
+    "updated_at": "2026-08-10 18:58:53.415919"
+  },
+  "45516505-e80f-4b50-9486-9c24ea0596dd": {
+    "case_id": "45516505-e80f-4b50-9486-9c24ea0596dd",
+    "session_id": "3fd64910-0318-43c7-ae02-acc9c4397469",
+    "customer_id": "debug_3",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "return|refund|cancel|track|general",
+    "status": "waiting_customer",
+    "missing_inputs": [
+      "photos"
+    ],
+    "photos_requested": true,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 11",
+      "Zepto Terms of Use, Page 11",
+      "Zepto_Terms_of_Use.pdf, Page 10.0"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-11 09:00:57.302924",
+    "updated_at": "2026-08-11 09:01:16.017277"
+  },
+  "8e55b800-b6a0-4e14-bce6-9c627bce8a12": {
+    "case_id": "8e55b800-b6a0-4e14-bce6-9c627bce8a12",
+    "session_id": "abc75122-8a3a-4a70-b40a-79b87506bb11",
+    "customer_id": "debug_4",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": "general",
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [
+      "shopify_get_order"
+    ],
+    "tool_results_summary": {
+      "shopify_get_order": {
+        "status": "skipped",
+        "reason": "Missing required input: order_id"
+      }
+    },
+    "policy_citations": [
+      "Zepto Terms of Use, Page 17.0",
+      "Zepto_Terms_of_Use.pdf, Page 3.0",
+      "Zepto Terms of Use, Page 32, Clause 2.1"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-11 09:20:41.336456",
+    "updated_at": "2026-08-11 09:20:57.730014"
   }
 }

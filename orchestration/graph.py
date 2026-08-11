@@ -7,22 +7,33 @@ from orchestration.execution import execution_engine_node
 from orchestration.verifier import verifier_node
 from orchestration.hitl import check_escalation
 from orchestration.routing import after_supervisor_route
+from identity.gate import identity_gate_node
 from agents.qa import qa_node
+
+
+def after_identity_route(state: AgentState) -> str:
+    """
+    If identity is required and not satisfied, go straight to QA
+    to ask for order_id/contact or report mismatch.
+    Otherwise continue normal planner/HITL routing.
+    """
+    if state.get("needs_identity"):
+        return "qa"
+    return after_supervisor_route(state)
 
 
 def build_graph():
     graph = StateGraph(AgentState)
 
-    # Nodes
     graph.add_node("guardrails", apply_guardrails)
-    graph.add_node("supervisor", supervisor_with_rag_node)  # supervisor + RAG in parallel inside node
+    graph.add_node("supervisor", supervisor_with_rag_node)
+    graph.add_node("identity_gate", identity_gate_node)
     graph.add_node("planner", planner_node)
     graph.add_node("executor", execution_engine_node)
     graph.add_node("verifier", verifier_node)
     graph.add_node("hitl_check", check_escalation)
     graph.add_node("qa", qa_node)
 
-    # Entry
     graph.set_entry_point("guardrails")
 
     # Guardrails
@@ -35,13 +46,17 @@ def build_graph():
         },
     )
 
-    # Supervisor routing (policy fast path vs action path)
+    # Supervisor → Identity Gate
+    graph.add_edge("supervisor", "identity_gate")
+
+    # Identity Gate → QA challenge OR normal route
     graph.add_conditional_edges(
-        "supervisor",
-        after_supervisor_route,
+        "identity_gate",
+        after_identity_route,
         {
-            "planner": "planner",
-            "hitl_check": "hitl_check",
+            "qa": "qa",                 # ask for ownership details / mismatch
+            "planner": "planner",       # action path
+            "hitl_check": "hitl_check", # policy fast path
             "end": END,
         },
     )
@@ -59,7 +74,6 @@ def build_graph():
         },
     )
 
-    # HITL → QA (single path, no join fan-in)
     graph.add_conditional_edges(
         "hitl_check",
         lambda s: "escalate" if s.get("needs_escalation") else "qa",

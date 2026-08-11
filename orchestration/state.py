@@ -23,3 +23,8 @@ class AgentState(Dict):
     prefetched_docs: Optional[list] = None
     prefetched_citations: Optional[list] = None
     rag_prefetched: bool = False
+    needs_identity: bool
+    auth_level: str
+    identity_challenge: dict
+    identity_result: dict
+    customer_contact: str

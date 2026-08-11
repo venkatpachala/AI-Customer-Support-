@@ -1,0 +1,1853 @@
+{
+  "created_at": "20260811_144057",
+  "summary": {
+    "n_total": 31,
+    "n_answerable": 31,
+    "n_unanswerable": 0,
+    "retrieval_recall_at_3": 0.0,
+    "buckets": {
+      "retrieved_wrong_context": 31
+    }
+  },
+  "results": [
+    {
+      "id": "policy_return_damaged_1",
+      "question": "What is the return policy for damaged products?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "damaged\n \nor\n \ndeteriorated\n \nin\n \nquality\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nagree\n \nthat\n \nYou\n \nshall\n \ngive\n \nall\n \nthe\n \nrequisite\n \nproofs\n \nincluding\n \nbut\n \nnot\n \nl",
+          "metadata": {
+            "chunk_id": 75.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.54161489,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0"
+          }
+        },
+        {
+          "preview": "Items\n \nsubstantially\n \ndamaged\n \nor\n \ndeteriorated\n \nin\n \nquality\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nagree\n \nthat\n \nYou\n \nshall\n \ngive\n \nall\n \nthe\n \nrequisite\n \nproofs\n \ni",
+          "metadata": {
+            "chunk_id": "p15-c8.1.2-89",
+            "clause": "8.1.2",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.530832052,
+            "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.2"
+          }
+        },
+        {
+          "preview": "Items\n \nsubstantially\n \ndamaged\n \nor\n \ndeteriorated\n \nin\n \nquality\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nagree\n \nthat\n \nYou\n \nshall\n \ngive\n \nall\n \nthe\n \nrequisite\n \nproofs\n \ni",
+          "metadata": {
+            "chunk_id": "p15-c8.1.2-89",
+            "clause": "8.1.2",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.530832052,
+            "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_refund_timeline_1",
+      "question": "How long do refunds take?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "and\n \nthe\n \ndocuments\n \nrelating\n \nthereto,\n \nthe\n \nrefund\n \namount\n \nfor\n \nsuch\n \nProducts\n \nwhich\n \nare\n \neligible\n \nfor\n \nreturn\n \nas\n \nper\n \nthese\n \nTerms,\n \nwill\n \nbe\n \nproces",
+          "metadata": {
+            "chunk_id": 76.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.543052495,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "the\n \nProducts\n \nand\n \nthe\n \ndocuments\n \nrelating\n \nthereto,\n \nthe\n \nrefund\n \namount\n \nfor\n \nsuch\n \nProducts\n \nwhich\n \nare\n \neligible\n \nfor\n \nreturn\n \nas\n \nper\n \nthese\n \nTerms,\n \nw",
+          "metadata": {
+            "chunk_id": 80.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.542995572,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "some\n \ntime\n \nfor\n \nthe\n \nrefund\n \nto\n \nappear\n \non\n \nyour\n \naccount\n \nstatement.In\n \nthe\n \nevent\n \nof\n \na\n \nrefund\n \nfor\n \ncash-on-delivery\n \norders,\n \nthe\n \nrefund\n \nvalue\n \nwill",
+          "metadata": {
+            "chunk_id": 77.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.525171697,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_cancel_1",
+      "question": "What is the cancellation policy?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "must  contact  the  respective  issuer.  Please  review  the  issuer  or  Platform’s  terms  and  conditions  \nwhich\n \napply\n \nalongside\n \nthese\n \nTerms.\n \n8.2.  Cancellations:  Yo",
+          "metadata": {
+            "chunk_id": 56.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.449497,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "nonavailability\n \nof\n \nservices,\n \nunforeseen\n \ncircumstances,\n \ndelivery-related\n \nissues\n \nor\n \nif\n \nthere\n \nare\n \nconcerns\n \nregarding\n \nfraudulent\n \nactivity\n \nor\n \nnon-complia",
+          "metadata": {
+            "chunk_id": 79.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.448644966,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "must  contact  the  respective  issuer.  Please  review  the  issuer  or  Platform’s  terms  and  conditions  \nwhich\n \napply\n \nalongside\n \nthese\n \nTerms.\n \n8.2.  Cancellations:  Yo",
+          "metadata": {
+            "chunk_id": 78.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.443563253,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_sealed_return_1",
+      "question": "Can I return an unopened product?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "provided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \nday\n \nof\n \ndelivery/or\n \nas\n \nper\n \nthe\n \nexchange/refun",
+          "metadata": {
+            "chunk_id": 76.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.511547923,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0"
+          }
+        },
+        {
+          "preview": "provided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \nday\n \nof\n \ndelivery/or\n \nas\n \nper\n \nthe\n \nexchange/refun",
+          "metadata": {
+            "chunk_id": 72.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.508978367,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 14.0"
+          }
+        },
+        {
+          "preview": "the\n \neligible\n \nProducts\n \nby\n \ncontacting\n \nOur\n \ncustomer\n \nsupport\n \nteam.\n \n8.1.3. You may request exchange or return of the eligible Products, purchased from the Sellers \npro",
+          "metadata": {
+            "chunk_id": "p15-c8.1.3-90",
+            "clause": "8.1.3",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.439497501,
+            "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_medicine_1",
+      "question": "What is the return policy for medicines?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "7.7.10. Prescription and Transaction Records Zepto and Pharmacy may retain records of \nprescriptions\n \nand\n \ntransaction\n \ndetails\n \nas\n \nmandated\n \nby\n \napplicable\n \nregulations\n ",
+          "metadata": {
+            "chunk_id": "p15-c7.7.10-88",
+            "clause": "7.7.10",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.508030474,
+            "citation": "Zepto Terms of Use, Page 15.0, Clause 7.7.10"
+          }
+        },
+        {
+          "preview": "7.7.10. Prescription and Transaction Records Zepto and Pharmacy may retain records of \nprescriptions\n \nand\n \ntransaction\n \ndetails\n \nas\n \nmandated\n \nby\n \napplicable\n \nregulations\n ",
+          "metadata": {
+            "chunk_id": "p15-c7.7.10-88",
+            "clause": "7.7.10",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.508030474,
+            "citation": "Zepto Terms of Use, Page 15.0, Clause 7.7.10"
+          }
+        },
+        {
+          "preview": "7.7.10.  Prescription  and  Transaction  Records   Zepto  and  Pharmacy  may  retain  records  of  \nprescriptions\n \nand\n \ntransaction\n \ndetails\n \nas\n \nmandated\n \nby\n \napplicable\n \n",
+          "metadata": {
+            "chunk_id": 53.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.496513039,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 14.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_wrong_item_1",
+      "question": "Can I return a product if I received the wrong item?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "provided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \nday\n \nof\n \ndelivery/or\n \nas\n \nper\n \nthe\n \nexchange/refun",
+          "metadata": {
+            "chunk_id": 72.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.427846372,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 14.0"
+          }
+        },
+        {
+          "preview": "provided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \nday\n \nof\n \ndelivery/or\n \nas\n \nper\n \nthe\n \nexchange/refun",
+          "metadata": {
+            "chunk_id": 76.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.423748314,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0"
+          }
+        },
+        {
+          "preview": "the\n \neligible\n \nProducts\n \nby\n \ncontacting\n \nOur\n \ncustomer\n \nsupport\n \nteam.\n \n8.1.3. You may request exchange or return of the eligible Products, purchased from the Sellers \npro",
+          "metadata": {
+            "chunk_id": "p15-c8.1.3-90",
+            "clause": "8.1.3",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.406921297,
+            "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_return_timing_1",
+      "question": "How soon do I need to request a return after delivery?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "provided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \nday\n \nof\n \ndelivery/or\n \nas\n \nper\n \nthe\n \nexchange/refun",
+          "metadata": {
+            "chunk_id": 76.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.506265342,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0"
+          }
+        },
+        {
+          "preview": "provided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \nday\n \nof\n \ndelivery/or\n \nas\n \nper\n \nthe\n \nexchange/refun",
+          "metadata": {
+            "chunk_id": 72.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.506113112,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 14.0"
+          }
+        },
+        {
+          "preview": "any.\n \nPlease\n \nnote,\n \nthe\n \nrequests\n \nfor\n \nexchange\n \nor\n \nreturns\n \nwill\n \nnot\n \nbe\n \naccepted\n \nfrom\n \nthe\n \nday\n \nfollowing\n \nthe\n \nday\n \nwhen\n \nProduct/s\n \nwere\n \ndelivered",
+          "metadata": {
+            "chunk_id": "p15-c91-91",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.504357755,
+            "citation": "Zepto Terms of Use, Page 15.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_return_proof_1",
+      "question": "What proof do I need to provide for a damaged product return?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "damaged\n \nor\n \ndeteriorated\n \nin\n \nquality\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nagree\n \nthat\n \nYou\n \nshall\n \ngive\n \nall\n \nthe\n \nrequisite\n \nproofs\n \nincluding\n \nbut\n \nnot\n \nl",
+          "metadata": {
+            "chunk_id": 75.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.527311,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0"
+          }
+        },
+        {
+          "preview": "Items\n \nsubstantially\n \ndamaged\n \nor\n \ndeteriorated\n \nin\n \nquality\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nagree\n \nthat\n \nYou\n \nshall\n \ngive\n \nall\n \nthe\n \nrequisite\n \nproofs\n \ni",
+          "metadata": {
+            "chunk_id": "p15-c8.1.2-89",
+            "clause": "8.1.2",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.520817518,
+            "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.2"
+          }
+        },
+        {
+          "preview": "Items\n \nsubstantially\n \ndamaged\n \nor\n \ndeteriorated\n \nin\n \nquality\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nagree\n \nthat\n \nYou\n \nshall\n \ngive\n \nall\n \nthe\n \nrequisite\n \nproofs\n \ni",
+          "metadata": {
+            "chunk_id": "p15-c8.1.2-89",
+            "clause": "8.1.2",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.520817518,
+            "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_return_exchange_1",
+      "question": "Can I exchange a product instead of returning it?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "provided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \nday\n \nof\n \ndelivery/or\n \nas\n \nper\n \nthe\n \nexchange/refun",
+          "metadata": {
+            "chunk_id": 72.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.481238455,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 14.0"
+          }
+        },
+        {
+          "preview": "provided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \nday\n \nof\n \ndelivery/or\n \nas\n \nper\n \nthe\n \nexchange/refun",
+          "metadata": {
+            "chunk_id": 76.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.477851838,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0"
+          }
+        },
+        {
+          "preview": "the\n \neligible\n \nProducts\n \nby\n \ncontacting\n \nOur\n \ncustomer\n \nsupport\n \nteam.\n \n8.1.3. You may request exchange or return of the eligible Products, purchased from the Sellers \npro",
+          "metadata": {
+            "chunk_id": "p15-c8.1.3-90",
+            "clause": "8.1.3",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.467041194,
+            "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_seller_return_1",
+      "question": "Does the seller have to approve a return request?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "that\n \nYour\n \nrequest\n \nfor\n \nexchange\n \nor\n \nreturn\n \nof\n \nthe\n \nProducts\n \nshall\n \nonly\n \nbe\n \nprocessed\n \nif\n \nthe\n \nrelevant\n \nSeller\n \naccepts\n \nsuch\n \nrequest.\n \n8.1.4. For d",
+          "metadata": {
+            "chunk_id": "p15-c8.1.4-92",
+            "clause": "8.1.4",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.445513397,
+            "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.4"
+          }
+        },
+        {
+          "preview": "that\n \nYour\n \nrequest\n \nfor\n \nexchange\n \nor\n \nreturn\n \nof\n \nthe\n \nProducts\n \nshall\n \nonly\n \nbe\n \nprocessed\n \nif\n \nthe\n \nrelevant\n \nSeller\n \naccepts\n \nsuch\n \nrequest.\n \n8.1.4. For d",
+          "metadata": {
+            "chunk_id": "p15-c8.1.4-92",
+            "clause": "8.1.4",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.445513397,
+            "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.4"
+          }
+        },
+        {
+          "preview": "requisite\n \nproofs\n \non\n \nthe\n \nPlatform,\n \nas\n \navailable.\n \nYou\n \nmay\n \nalso\n \nexchange\n \nor\n \nreturn\n \nthe\n \neligible\n \nProducts\n \nby\n \ncontacting\n \nOur\n \ncustomer\n \nsupport\n \nt",
+          "metadata": {
+            "chunk_id": 54.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.435033262,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 14.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_digital_products_1",
+      "question": "Can I return or get a refund for digital products?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "higher\n \nreturn\n \nor\n \nexchange\n \nperiod\n \nis\n \nprovided.\n \nYou\n \nare\n \nrequested\n \nto\n \ndispose\n \noff\n \nthe\n \nProducts\n \nfor\n \nwhich\n \nrefund\n \nhas\n \nbeen\n \nprocessed.\n \nIt\n \nis\n ",
+          "metadata": {
+            "chunk_id": 55.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.594791651,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 14.0"
+          }
+        },
+        {
+          "preview": "higher\n \nreturn\n \nor\n \nexchange\n \nperiod\n \nis\n \nprovided.\n \nYou\n \nare\n \nrequested\n \nto\n \ndispose\n \noff\n \nthe\n \nProducts\n \nfor\n \nwhich\n \nrefund\n \nhas\n \nbeen\n \nprocessed.\n \nIt\n \nis\n ",
+          "metadata": {
+            "chunk_id": 77.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.594791651,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0"
+          }
+        },
+        {
+          "preview": "period\n \nis\n \nprovided.\n \nYou\n \nare\n \nrequested\n \nto\n \ndispose\n \noff\n \nthe\n \nProducts\n \nfor\n \nwhich\n \nrefund\n \nhas\n \nbeen\n \nprocessed.\n \nIt\n \nis\n \nclarified\n \nthat\n \nYour\n \nrequest",
+          "metadata": {
+            "chunk_id": 73.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 14.0,
+            "page_label": "15",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.583075106,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 14.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_gift_card_refund_1",
+      "question": "Can I get a refund for a gift card?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "the\n \nrefund\n \nvalue\n \nwill\n \nbe\n \ncredited\n \nto\n \nthe\n \nUser’s\n \nZepto\n \nCash\n \naccount\n \nin\n \nthe\n \nform\n \nof\n \na\n \nZepto\n \nGift\n \nCard.\n \nThis\n \nis\n \ndue\n \nto\n \nthe\n \nabsence\n \n",
+          "metadata": {
+            "chunk_id": "p16-c97-97",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 16.0,
+            "section": "refund",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.458874255,
+            "citation": "Zepto Terms of Use, Page 16.0, refund"
+          }
+        },
+        {
+          "preview": "the\n \nrefund\n \nvalue\n \nwill\n \nbe\n \ncredited\n \nto\n \nthe\n \nUser’s\n \nZepto\n \nCash\n \naccount\n \nin\n \nthe\n \nform\n \nof\n \na\n \nZepto\n \nGift\n \nCard.\n \nThis\n \nis\n \ndue\n \nto\n \nthe\n \nabsence\n \n",
+          "metadata": {
+            "chunk_id": "p16-c97-97",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 16.0,
+            "section": "refund",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.458021671,
+            "citation": "Zepto Terms of Use, Page 16.0, refund"
+          }
+        },
+        {
+          "preview": "gateway\n \nservice\n \nprovider.\n \nIt\n \nmay\n \ntake\n \nsome\n \ntime\n \nfor\n \nthe\n \nrefund\n \nto\n \nappear\n \non\n \nyour\n \naccount\n \nstatement.In\n \nthe\n \nevent\n \nof\n \na\n \nrefund\n \nfor\n \ncash-o",
+          "metadata": {
+            "chunk_id": 81.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.422644794,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_cancel_before_acceptance_1",
+      "question": "Can I cancel my order before the seller accepts it?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "must  contact  the  respective  issuer.  Please  review  the  issuer  or  Platform’s  terms  and  conditions  \nwhich\n \napply\n \nalongside\n \nthese\n \nTerms.\n \n8.2.  Cancellations:  Yo",
+          "metadata": {
+            "chunk_id": 56.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.512584507,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "must  contact  the  respective  issuer.  Please  review  the  issuer  or  Platform’s  terms  and  conditions  \nwhich\n \napply\n \nalongside\n \nthese\n \nTerms.\n \n8.2.  Cancellations:  Yo",
+          "metadata": {
+            "chunk_id": 78.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.509157,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "must contact the respective issuer. Please review the issuer or Platform’s terms and conditions \nwhich\n \napply\n \nalongside\n \nthese\n \nTerms.\n \n8.2. Cancellations: You may cancel an ",
+          "metadata": {
+            "chunk_id": "p16-c8.2-93",
+            "clause": "8.2",
+            "document_type": "official_policy",
+            "page": 16.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.508378625,
+            "citation": "Zepto Terms of Use, Page 16.0, Clause 8.2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_cancel_after_acceptance_1",
+      "question": "Can I cancel my order after the seller accepts it?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "must  contact  the  respective  issuer.  Please  review  the  issuer  or  Platform’s  terms  and  conditions  \nwhich\n \napply\n \nalongside\n \nthese\n \nTerms.\n \n8.2.  Cancellations:  Yo",
+          "metadata": {
+            "chunk_id": 56.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.539502919,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "must  contact  the  respective  issuer.  Please  review  the  issuer  or  Platform’s  terms  and  conditions  \nwhich\n \napply\n \nalongside\n \nthese\n \nTerms.\n \n8.2.  Cancellations:  Yo",
+          "metadata": {
+            "chunk_id": 78.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.53126961,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "must  contact  the  respective  issuer.  Please  review  the  issuer  or  Platform’s  terms  and  conditions  \nwhich\n \napply\n \nalongside\n \nthese\n \nTerms.\n \n8.2.  Cancellations:  Yo",
+          "metadata": {
+            "chunk_id": 74.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.531263709,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_seller_cancellation_1",
+      "question": "Can Zepto cancel my order if a product is unavailable?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "providers\n \nshall\n \nhave\n \nthe\n \nright\n \nto\n \nrefuse\n \ndelivery\n \nof\n \nthe\n \norder\n \nto\n \nYou\n \nif\n \nYou\n \nfail\n \nto\n \nmake\n \nthe\n \ncomplete\n \npayment\n \nand\n \nZepto\n \nshall\n \ntreat",
+          "metadata": {
+            "chunk_id": "p10-c56-56",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.612741292,
+            "citation": "Zepto Terms of Use, Page 10.0"
+          }
+        },
+        {
+          "preview": "providers\n \nshall\n \nhave\n \nthe\n \nright\n \nto\n \nrefuse\n \ndelivery\n \nof\n \nthe\n \norder\n \nto\n \nYou\n \nif\n \nYou\n \nfail\n \nto\n \nmake\n \nthe\n \ncomplete\n \npayment\n \nand\n \nZepto\n \nshall\n \ntreat",
+          "metadata": {
+            "chunk_id": "p10-c56-56",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.611284554,
+            "citation": "Zepto Terms of Use, Page 10.0"
+          }
+        },
+        {
+          "preview": "Zepto\n \nmay\n \ndo\n \nsuch\n \nchecks\n \nas\n \nit\n \ndeems\n \nfit\n \nbefore\n \napproving\n \nthe\n \nUser’s\n \norder\n \nfor\n \nsecurity\n \nor\n \nother\n \nreasons\n \nat\n \nthe\n \ndiscretion\n \nof\n \nZepto.\n ",
+          "metadata": {
+            "chunk_id": "p18-c109-109",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 18.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.6005072,
+            "citation": "Zepto Terms of Use, Page 18.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_cancellation_refund_1",
+      "question": "Will I get a refund if my order is cancelled?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "nonavailability\n \nof\n \nservices,\n \nunforeseen\n \ncircumstances,\n \ndelivery-related\n \nissues\n \nor\n \nif\n \nthere\n \nare\n \nconcerns\n \nregarding\n \nfraudulent\n \nactivity\n \nor\n \nnon-complia",
+          "metadata": {
+            "chunk_id": 79.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.556153536,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "services,\n \nunforeseen\n \ncircumstances,\n \ndelivery-related\n \nissues\n \nor\n \nif\n \nthere\n \nare\n \nconcerns\n \nregarding\n \nfraudulent\n \nactivity\n \nor\n \nnon-compliance\n \nwith\n \nthese\n \nTe",
+          "metadata": {
+            "chunk_id": 75.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.547600806,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "not\n \nbe\n \ncharged\n \nfor\n \nsuch\n \ncancellations\n \nand\n \nYou\n \nwill\n \nreceive\n \na\n \nrefund\n \nfor\n \nany\n \npayment\n \nalready\n \nmade,\n \nas\n \nearly\n \nas\n \npractically\n \npossible.\n \n8.3.",
+          "metadata": {
+            "chunk_id": 57.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.522965908,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_prepaid_refund_1",
+      "question": "Where will my prepaid order refund be credited?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "of\n \nverifying\n \nand\n \nconfirming\n \nthe\n \nrefund\n \nrequest.\n \nThe\n \nrefund\n \namount\n \nof\n \nprepaid\n \norders\n \nwill\n \nbe\n \ncredited\n \nto\n \nthe\n \nsource\n \naccount.\n \nRefunds\n \nare\n \n",
+          "metadata": {
+            "chunk_id": "p16-c96-96",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 16.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.597776413,
+            "citation": "Zepto Terms of Use, Page 16.0"
+          }
+        },
+        {
+          "preview": "of\n \nverifying\n \nand\n \nconfirming\n \nthe\n \nrefund\n \nrequest.\n \nThe\n \nrefund\n \namount\n \nof\n \nprepaid\n \norders\n \nwill\n \nbe\n \ncredited\n \nto\n \nthe\n \nsource\n \naccount.\n \nRefunds\n \nare\n \n",
+          "metadata": {
+            "chunk_id": "p16-c96-96",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 16.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.597709477,
+            "citation": "Zepto Terms of Use, Page 16.0"
+          }
+        },
+        {
+          "preview": "gateway\n \nservice\n \nprovider.\n \nIt\n \nmay\n \ntake\n \nsome\n \ntime\n \nfor\n \nthe\n \nrefund\n \nto\n \nappear\n \non\n \nyour\n \naccount\n \nstatement.In\n \nthe\n \nevent\n \nof\n \na\n \nrefund\n \nfor\n \ncash-o",
+          "metadata": {
+            "chunk_id": 81.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.533242822,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_cod_refund_1",
+      "question": "How are refunds handled for cash-on-delivery orders?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "some\n \ntime\n \nfor\n \nthe\n \nrefund\n \nto\n \nappear\n \non\n \nyour\n \naccount\n \nstatement.In\n \nthe\n \nevent\n \nof\n \na\n \nrefund\n \nfor\n \ncash-on-delivery\n \norders,\n \nthe\n \nrefund\n \nvalue\n \nwill",
+          "metadata": {
+            "chunk_id": 77.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.601492703,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "gateway\n \nservice\n \nprovider.\n \nIt\n \nmay\n \ntake\n \nsome\n \ntime\n \nfor\n \nthe\n \nrefund\n \nto\n \nappear\n \non\n \nyour\n \naccount\n \nstatement.In\n \nthe\n \nevent\n \nof\n \na\n \nrefund\n \nfor\n \ncash-o",
+          "metadata": {
+            "chunk_id": 81.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.593563616,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "of\n \nverifying\n \nand\n \nconfirming\n \nthe\n \nrefund\n \nrequest.\n \nThe\n \nrefund\n \namount\n \nof\n \nprepaid\n \norders\n \nwill\n \nbe\n \ncredited\n \nto\n \nthe\n \nsource\n \naccount.\n \nRefunds\n \nare\n \n",
+          "metadata": {
+            "chunk_id": "p16-c96-96",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 16.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.59079957,
+            "citation": "Zepto Terms of Use, Page 16.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_refund_bank_delay_1",
+      "question": "Why can a refund take additional time to appear in my bank account?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "some\n \ntime\n \nfor\n \nthe\n \nrefund\n \nto\n \nappear\n \non\n \nyour\n \naccount\n \nstatement.In\n \nthe\n \nevent\n \nof\n \na\n \nrefund\n \nfor\n \ncash-on-delivery\n \norders,\n \nthe\n \nrefund\n \nvalue\n \nwill",
+          "metadata": {
+            "chunk_id": 77.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.45223096,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "gateway\n \nservice\n \nprovider.\n \nIt\n \nmay\n \ntake\n \nsome\n \ntime\n \nfor\n \nthe\n \nrefund\n \nto\n \nappear\n \non\n \nyour\n \naccount\n \nstatement.In\n \nthe\n \nevent\n \nof\n \na\n \nrefund\n \nfor\n \ncash-o",
+          "metadata": {
+            "chunk_id": 81.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.449400187,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+          }
+        },
+        {
+          "preview": "of\n \nverifying\n \nand\n \nconfirming\n \nthe\n \nrefund\n \nrequest.\n \nThe\n \nrefund\n \namount\n \nof\n \nprepaid\n \norders\n \nwill\n \nbe\n \ncredited\n \nto\n \nthe\n \nsource\n \naccount.\n \nRefunds\n \nare\n \n",
+          "metadata": {
+            "chunk_id": "p16-c96-96",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 16.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.424091965,
+            "citation": "Zepto Terms of Use, Page 16.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_cod_payment_1",
+      "question": "What happens if I cannot make the full payment for a cash-on-delivery order?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "providers\n \nshall\n \nhave\n \nthe\n \nright\n \nto\n \nrefuse\n \ndelivery\n \nof\n \nthe\n \norder\n \nto\n \nYou\n \nif\n \nYou\n \nfail\n \nto\n \nmake\n \nthe\n \ncomplete\n \npayment\n \nand\n \nZepto\n \nshall\n \ntreat",
+          "metadata": {
+            "chunk_id": "p10-c56-56",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.492135197,
+            "citation": "Zepto Terms of Use, Page 10.0"
+          }
+        },
+        {
+          "preview": "providers\n \nshall\n \nhave\n \nthe\n \nright\n \nto\n \nrefuse\n \ndelivery\n \nof\n \nthe\n \norder\n \nto\n \nYou\n \nif\n \nYou\n \nfail\n \nto\n \nmake\n \nthe\n \ncomplete\n \npayment\n \nand\n \nZepto\n \nshall\n \ntreat",
+          "metadata": {
+            "chunk_id": "p10-c56-56",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.491898626,
+            "citation": "Zepto Terms of Use, Page 10.0"
+          }
+        },
+        {
+          "preview": "Your  address,  You  expressly  waive  and  release  Zepto  from  any  liability  arising  from  the  \nProducts\n \nbeing\n \nleft\n \nunattended,\n \nincluding,\n \nbut\n \nnot\n \nlimited\n \nto",
+          "metadata": {
+            "chunk_id": 33.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 9.0,
+            "page_label": "10",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.476071119,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 9.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_cod_cancel_fee_1",
+      "question": "Do I have to pay delivery charges if a cash-on-delivery order is cancelled because I could not pay?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "providers\n \nshall\n \nhave\n \nthe\n \nright\n \nto\n \nrefuse\n \ndelivery\n \nof\n \nthe\n \norder\n \nto\n \nYou\n \nif\n \nYou\n \nfail\n \nto\n \nmake\n \nthe\n \ncomplete\n \npayment\n \nand\n \nZepto\n \nshall\n \ntreat",
+          "metadata": {
+            "chunk_id": "p10-c56-56",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.511276245,
+            "citation": "Zepto Terms of Use, Page 10.0"
+          }
+        },
+        {
+          "preview": "providers\n \nshall\n \nhave\n \nthe\n \nright\n \nto\n \nrefuse\n \ndelivery\n \nof\n \nthe\n \norder\n \nto\n \nYou\n \nif\n \nYou\n \nfail\n \nto\n \nmake\n \nthe\n \ncomplete\n \npayment\n \nand\n \nZepto\n \nshall\n \ntreat",
+          "metadata": {
+            "chunk_id": "p10-c56-56",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.510881424,
+            "citation": "Zepto Terms of Use, Page 10.0"
+          }
+        },
+        {
+          "preview": "Your  address,  You  expressly  waive  and  release  Zepto  from  any  liability  arising  from  the  \nProducts\n \nbeing\n \nleft\n \nunattended,\n \nincluding,\n \nbut\n \nnot\n \nlimited\n \nto",
+          "metadata": {
+            "chunk_id": 33.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 9.0,
+            "page_label": "10",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.510038376,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 9.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_alcohol_age_1",
+      "question": "What are the age requirements for ordering alcoholic beverages?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "time\n \nof\n \nordering\n \nand\n \ndelivery\n \nof\n \nalcoholic\n \nbeverage\n \nand\n \ntobacco\n \nProducts.\n \nNotwithstanding\n \nanything\n \ncontained\n \nin\n \nthese\n \nTerms,\n \nthe\n \nordered\n \nalcoh",
+          "metadata": {
+            "chunk_id": 35.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 9.0,
+            "page_label": "10",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.52870065,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 9.0"
+          }
+        },
+        {
+          "preview": "identification\n \nand\n \nage\n \nproof\n \ndocuments\n \nto\n \nevidence\n \ncompliance\n \nwith\n \nthe\n \naforesaid,\n \nincluding\n \npermanent\n \naccount\n \nnumber\n \n(PAN)\n \ncard\n \nor\n \nother\n \ndocum",
+          "metadata": {
+            "chunk_id": "p10-c58-58",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.498081774,
+            "citation": "Zepto Terms of Use, Page 10.0"
+          }
+        },
+        {
+          "preview": "identification\n \nand\n \nage\n \nproof\n \ndocuments\n \nto\n \nevidence\n \ncompliance\n \nwith\n \nthe\n \naforesaid,\n \nincluding\n \npermanent\n \naccount\n \nnumber\n \n(PAN)\n \ncard\n \nor\n \nother\n \ndocum",
+          "metadata": {
+            "chunk_id": "p10-c58-58",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.497263074,
+            "citation": "Zepto Terms of Use, Page 10.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_tobacco_age_1",
+      "question": "What are the eligibility requirements for ordering tobacco products?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "and\n \ntobacco\n \nProducts\n \nshall\n \nbe\n \ndelivered\n \nonly\n \nto\n \nthe\n \nperson\n \nfrom\n \nwhose\n \naccount\n \nthe\n \norder\n \nhas\n \nbeen\n \nplaced\n \nsubject\n \nto\n \nverification\n \nat\n \nthe\n ",
+          "metadata": {
+            "chunk_id": "p10-c7.6.2-59",
+            "clause": "7.6.2",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.63133055,
+            "citation": "Zepto Terms of Use, Page 10.0, Clause 7.6.2"
+          }
+        },
+        {
+          "preview": "and\n \ntobacco\n \nProducts\n \nshall\n \nbe\n \ndelivered\n \nonly\n \nto\n \nthe\n \nperson\n \nfrom\n \nwhose\n \naccount\n \nthe\n \norder\n \nhas\n \nbeen\n \nplaced\n \nsubject\n \nto\n \nverification\n \nat\n \nthe\n ",
+          "metadata": {
+            "chunk_id": "p10-c7.6.2-59",
+            "clause": "7.6.2",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.6305902,
+            "citation": "Zepto Terms of Use, Page 10.0, Clause 7.6.2"
+          }
+        },
+        {
+          "preview": "time\n \nof\n \nordering\n \nand\n \ndelivery\n \nof\n \nalcoholic\n \nbeverage\n \nand\n \ntobacco\n \nProducts.\n \nNotwithstanding\n \nanything\n \ncontained\n \nin\n \nthese\n \nTerms,\n \nthe\n \nordered\n \nalcoh",
+          "metadata": {
+            "chunk_id": 35.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 9.0,
+            "page_label": "10",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.595330656,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 9.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_alcohol_id_1",
+      "question": "Do I need to provide identification when ordering alcohol?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "identification\n \nand\n \nage\n \nproof\n \ndocuments\n \nto\n \nevidence\n \ncompliance\n \nwith\n \nthe\n \naforesaid,\n \nincluding\n \npermanent\n \naccount\n \nnumber\n \n(PAN)\n \ncard\n \nor\n \nother\n \ndocum",
+          "metadata": {
+            "chunk_id": "p10-c58-58",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.57360357,
+            "citation": "Zepto Terms of Use, Page 10.0"
+          }
+        },
+        {
+          "preview": "identification\n \nand\n \nage\n \nproof\n \ndocuments\n \nto\n \nevidence\n \ncompliance\n \nwith\n \nthe\n \naforesaid,\n \nincluding\n \npermanent\n \naccount\n \nnumber\n \n(PAN)\n \ncard\n \nor\n \nother\n \ndocum",
+          "metadata": {
+            "chunk_id": "p10-c58-58",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.573181629,
+            "citation": "Zepto Terms of Use, Page 10.0"
+          }
+        },
+        {
+          "preview": "fulfillment\n \nof\n \neligibility\n \ncriteria\n \nprescribed\n \nunder\n \nthe\n \napplicable\n \nlaw\n \nin\n \nthis\n \nregard,\n \nwhich\n \nmay\n \nvary\n \nfrom\n \nState\n \nto\n \nState.\n \nZepto\n \nand/or\n \nS",
+          "metadata": {
+            "chunk_id": 46.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 9.0,
+            "page_label": "10",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.538700879,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 9.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_alcohol_delivery_person_1",
+      "question": "Can someone else receive my alcohol order on my behalf?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "time\n \nof\n \nordering\n \nand\n \ndelivery\n \nof\n \nalcoholic\n \nbeverage\n \nand\n \ntobacco\n \nProducts.\n \nNotwithstanding\n \nanything\n \ncontained\n \nin\n \nthese\n \nTerms,\n \nthe\n \nordered\n \nalcoh",
+          "metadata": {
+            "chunk_id": 35.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 9.0,
+            "page_label": "10",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.485662371,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 9.0"
+          }
+        },
+        {
+          "preview": "and\n \ntobacco\n \nProducts.\n \nNotwithstanding\n \nanything\n \ncontained\n \nin\n \nthese\n \nTerms,\n \nthe\n \nordered\n \nalcoholic\n \nbeverage\n \nand\n \ntobacco\n \nProducts\n \nshall\n \nbe\n \ndelivered\n",
+          "metadata": {
+            "chunk_id": 47.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 9.0,
+            "page_label": "10",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.472714305,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 9.0"
+          }
+        },
+        {
+          "preview": "of\n \nalcoholic\n \nbeverage\n \nand\n \ntobacco\n \nProducts.\n \nNotwithstanding\n \nanything\n \ncontained\n \nin\n \nthese\n \nTerms,\n \nthe\n \nordered\n \nalcoholic\n \nbeverage\n \nand\n \ntobacco\n \nProduc",
+          "metadata": {
+            "chunk_id": 49.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 9.0,
+            "page_label": "10",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.470755875,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 9.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_alcohol_delivery_address_1",
+      "question": "Can I use a public place as the delivery address for alcohol or tobacco products?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "and\n \ntobacco\n \nProducts\n \nshall\n \nbe\n \ndelivered\n \nonly\n \nto\n \nthe\n \nperson\n \nfrom\n \nwhose\n \naccount\n \nthe\n \norder\n \nhas\n \nbeen\n \nplaced\n \nsubject\n \nto\n \nverification\n \nat\n \nthe\n ",
+          "metadata": {
+            "chunk_id": "p10-c7.6.2-59",
+            "clause": "7.6.2",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.554720581,
+            "citation": "Zepto Terms of Use, Page 10.0, Clause 7.6.2"
+          }
+        },
+        {
+          "preview": "and\n \ntobacco\n \nProducts\n \nshall\n \nbe\n \ndelivered\n \nonly\n \nto\n \nthe\n \nperson\n \nfrom\n \nwhose\n \naccount\n \nthe\n \norder\n \nhas\n \nbeen\n \nplaced\n \nsubject\n \nto\n \nverification\n \nat\n \nthe\n ",
+          "metadata": {
+            "chunk_id": "p10-c7.6.2-59",
+            "clause": "7.6.2",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.554497063,
+            "citation": "Zepto Terms of Use, Page 10.0, Clause 7.6.2"
+          }
+        },
+        {
+          "preview": "time\n \nof\n \nordering\n \nand\n \ndelivery\n \nof\n \nalcoholic\n \nbeverage\n \nand\n \ntobacco\n \nProducts.\n \nNotwithstanding\n \nanything\n \ncontained\n \nin\n \nthese\n \nTerms,\n \nthe\n \nordered\n \nalcoh",
+          "metadata": {
+            "chunk_id": 35.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 9.0,
+            "page_label": "10",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.537867188,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 9.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_pharmacy_responsibility_1",
+      "question": "Who is responsible for verifying and dispensing pharmaceutical products?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "the\n \nmanufacturers\n \nthemselves\n \nare\n \nresponsible\n \nfor\n \nall\n \ncompliances\n \nrelating\n \nto\n \nthe\n \nmanufacturing\n \nof\n \nthe\n \nPharmaceutical\n \nProducts\n \nincluding\n \nany\n \nlabe",
+          "metadata": {
+            "chunk_id": 40.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 10.0,
+            "page_label": "11",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.487814188,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 10.0"
+          }
+        },
+        {
+          "preview": "Users\n \nand\n \nPharmacy,\n \nand\n \nthat\n \nany\n \norder\n \nor\n \ntransaction\n \nis\n \ngoverned\n \nsolely\n \nbetween\n \nthe\n \nUser\n \nand\n \nthe\n \nPharmacy.\n \nIt\n \nis\n \nhereby\n \nclarified\n \nthat\n",
+          "metadata": {
+            "chunk_id": "p11-c66-66",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 11.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.486152589,
+            "citation": "Zepto Terms of Use, Page 11.0"
+          }
+        },
+        {
+          "preview": "Users\n \nand\n \nPharmacy,\n \nand\n \nthat\n \nany\n \norder\n \nor\n \ntransaction\n \nis\n \ngoverned\n \nsolely\n \nbetween\n \nthe\n \nUser\n \nand\n \nthe\n \nPharmacy.\n \nIt\n \nis\n \nhereby\n \nclarified\n \nthat\n",
+          "metadata": {
+            "chunk_id": "p11-c66-66",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 11.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.486152589,
+            "citation": "Zepto Terms of Use, Page 11.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_prescription_records_1",
+      "question": "How are prescription and pharmaceutical transaction records handled?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "herein\n \nreferred\n \nto\n \nas\n \n“Prescription\n \nDrugs”\n \nprovided\n \nthey\n \nsubmit\n \na\n \nprescription.\n \nThese\n \nPrescription\n \nDrugs\n \nare\n \noffered\n \nfor\n \nsale\n \nby\n \nPharmacy\n \nth",
+          "metadata": {
+            "chunk_id": 59.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 11.0,
+            "page_label": "12",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.526774704,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 11.0"
+          }
+        },
+        {
+          "preview": "to\n \nas\n \n“Prescription\n \nDrugs”\n \nprovided\n \nthey\n \nsubmit\n \na\n \nprescription.\n \nThese\n \nPrescription\n \nDrugs\n \nare\n \noffered\n \nfor\n \nsale\n \nby\n \nPharmacy\n \nthrough\n \nthe\n \nPlatfo",
+          "metadata": {
+            "chunk_id": 57.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 11.0,
+            "page_label": "12",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "Zepto_Terms_of_Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.520067871,
+            "citation": "Zepto_Terms_of_Use.pdf, Page 11.0"
+          }
+        },
+        {
+          "preview": "prescription\n \n(for\n \nPrescription\n \nDrugs)\n \n&\n \nascertainment\n \nof\n \nstock\n \navailability\n \nin\n \nthe\n \nPharmacy\n \n(for\n \nall\n \nPharmaceutical\n \nProducts).\n \n7.7.3 Prescription Re",
+          "metadata": {
+            "chunk_id": "p12-c7.7.3-70",
+            "clause": "7.7.3",
+            "document_type": "official_policy",
+            "page": 12.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.519521236,
+            "citation": "Zepto Terms of Use, Page 12.0, Clause 7.7.3"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_payment_failure_1",
+      "question": "What happens if my payment fails because of insufficient funds?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "Payment\n \nDetails\n \n;\n \n(c)\n \nTechnical\n \nissues\n \nor\n \ninterruptions\n \nin\n \nthe\n \nPlatform\n \nor\n \npayment\n \nprocessing\n \nsystems.\n \n(d)\n \nViolation\n \nof\n \nany\n \nterms\n \nor\n \ncondi",
+          "metadata": {
+            "chunk_id": "p7-c38-38",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 7.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.397020102,
+            "citation": "Zepto Terms of Use, Page 7.0"
+          }
+        },
+        {
+          "preview": "Payment\n \nDetails\n \n;\n \n(c)\n \nTechnical\n \nissues\n \nor\n \ninterruptions\n \nin\n \nthe\n \nPlatform\n \nor\n \npayment\n \nprocessing\n \nsystems.\n \n(d)\n \nViolation\n \nof\n \nany\n \nterms\n \nor\n \ncondi",
+          "metadata": {
+            "chunk_id": "p7-c38-38",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 7.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.397020102,
+            "citation": "Zepto Terms of Use, Page 7.0"
+          }
+        },
+        {
+          "preview": "the\n \nPlatform\n \nor\n \npayment\n \nprocessing\n \nsystems.\n \n(d)\n \nViolation\n \nof\n \nany\n \nterms\n \nor\n \nconditions\n \ngoverning\n \nthe\n \nuse\n \nof\n \nYour\n \nPayment\n \nDetails.\n \n(e)\n \nFraudu",
+          "metadata": {
+            "chunk_id": 32.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 6.0,
+            "page_label": "7",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.376116,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 6.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_payment_details_1",
+      "question": "What happens if I provide incorrect payment details?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "(“Payment\n \nDetails”).\n \nBy\n \nproviding\n \nthe\n \nPayment\n \nDetails,\n \nYou\n \nrepresent,\n \nwarrant,\n \nand\n \ncovenant\n \nthat:\n \n(a)\n \nYou\n \nare\n \nlegally\n \nauthorized\n \nto\n \nprovide\n \n",
+          "metadata": {
+            "chunk_id": "p6-c35-35",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 6.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.496859759,
+            "citation": "Zepto Terms of Use, Page 6.0"
+          }
+        },
+        {
+          "preview": "(“Payment\n \nDetails”).\n \nBy\n \nproviding\n \nthe\n \nPayment\n \nDetails,\n \nYou\n \nrepresent,\n \nwarrant,\n \nand\n \ncovenant\n \nthat:\n \n(a)\n \nYou\n \nare\n \nlegally\n \nauthorized\n \nto\n \nprovide\n \n",
+          "metadata": {
+            "chunk_id": "p6-c35-35",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 6.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.496752828,
+            "citation": "Zepto Terms of Use, Page 6.0"
+          }
+        },
+        {
+          "preview": "Payment\n \nDetails\n \n;\n \n(c)\n \nTechnical\n \nissues\n \nor\n \ninterruptions\n \nin\n \nthe\n \nPlatform\n \nor\n \npayment\n \nprocessing\n \nsystems.\n \n(d)\n \nViolation\n \nof\n \nany\n \nterms\n \nor\n \ncondi",
+          "metadata": {
+            "chunk_id": "p7-c38-38",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 7.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.490790337,
+            "citation": "Zepto Terms of Use, Page 7.0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "policy_delivery_unavailable_1",
+      "question": "Can an order be cancelled if delivery services are unavailable?",
+      "answerable": true,
+      "gold_clause": null,
+      "gold_page": null,
+      "bucket": "retrieved_wrong_context",
+      "retrieval_success": false,
+      "clause_hit": false,
+      "page_hit": false,
+      "keyword_hits": 0,
+      "top_previews": [
+        {
+          "preview": "or\n \nunavailability\n \nof\n \ncertain\n \nProducts\n \nor\n \nforce\n \nmajeure\n \nevents,\n \nnonavailability\n \nof\n \nservices,\n \nunforeseen\n \ncircumstances,\n \ndelivery-related\n \nissues\n \nor\n \ni",
+          "metadata": {
+            "chunk_id": "p16-c94-94",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 16.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.62988013,
+            "citation": "Zepto Terms of Use, Page 16.0"
+          }
+        },
+        {
+          "preview": "or\n \nunavailability\n \nof\n \ncertain\n \nProducts\n \nor\n \nforce\n \nmajeure\n \nevents,\n \nnonavailability\n \nof\n \nservices,\n \nunforeseen\n \ncircumstances,\n \ndelivery-related\n \nissues\n \nor\n \ni",
+          "metadata": {
+            "chunk_id": "p16-c94-94",
+            "clause": "",
+            "document_type": "official_policy",
+            "page": 16.0,
+            "section": "",
+            "source": "Zepto Terms of Use",
+            "dense_score": 0.62988013,
+            "citation": "Zepto Terms of Use, Page 16.0"
+          }
+        },
+        {
+          "preview": "nonavailability\n \nof\n \nservices,\n \nunforeseen\n \ncircumstances,\n \ndelivery-related\n \nissues\n \nor\n \nif\n \nthere\n \nare\n \nconcerns\n \nregarding\n \nfraudulent\n \nactivity\n \nor\n \nnon-complia",
+          "metadata": {
+            "chunk_id": 79.0,
+            "creationdate": "",
+            "creator": "PyPDF",
+            "document_type": "official_policy",
+            "page": 15.0,
+            "page_label": "16",
+            "producer": "Skia/PDF m152 Google Docs Renderer",
+            "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+            "title": "Zepto Terms of Use",
+            "total_pages": 36.0,
+            "dense_score": 0.559453,
+            "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+          }
+        }
+      ]
+    }
+  ]
+}
