@@ -5137,5 +5137,28 @@
     "last_agent_action": "responded",
     "created_at": "2026-08-11 09:20:41.336456",
     "updated_at": "2026-08-11 09:20:57.730014"
+  },
+  "ede1e602-76a4-42c4-aa67-7446d2c7094f": {
+    "case_id": "ede1e602-76a4-42c4-aa67-7446d2c7094f",
+    "session_id": "884dd0b3-0159-49c3-9ce0-38084a529ad1",
+    "customer_id": "debug_6",
+    "tenant_id": "zepto",
+    "order_id": null,
+    "issue_type": null,
+    "status": "open",
+    "missing_inputs": [],
+    "photos_requested": false,
+    "photos_received": false,
+    "tools_executed": [],
+    "tool_results_summary": {},
+    "policy_citations": [
+      "Zepto_Terms_of_Use.pdf, Page 15.0",
+      "Zepto Terms of Use, Page 16.0",
+      "Zepto Terms of Use, Page 15, Clause 8.3"
+    ],
+    "escalation_reason": null,
+    "last_agent_action": "responded",
+    "created_at": "2026-08-11 14:03:16.695062",
+    "updated_at": "2026-08-11 14:03:31.606109"
   }
 }

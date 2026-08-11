@@ -41,17 +41,25 @@ def _norm_text(text: str, n: int = 300) -> str:
 
 def dedup_docs(docs: List[Document]) -> List[Document]:
     """
-    Remove near-duplicate chunks while preserving rank order.
-    Signature uses page + clause + normalized text prefix.
+    Collapse near-identical chunks using stable identity.
+    Prefer source_id + clause + normalized content.
     """
     seen = set()
     unique: List[Document] = []
 
     for doc in docs:
         md = doc.metadata or {}
-        page = md.get("page", md.get("page_number", ""))
-        clause = md.get("clause", "")
-        key = f"{page}|{clause}|{_norm_text(doc.page_content)}"
+        source_id = md.get("source_id") or md.get("source") or ""
+        clause = str(md.get("clause") or "").strip()
+        page = str(md.get("page") or "")
+        content_key = _norm_text(doc.page_content, n=400)
+
+        # primary identity
+        if clause:
+            key = f"{source_id}|{clause}|{content_key[:160]}"
+        else:
+            key = f"{source_id}|p{page}|{content_key[:200]}"
+
         sig = hashlib.md5(key.encode("utf-8")).hexdigest()
         if sig in seen:
             continue

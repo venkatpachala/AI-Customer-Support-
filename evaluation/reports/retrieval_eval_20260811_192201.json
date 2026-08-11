@@ -1,0 +1,2245 @@
+{
+  "created_at": "20260811_192201",
+  "summary": {
+    "n_total": 39,
+    "n_labeled_answerable": 39,
+    "n_unlabeled": 0,
+    "n_unanswerable": 0,
+    "recall@1": 0.641,
+    "recall@3": 0.8462,
+    "recall@5": 0.9231,
+    "mrr": 0.7573,
+    "buckets": {
+      "retrieved_rank2_3": 8,
+      "missed_in_top_k": 3,
+      "retrieved_rank1": 25,
+      "retrieved_rank_gt3": 3
+    },
+    "note": "Metrics on labeled answerable only; success = gold_clause hit in content/metadata"
+  },
+  "results": [
+    {
+      "id": "policy_product_scope_1",
+      "question": "What types of products can users purchase through Zepto?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "2.2",
+      "gold_page": 3,
+      "gold_rank": 2,
+      "mrr": 0.5,
+      "recall@1": 0.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank2_3",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 1,
+          "clause": "2.1",
+          "source": "Zepto Terms of Use",
+          "preview": "2.1. Zepto enables transactions on the Platform between participating sellers and service \nproviders\n \n(“Seller(s)”)\n \nand\n \nUsers.\n \nUsers\n \ncan\n \norder\n \nProducts\n \n(defined\n \nhereunder)\n \nand\n \nservices\n \noffered\n \nfo",
+          "citation": "Zepto Terms of Use, Page 1, Clause 2.1"
+        },
+        {
+          "rank": 2,
+          "page": 2,
+          "clause": "2.2",
+          "source": "Zepto Terms of Use",
+          "preview": "2.2. You acknowledge that the Platform allows You to avail a personal, limited, non-exclusive, \nnon-transferable,\n \nand\n \nrevocable\n \nprivilege\n \nto\n \naccess\n \nand\n \nuse\n \nthe\n \nPlatform\n \nfor\n \nthe\n \npurposes\n \nof\n \npur",
+          "citation": "Zepto Terms of Use, Page 2, Clause 2.2"
+        },
+        {
+          "rank": 3,
+          "page": 6,
+          "clause": "5.6",
+          "source": "Zepto Terms of Use",
+          "preview": "5.6. Gift Cards: You can use Zepto Gift Cards for the purchases on the Platform, by redeeming \nthe\n \nvalue\n \ncontained\n \nin\n \nsuch\n \nGift\n \nCards\n \nat\n \nthe\n \ntime\n \nof\n \npayment\n \nfor\n \nthe\n \npurchase\n \nof\n \neligible\n \n",
+          "citation": "Zepto Terms of Use, Page 6, Clause 5.6"
+        },
+        {
+          "rank": 4,
+          "page": 10,
+          "clause": "7.7.1",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.1. Zepto’s Role and Disclaimer of Liability Zepto operates solely as a digital marketplace \nPlatform\n \nconnecting\n \nUsers\n \nwith\n \nthird-\n \nparty\n \nSeller(s)\n \n(“Pharmacy”)\n \nfor\n \nthe\n \nsale\n \nand\n \npurchase\n \nof\n \n",
+          "citation": "Zepto Terms of Use, Page 10, Clause 7.7.1"
+        },
+        {
+          "rank": 5,
+          "page": 17,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "quality,\n \ntaste,\n \nperformance\n \nof\n \nthe\n \nProducts/services\n \nsold.\n \nAll\n \ncommercial\n \nand\n \ncontractual\n \narrangements\n \nregarding\n \nthe\n \nProducts\n \nand\n \nservices\n \noffered\n \nfor\n \nsale\n \nare\n \nsolely\n \nbetween\n ",
+          "citation": "Zepto Terms of Use, Page 17.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_service_area_1",
+      "question": "Does Zepto provide its services in every area and city in India?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "2.3",
+      "gold_page": 3,
+      "gold_rank": null,
+      "mrr": 0.0,
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 0.0,
+      "bucket": "missed_in_top_k",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 3,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "Products\n \nor\n \nservices\n \nin\n \naddition\n \nto\n \nthese\n \nTerms\n \nand\n \nYour\n \npurchase\n \nof\n \nany\n \nof\n \nsuch\n \ncategory\n \nor\n \nsection\n \nof\n \nProducts\n \nor\n \nservices\n \nshall\n \nalso\n \nbe\n \ngoverned\n \nby\n \nsuch\n \naddition",
+          "citation": "Zepto Terms of Use, Page 3.0"
+        },
+        {
+          "rank": 2,
+          "page": 2,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "at\n \nits\n \ndiscretion,\n \nadditional\n \nterms\n \nand\n \nconditions\n \nspecific\n \nto\n \nany\n \ncategory\n \nor\n \nsection\n \nof\n \nProducts\n \nor\n \nservices\n \nin\n \naddition\n \nto\n \nthese\n \nTerms\n \nand\n \nYour\n \npurchase\n \nof\n \nany\n \nof\n",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 2.0"
+        },
+        {
+          "rank": 3,
+          "page": 2,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "or\n \nsection\n \nof\n \nProducts\n \nor\n \nservices\n \nshall\n \nalso\n \nbe\n \ngoverned\n \nby\n \nsuch\n \nadditional\n \nterms\n \nand\n \nconditions.\n \nZepto\n \nreserves\n \nthe\n \nright\n \nto\n \nprovide\n \nthe\n \nservices\n \nin\n \nany\n \narea\n \nor\n \nc",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 2.0"
+        },
+        {
+          "rank": 4,
+          "page": 2,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "by\n \nZepto\n \nin\n \nits\n \nsole\n \ndiscretion.\n \nBefore\n \napplying\n \nor\n \nregistering\n \nfor\n \navailing\n \nany\n \nof\n \nthe\n \nservices,\n \nWe\n \nrequest\n \nYou\n \nto\n \nplease\n \ncheck\n \nif\n \nthe\n \nservices\n \nare\n \navailable\n \nin\n \nYo",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 2.0"
+        },
+        {
+          "rank": 5,
+          "page": 1,
+          "clause": "2.1",
+          "source": "Zepto Terms of Use",
+          "preview": "2.1. Zepto enables transactions on the Platform between participating sellers and service \nproviders\n \n(“Seller(s)”)\n \nand\n \nUsers.\n \nUsers\n \ncan\n \norder\n \nProducts\n \n(defined\n \nhereunder)\n \nand\n \nservices\n \noffered\n \nfo",
+          "citation": "Zepto Terms of Use, Page 1.0, Clause 2.1"
+        }
+      ]
+    },
+    {
+      "id": "policy_minimum_age_1",
+      "question": "What is the minimum age required to use Zepto?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "3.1",
+      "gold_page": 4,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 3,
+          "clause": "3.1",
+          "source": "Zepto Terms of Use",
+          "preview": "3.1. The Products and services are not available to minors i.e., persons under the age of 18 \n(eighteen)\n \nyears,\n \nundischarged\n \ninsolvent,\n \nany\n \nUsers\n \nwho\n \nare\n \nnot\n \ncompetent\n \nto\n \nenter\n \ninto\n \na\n \ncontract",
+          "citation": "Zepto Terms of Use, Page 3, Clause 3.1"
+        },
+        {
+          "rank": 2,
+          "page": 4,
+          "clause": "2.6.1.3",
+          "source": "Zepto Terms of Use",
+          "preview": "are\n \ngenuine\n \nand\n \ncomplete.\n \n2.6.1.3.\n \nThat\n \nthe\n \nUser\n \nshall\n \nnot\n \nact\n \nas\n \nan\n \nagent\n \nof\n \nZepto.\n \n2.6.1.4.\n \nTo\n \nadhere\n \nto\n \nsuch\n \nother\n \nterms\n \nas\n \nmay\n \nbe\n \napplicable\n \nor\n \ndisplayed\n \non\n ",
+          "citation": "Zepto Terms of Use, Page 4.0, Clause 2.6.1.3"
+        },
+        {
+          "rank": 3,
+          "page": 3,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "and\n \ncomplete.\n \n2.6.1.3.\n \nThat\n \nthe\n \nUser\n \nshall\n \nnot\n \nact\n \nas\n \nan\n \nagent\n \nof\n \nZepto.\n \n2.6.1.4.\n \nTo\n \nadhere\n \nto\n \nsuch\n \nother\n \nterms\n \nas\n \nmay\n \nbe\n \napplicable\n \nor\n \ndisplayed\n \non\n \nPlatform\n \nfrom",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 3.0"
+        },
+        {
+          "rank": 4,
+          "page": 11,
+          "clause": "7.6.4",
+          "source": "Zepto Terms of Use",
+          "preview": "the\n \nlegal\n \nage\n \nto\n \nconsume\n \nalcoholic\n \nbeverages\n \nand/or\n \ntobacco\n \nProducts.\n \n7.6.4. The delivery of such Products to You are subject to the right to refuse in case of any non \ncompliance\n \non\n \nYour\n \npart,\n",
+          "citation": "Zepto Terms of Use, Page 11.0, Clause 7.6.4"
+        },
+        {
+          "rank": 5,
+          "page": 9,
+          "clause": "7.6.1",
+          "source": "Zepto Terms of Use",
+          "preview": "7.6.1. The delivery of alcoholic beverage and tobacco Products to You is subject to the \nfulfillment\n \nof\n \neligibility\n \ncriteria\n \nprescribed\n \nunder\n \nthe\n \napplicable\n \nlaw\n \nin\n \nthis\n \nregard,\n \nwhich\n \nmay\n \nvary\n",
+          "citation": "Zepto Terms of Use, Page 9, Clause 7.6.1"
+        }
+      ]
+    },
+    {
+      "id": "policy_payment_failure_funds_1",
+      "question": "What happens if a payment fails because I do not have sufficient funds in my bank account?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "5.4",
+      "gold_page": 7,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 7,
+          "clause": "5.4",
+          "source": "Zepto Terms of Use",
+          "preview": "5.4. Except to the extent otherwise required by applicable law, Zepto is not liable for any \npayments\n \nauthorized\n \nthrough\n \nthe\n \nPlatform\n \nusing\n \nYour\n \nPayment\n \nDetails.\n \nZepto\n \nis\n \nnot\n \nliable\n \nfor\n \nany\n \n",
+          "citation": "Zepto Terms of Use, Page 7.0, Clause 5.4"
+        },
+        {
+          "rank": 2,
+          "page": 10,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "providers\n \nshall\n \nhave\n \nthe\n \nright\n \nto\n \nrefuse\n \ndelivery\n \nof\n \nthe\n \norder\n \nto\n \nYou\n \nif\n \nYou\n \nfail\n \nto\n \nmake\n \nthe\n \ncomplete\n \npayment\n \nand\n \nZepto\n \nshall\n \ntreat\n \nsuch\n \norder\n \nas\n \ncanceled\n \norder\n",
+          "citation": "Zepto Terms of Use, Page 10.0"
+        },
+        {
+          "rank": 3,
+          "page": 9,
+          "clause": "7.5",
+          "source": "Zepto Terms of Use",
+          "preview": "7.5. In the event You opt for ‘Cash on Delivery (CoD)’ mode, Seller/ third-party delivery service \nproviders\n \nshall\n \nhave\n \nthe\n \nright\n \nto\n \nrefuse\n \ndelivery\n \nof\n \nthe\n \norder\n \nto\n \nYou\n \nif\n \nYou\n \nfail\n \nto\n \nma",
+          "citation": "Zepto Terms of Use, Page 9, Clause 7.5"
+        },
+        {
+          "rank": 4,
+          "page": 5,
+          "clause": "5.3",
+          "source": "Zepto Terms of Use",
+          "preview": "5.3. You undertake to provide valid bank details or other details required for facilitating payment \ntowards\n \nthe\n \ntransaction\n \n(“Payment\n \nDetails”).\n \nBy\n \nproviding\n \nthe\n \nPayment\n \nDetails,\n \nYou\n \nrepresent,\n \nw",
+          "citation": "Zepto Terms of Use, Page 5, Clause 5.3"
+        },
+        {
+          "rank": 5,
+          "page": 7,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "Payment\n \nDetails\n \n;\n \n(c)\n \nTechnical\n \nissues\n \nor\n \ninterruptions\n \nin\n \nthe\n \nPlatform\n \nor\n \npayment\n \nprocessing\n \nsystems.\n \n(d)\n \nViolation\n \nof\n \nany\n \nterms\n \nor\n \nconditions\n \ngoverning\n \nthe\n \nuse\n \nof\n \nYou",
+          "citation": "Zepto Terms of Use, Page 7.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_payment_failure_details_1",
+      "question": "What happens if I provide incorrect payment details?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "5.4",
+      "gold_page": 7,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 6,
+          "clause": "5.4",
+          "source": "Zepto Terms of Use",
+          "preview": "5.4. Except to the extent otherwise required by applicable law, Zepto is not liable for any \npayments\n \nauthorized\n \nthrough\n \nthe\n \nPlatform\n \nusing\n \nYour\n \nPayment\n \nDetails.\n \nZepto\n \nis\n \nnot\n \nliable\n \nfor\n \nany\n \n",
+          "citation": "Zepto Terms of Use, Page 6, Clause 5.4"
+        },
+        {
+          "rank": 2,
+          "page": 7,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "Payment\n \nDetails\n \n;\n \n(c)\n \nTechnical\n \nissues\n \nor\n \ninterruptions\n \nin\n \nthe\n \nPlatform\n \nor\n \npayment\n \nprocessing\n \nsystems.\n \n(d)\n \nViolation\n \nof\n \nany\n \nterms\n \nor\n \nconditions\n \ngoverning\n \nthe\n \nuse\n \nof\n \nYou",
+          "citation": "Zepto Terms of Use, Page 7.0"
+        },
+        {
+          "rank": 3,
+          "page": 6,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "processing\n \nsystems.\n \n(d)\n \nViolation\n \nof\n \nany\n \nterms\n \nor\n \nconditions\n \ngoverning\n \nthe\n \nuse\n \nof\n \nYour\n \nPayment\n \nDetails.\n \n(e)\n \nFraudulent\n \nactivity\n \nor\n \nunauthorized\n \nuse\n \nof\n \nYour\n \nPayment\n \nDetail",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 6.0"
+        },
+        {
+          "rank": 4,
+          "page": 6,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "(“Payment\n \nDetails”).\n \nBy\n \nproviding\n \nthe\n \nPayment\n \nDetails,\n \nYou\n \nrepresent,\n \nwarrant,\n \nand\n \ncovenant\n \nthat:\n \n(a)\n \nYou\n \nare\n \nlegally\n \nauthorized\n \nto\n \nprovide\n \nsuch\n \nPayment\n \nDetails;\n \n(b)\n \nYou\n \n",
+          "citation": "Zepto Terms of Use, Page 6.0"
+        },
+        {
+          "rank": 5,
+          "page": 5,
+          "clause": "5.3",
+          "source": "Zepto Terms of Use",
+          "preview": "5.3. You undertake to provide valid bank details or other details required for facilitating payment \ntowards\n \nthe\n \ntransaction\n \n(“Payment\n \nDetails”).\n \nBy\n \nproviding\n \nthe\n \nPayment\n \nDetails,\n \nYou\n \nrepresent,\n \nw",
+          "citation": "Zepto Terms of Use, Page 5, Clause 5.3"
+        }
+      ]
+    },
+    {
+      "id": "policy_gift_card_usage_1",
+      "question": "Can Zepto Gift Cards be used to purchase products on the Platform?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "5.6",
+      "gold_page": 7,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 1,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 7,
+          "clause": "5.5",
+          "source": "Zepto Terms of Use",
+          "preview": "Any\n \nother\n \ncircumstances\n \nbeyond\n \nZepto’s\n \nreasonable\n \ncontrol\n \nwhich\n \nprevent\n \nthe\n \nexecution\n \nof\n \nthe\n \ntransaction.\n \n5.5. Zepto shall not be responsible or obligated to refund any money to You for any \nu",
+          "citation": "Zepto Terms of Use, Page 7.0, Clause 5.5"
+        },
+        {
+          "rank": 2,
+          "page": 6,
+          "clause": "5.6",
+          "source": "Zepto Terms of Use",
+          "preview": "5.6. Gift Cards: You can use Zepto Gift Cards for the purchases on the Platform, by redeeming \nthe\n \nvalue\n \ncontained\n \nin\n \nsuch\n \nGift\n \nCards\n \nat\n \nthe\n \ntime\n \nof\n \npayment\n \nfor\n \nthe\n \npurchase\n \nof\n \neligible\n \n",
+          "citation": "Zepto Terms of Use, Page 6, Clause 5.6"
+        },
+        {
+          "rank": 3,
+          "page": 7,
+          "clause": "5.7",
+          "source": "Zepto Terms of Use",
+          "preview": "in\n \nsuch\n \nGift\n \nCards\n \nat\n \nthe\n \ntime\n \nof\n \npayment\n \nfor\n \nthe\n \npurchase\n \nof\n \neligible\n \nProducts\n \nor\n \nservices\n \nonly\n \non\n \nthe\n \nPlatform.\n \nGift\n \nCards\n \nare\n \nsubject\n \nto\n \nadditional\n \nterms\n \nand\n \nc",
+          "citation": "Zepto Terms of Use, Page 7.0, Clause 5.7"
+        },
+        {
+          "rank": 4,
+          "page": 6,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "unauthorised\n \ntransactions\n \nconducted\n \non\n \nthe\n \nPlatform\n \nusing\n \nYour\n \nPayment\n \nDetails.\n \n \n \n5.6.  Gift  Cards:  You  can  use  Zepto  Gift  Cards  for  the  purchases  on  the  Platform,  by  redeeming  \nthe\n",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 6.0"
+        },
+        {
+          "rank": 5,
+          "page": 6,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "unauthorised\n \ntransactions\n \nconducted\n \non\n \nthe\n \nPlatform\n \nusing\n \nYour\n \nPayment\n \nDetails.\n \n \n \n5.6.  Gift  Cards:  You  can  use  Zepto  Gift  Cards  for  the  purchases  on  the  Platform,  by  redeeming  \nthe\n",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 6.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_product_pricing_1",
+      "question": "Who determines the prices of products sold on Zepto?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "6.1",
+      "gold_page": 8,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 8,
+          "clause": "6.1",
+          "source": "Zepto Terms of Use",
+          "preview": "6. Price of Products and services \n6.1. The prices for Products and services listed by Sellers on the Platform are determined \nentirely\n \nby\n \nthe\n \nSellers\n \nthemselves\n \nand\n \nZepto\n \ndoes\n \nnot\n \nparticipate\n \nin\n \nor",
+          "citation": "Zepto Terms of Use, Page 8.0, Clause 6.1"
+        },
+        {
+          "rank": 2,
+          "page": 7,
+          "clause": "6.1",
+          "source": "Zepto Terms of Use",
+          "preview": "6.1. The prices for Products and services listed by Sellers on the Platform are determined \nentirely\n \nby\n \nthe\n \nSellers\n \nthemselves\n \nand\n \nZepto\n \ndoes\n \nnot\n \nparticipate\n \nin\n \nor\n \ninfluence\n \nthis\n \npricing\n \npro",
+          "citation": "Zepto Terms of Use, Page 7, Clause 6.1"
+        },
+        {
+          "rank": 3,
+          "page": 8,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "Sellers\n \nand\n \nmay\n \nbe\n \nmodified\n \nby\n \nthe\n \nSellers\n \nfrom\n \ntime\n \nto\n \ntime\n \nwithout\n \nany\n \nprior\n \nnotice.\n \nZepto\n \nendeavour\n \nto\n \ndisplay\n \nthe\n \nProducts\n \nand\n \nservices\n \nat\n \nthe\n \naccurate\n \nprices\n \na",
+          "citation": "Zepto Terms of Use, Page 8.0"
+        },
+        {
+          "rank": 4,
+          "page": 7,
+          "clause": "6.3",
+          "source": "Zepto Terms of Use",
+          "preview": "6.3. The expression like ‘Lowest Prices’ pertains to the computation of average prices for all \nProductsand\n \nservices\n \noffered\n \nfor\n \nsale\n \nby\n \nthe\n \nSellers\n \non\n \nthe\n \nPlatform\n \n(in\n \ncomparison\n \nto\n \ncompetito",
+          "citation": "Zepto Terms of Use, Page 7, Clause 6.3"
+        },
+        {
+          "rank": 5,
+          "page": 17,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "quality,\n \ntaste,\n \nperformance\n \nof\n \nthe\n \nProducts/services\n \nsold.\n \nAll\n \ncommercial\n \nand\n \ncontractual\n \narrangements\n \nregarding\n \nthe\n \nProducts\n \nand\n \nservices\n \noffered\n \nfor\n \nsale\n \nare\n \nsolely\n \nbetween\n ",
+          "citation": "Zepto Terms of Use, Page 17.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_checkout_charges_1",
+      "question": "Where can I see the charges and fees that will be applied to my order?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "6.2",
+      "gold_page": 8,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 8,
+          "clause": "6.2",
+          "source": "Zepto Terms of Use",
+          "preview": "and\n \nWe\n \nshall\n \neffect\n \nnecessary\n \ncorrections,\n \nhowever\n \nZepto\n \nshall\n \nnot\n \nbe\n \nliable\n \nin\n \ncase\n \nSeller\n \nproceeds\n \nwith\n \ncanceling\n \nof\n \nsuch\n \norder.\n \n6.2. The Users will be informed about all the c",
+          "citation": "Zepto Terms of Use, Page 8.0, Clause 6.2"
+        },
+        {
+          "rank": 2,
+          "page": 7,
+          "clause": "6.2",
+          "source": "Zepto Terms of Use",
+          "preview": "6.2. The Users will be informed about all the charges, fees, and costs (including delivery fee) \nthat\n \nmay\n \nbe\n \nlevied\n \non\n \nthe\n \npurchase\n \nof\n \nthe\n \nProducts\n \nor\n \nservices\n \non\n \nthe\n \nPlatform\n \nat\n \nthe\n \nche",
+          "citation": "Zepto Terms of Use, Page 7, Clause 6.2"
+        },
+        {
+          "rank": 3,
+          "page": 9,
+          "clause": "7.2.1",
+          "source": "Zepto Terms of Use",
+          "preview": "usage,\n \nsmall\n \ncart\n \nfees,\n \nor\n \nother\n \ncharges,\n \nmay\n \napply.\n \nThese\n \ncharges\n \nwill\n \nbe\n \ndisplayed\n \nin\n \nthe\n \n“View\n \nBill”\n \nsection\n \nbefore\n \nthe\n \ncheckout\n \npage\n \non\n \nthe\n \nPlatform.\n \nYour\n \norder\n ",
+          "citation": "Zepto Terms of Use, Page 9.0, Clause 7.2.1"
+        },
+        {
+          "rank": 4,
+          "page": 8,
+          "clause": "7.2",
+          "source": "Zepto Terms of Use",
+          "preview": "7.2. Additionally, You agree that certain charges, such as fees for rain, peak hours, high demand \nor\n \nsurge\n \nperiods,\n \nlate-night\n \ndelivery,\n \nhandling,\n \nconvenience,\n \nplatform\n \nusage,\n \nsmall\n \ncart\n \nfees,\n \nor",
+          "citation": "Zepto Terms of Use, Page 8, Clause 7.2"
+        },
+        {
+          "rank": 5,
+          "page": 9,
+          "clause": "7.2",
+          "source": "Zepto Terms of Use",
+          "preview": "of\n \nthe\n \nPlatform\n \neven\n \nbefore\n \nplacing\n \nan\n \norder,\n \nensuring\n \nYou\n \nare\n \ninformed\n \nabout\n \nthe\n \nETA\n \nbefore\n \nproceeding.\n \nOrders\n \nplaced\n \nby\n \nYou\n \nmay\n \nbe\n \nsplit\n \ninto\n \nmultiple\n \nsub-orders,\n \ne",
+          "citation": "Zepto Terms of Use, Page 9.0, Clause 7.2"
+        }
+      ]
+    },
+    {
+      "id": "policy_delivery_eta_1",
+      "question": "Does Zepto guarantee that every order will arrive within 10 minutes?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.1",
+      "gold_page": 9,
+      "gold_rank": 2,
+      "mrr": 0.5,
+      "recall@1": 0.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank2_3",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 9,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "time\n \nmay\n \nvary\n \ndue\n \nto\n \nfactors\n \nsuch\n \nas\n \nthird-party\n \ndelivery\n \nservice\n \navailability,\n \ndemand,\n \ntraffic,\n \nweather\n \nconditions,\n \nforce\n \nmajeure\n \nevents,\n \nand\n \nother\n \nunforeseen\n \ncircumstances.\n ",
+          "citation": "Zepto Terms of Use, Page 9.0"
+        },
+        {
+          "rank": 2,
+          "page": 8,
+          "clause": "7.1",
+          "source": "Zepto Terms of Use",
+          "preview": "7.1. The delivery fees cover the delivery services as part of the sale of Products purchased by \nYou\n \non\n \nthe\n \nPlatform.\n \nThe\n \ndelivery\n \nof\n \nthe\n \norder\n \nwill\n \nbe\n \nprovided\n \nwithin\n \nthe\n \ntime\n \nperiod\n \ncomm",
+          "citation": "Zepto Terms of Use, Page 8, Clause 7.1"
+        },
+        {
+          "rank": 3,
+          "page": 8,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "traffic,\n \nweather\n \nconditions,\n \nforce\n \nmajeure\n \nevents,\n \nand\n \nother\n \nunforeseen\n \ncircumstances.\n \nAlthough\n \nZepto\n \nendeavors\n \nto\n \ndeliver\n \norders\n \nwithin\n \na\n \n10-minute\n \nETA,\n \nthe\n \nactual\n \ndelivery\n \n",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 8.0"
+        },
+        {
+          "rank": 4,
+          "page": 8,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "availability,\n \ndemand,\n \ntraffic,\n \nweather\n \nconditions,\n \nforce\n \nmajeure\n \nevents,\n \nand\n \nother\n \nunforeseen\n \ncircumstances.\n \nAlthough\n \nZepto\n \nendeavors\n \nto\n \ndeliver\n \norders\n \nwithin\n \na\n \n10-minute\n \nETA,\n \n",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 8.0"
+        },
+        {
+          "rank": 5,
+          "page": 19,
+          "clause": "9.8",
+          "source": "Zepto Terms of Use",
+          "preview": "9.8. For assistance on a Zepto order or refund related issues, click on the ‘Get Help’ section on \nthe\n \nApp.\n \n9.9. Please exercise caution to verify the portals/website links claiming to be Zepto or a \nlookalike\n \nor\n ",
+          "citation": "Zepto Terms of Use, Page 19.0, Clause 9.8"
+        }
+      ]
+    },
+    {
+      "id": "policy_wrong_address_1",
+      "question": "Who is responsible if an order is not delivered because I entered an incorrect address?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.3",
+      "gold_page": 9,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 9,
+          "clause": "7.3",
+          "source": "Zepto Terms of Use",
+          "preview": "7.3. The delivery of the orders will be made to the address specified by You at the time of \nplacing\n \ntheorder\n \non\n \nthe\n \nPlatform.\n \nIt\n \nis\n \nYour\n \nsole\n \nresponsibility\n \nto\n \nensure\n \nthat\n \nthe\n \ndelivery\n \naddr",
+          "citation": "Zepto Terms of Use, Page 9.0, Clause 7.3"
+        },
+        {
+          "rank": 2,
+          "page": 9,
+          "clause": "7.4",
+          "source": "Zepto Terms of Use",
+          "preview": "from\n \nan\n \nincorrector\n \nincomplete\n \naddress\n \nprovided\n \nby\n \nYou.\n \n7.4. The Products will ordinarily be delivered when an appropriate person is available to receive \nthe\n \norder\n \nat\n \nthe\n \naddress\n \nprovided\n \nby\n",
+          "citation": "Zepto Terms of Use, Page 9.0, Clause 7.4"
+        },
+        {
+          "rank": 3,
+          "page": 8,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "iscomplete,\n \naccurate\n \nand\n \nincludes\n \nany\n \nadditional\n \ninstructions\n \nrequired\n \nto\n \nfacilitate\n \ndelivery.\n \nZeptoand\n \nits\n \nSellers\n \nshall\n \nnot\n \nbe\n \nliable\n \nfor\n \nnon-delivery\n \nor\n \ndelays\n \nin\n \ndelivery",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 8.0"
+        },
+        {
+          "rank": 4,
+          "page": 8,
+          "clause": "7.4",
+          "source": "Zepto Terms of Use",
+          "preview": "7.4. The Products will ordinarily be delivered when an appropriate person is available to receive \nthe\n \norder\n \nat\n \nthe\n \naddress\n \nprovided\n \nby\n \nYou.\n \nIf\n \nYou\n \nrequest\n \nthat\n \nthe\n \ndelivery,\n \nbe\n \nleft\n \nunatt",
+          "citation": "Zepto Terms of Use, Page 8, Clause 7.4"
+        },
+        {
+          "rank": 5,
+          "page": 10,
+          "clause": "7.5",
+          "source": "Zepto Terms of Use",
+          "preview": "Your address, You expressly waive and release Zepto from any liability arising from the \nProducts\n \nbeing\n \nleft\n \nunattended,\n \nincluding,\n \nbut\n \nnot\n \nlimited\n \nto,\n \ntheft,\n \ntampering,\n \ncontamination,\n \nor\n \nspoila",
+          "citation": "Zepto Terms of Use, Page 10.0, Clause 7.5"
+        }
+      ]
+    },
+    {
+      "id": "policy_cod_nonpayment_1",
+      "question": "What happens if I do not make the full payment for a cash-on-delivery order?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.5",
+      "gold_page": 10,
+      "gold_rank": 2,
+      "mrr": 0.5,
+      "recall@1": 0.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank2_3",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 10,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "providers\n \nshall\n \nhave\n \nthe\n \nright\n \nto\n \nrefuse\n \ndelivery\n \nof\n \nthe\n \norder\n \nto\n \nYou\n \nif\n \nYou\n \nfail\n \nto\n \nmake\n \nthe\n \ncomplete\n \npayment\n \nand\n \nZepto\n \nshall\n \ntreat\n \nsuch\n \norder\n \nas\n \ncanceled\n \norder\n",
+          "citation": "Zepto Terms of Use, Page 10.0"
+        },
+        {
+          "rank": 2,
+          "page": 9,
+          "clause": "7.5",
+          "source": "Zepto Terms of Use",
+          "preview": "7.5. In the event You opt for ‘Cash on Delivery (CoD)’ mode, Seller/ third-party delivery service \nproviders\n \nshall\n \nhave\n \nthe\n \nright\n \nto\n \nrefuse\n \ndelivery\n \nof\n \nthe\n \norder\n \nto\n \nYou\n \nif\n \nYou\n \nfail\n \nto\n \nma",
+          "citation": "Zepto Terms of Use, Page 9, Clause 7.5"
+        },
+        {
+          "rank": 3,
+          "page": 10,
+          "clause": "7.5",
+          "source": "Zepto Terms of Use",
+          "preview": "Your address, You expressly waive and release Zepto from any liability arising from the \nProducts\n \nbeing\n \nleft\n \nunattended,\n \nincluding,\n \nbut\n \nnot\n \nlimited\n \nto,\n \ntheft,\n \ntampering,\n \ncontamination,\n \nor\n \nspoila",
+          "citation": "Zepto Terms of Use, Page 10.0, Clause 7.5"
+        },
+        {
+          "rank": 4,
+          "page": 9,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "Your  address,  You  expressly  waive  and  release  Zepto  from  any  liability  arising  from  the  \nProducts\n \nbeing\n \nleft\n \nunattended,\n \nincluding,\n \nbut\n \nnot\n \nlimited\n \nto,\n \ntheft,\n \ntampering,\n \ncontamination,",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 9.0"
+        },
+        {
+          "rank": 5,
+          "page": 9,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "if\n \nYou\n \nfail\n \nto\n \nmake\n \nthe\n \ncomplete\n \npayment\n \nand\n \nZepto\n \nshall\n \ntreat\n \nsuch\n \norder\n \nas\n \ncanceled\n \norder\n \nand\n \nshall\n \nnot\n \nbe\n \nliable\n \nfor\n \nany\n \nlosses\n \nor\n \ndamage\n \nthat\n \nmay\n \narise\n \non\n ",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 9.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_cod_delivery_fee_1",
+      "question": "Do I have to pay delivery fees if my cash-on-delivery order is canceled because I did not make the payment?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.5",
+      "gold_page": 10,
+      "gold_rank": 2,
+      "mrr": 0.5,
+      "recall@1": 0.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank2_3",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 10,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "providers\n \nshall\n \nhave\n \nthe\n \nright\n \nto\n \nrefuse\n \ndelivery\n \nof\n \nthe\n \norder\n \nto\n \nYou\n \nif\n \nYou\n \nfail\n \nto\n \nmake\n \nthe\n \ncomplete\n \npayment\n \nand\n \nZepto\n \nshall\n \ntreat\n \nsuch\n \norder\n \nas\n \ncanceled\n \norder\n",
+          "citation": "Zepto Terms of Use, Page 10.0"
+        },
+        {
+          "rank": 2,
+          "page": 9,
+          "clause": "7.5",
+          "source": "Zepto Terms of Use",
+          "preview": "7.5. In the event You opt for ‘Cash on Delivery (CoD)’ mode, Seller/ third-party delivery service \nproviders\n \nshall\n \nhave\n \nthe\n \nright\n \nto\n \nrefuse\n \ndelivery\n \nof\n \nthe\n \norder\n \nto\n \nYou\n \nif\n \nYou\n \nfail\n \nto\n \nma",
+          "citation": "Zepto Terms of Use, Page 9, Clause 7.5"
+        },
+        {
+          "rank": 3,
+          "page": 16,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "or\n \nunavailability\n \nof\n \ncertain\n \nProducts\n \nor\n \nforce\n \nmajeure\n \nevents,\n \nnonavailability\n \nof\n \nservices,\n \nunforeseen\n \ncircumstances,\n \ndelivery-related\n \nissues\n \nor\n \nif\n \nthere\n \nare\n \nconcerns\n \nregarding\n ",
+          "citation": "Zepto Terms of Use, Page 16.0"
+        },
+        {
+          "rank": 4,
+          "page": 15,
+          "clause": "8.2",
+          "source": "Zepto Terms of Use",
+          "preview": "8.2. Cancellations: You may cancel an order without charge at any time before the Seller \naccepts\n \nthe\n \norder.\n \nYou\n \ncannot\n \ncancel\n \nthe\n \norder\n \npost\n \nacceptance\n \nof\n \norder.\n \nYour\n \norder\n \nmay\n \nbe\n \ncancele",
+          "citation": "Zepto Terms of Use, Page 15, Clause 8.2"
+        },
+        {
+          "rank": 5,
+          "page": 8,
+          "clause": "7.1",
+          "source": "Zepto Terms of Use",
+          "preview": "7.1. The delivery fees cover the delivery services as part of the sale of Products purchased by \nYou\n \non\n \nthe\n \nPlatform.\n \nThe\n \ndelivery\n \nof\n \nthe\n \norder\n \nwill\n \nbe\n \nprovided\n \nwithin\n \nthe\n \ntime\n \nperiod\n \ncomm",
+          "citation": "Zepto Terms of Use, Page 8, Clause 7.1"
+        }
+      ]
+    },
+    {
+      "id": "policy_alcohol_id_1",
+      "question": "Do I need to provide identification or age proof when ordering alcohol or tobacco products?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.6.1",
+      "gold_page": 10,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 9,
+          "clause": "7.6.1",
+          "source": "Zepto Terms of Use",
+          "preview": "7.6.1. The delivery of alcoholic beverage and tobacco Products to You is subject to the \nfulfillment\n \nof\n \neligibility\n \ncriteria\n \nprescribed\n \nunder\n \nthe\n \napplicable\n \nlaw\n \nin\n \nthis\n \nregard,\n \nwhich\n \nmay\n \nvary\n",
+          "citation": "Zepto Terms of Use, Page 9, Clause 7.6.1"
+        },
+        {
+          "rank": 2,
+          "page": 10,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "identification\n \nand\n \nage\n \nproof\n \ndocuments\n \nto\n \nevidence\n \ncompliance\n \nwith\n \nthe\n \naforesaid,\n \nincluding\n \npermanent\n \naccount\n \nnumber\n \n(PAN)\n \ncard\n \nor\n \nother\n \ndocuments\n \nor\n \nsuch\n \nother\n \ninformation,\n",
+          "citation": "Zepto Terms of Use, Page 10.0"
+        },
+        {
+          "rank": 3,
+          "page": 10,
+          "clause": "7.6.2",
+          "source": "Zepto Terms of Use",
+          "preview": "and\n \ntobacco\n \nProducts\n \nshall\n \nbe\n \ndelivered\n \nonly\n \nto\n \nthe\n \nperson\n \nfrom\n \nwhose\n \naccount\n \nthe\n \norder\n \nhas\n \nbeen\n \nplaced\n \nsubject\n \nto\n \nverification\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nmay\n \nbe\n",
+          "citation": "Zepto Terms of Use, Page 10.0, Clause 7.6.2"
+        },
+        {
+          "rank": 4,
+          "page": 9,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "fulfillment\n \nof\n \neligibility\n \ncriteria\n \nprescribed\n \nunder\n \nthe\n \napplicable\n \nlaw\n \nin\n \nthis\n \nregard,\n \nwhich\n \nmay\n \nvary\n \nfrom\n \nState\n \nto\n \nState.\n \nZepto\n \nand/or\n \nSellers\n \nmay\n \nrequest\n \nYou\n \nto\n \nprov",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 9.0"
+        },
+        {
+          "rank": 5,
+          "page": 9,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "time\n \nof\n \nordering\n \nand\n \ndelivery\n \nof\n \nalcoholic\n \nbeverage\n \nand\n \ntobacco\n \nProducts.\n \nNotwithstanding\n \nanything\n \ncontained\n \nin\n \nthese\n \nTerms,\n \nthe\n \nordered\n \nalcoholic\n \nbeverage\n \nand\n \ntobacco\n \nProduc",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 9.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_alcohol_recipient_1",
+      "question": "Can someone else receive my alcohol order on my behalf?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.6.1",
+      "gold_page": 10,
+      "gold_rank": 4,
+      "mrr": 0.25,
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank_gt3",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 10,
+          "clause": "7.6.2",
+          "source": "Zepto Terms of Use",
+          "preview": "and\n \ntobacco\n \nProducts\n \nshall\n \nbe\n \ndelivered\n \nonly\n \nto\n \nthe\n \nperson\n \nfrom\n \nwhose\n \naccount\n \nthe\n \norder\n \nhas\n \nbeen\n \nplaced\n \nsubject\n \nto\n \nverification\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nmay\n \nbe\n",
+          "citation": "Zepto Terms of Use, Page 10.0, Clause 7.6.2"
+        },
+        {
+          "rank": 2,
+          "page": 9,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "time\n \nof\n \nordering\n \nand\n \ndelivery\n \nof\n \nalcoholic\n \nbeverage\n \nand\n \ntobacco\n \nProducts.\n \nNotwithstanding\n \nanything\n \ncontained\n \nin\n \nthese\n \nTerms,\n \nthe\n \nordered\n \nalcoholic\n \nbeverage\n \nand\n \ntobacco\n \nProduc",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 9.0"
+        },
+        {
+          "rank": 3,
+          "page": 10,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "identification\n \nand\n \nage\n \nproof\n \ndocuments\n \nto\n \nevidence\n \ncompliance\n \nwith\n \nthe\n \naforesaid,\n \nincluding\n \npermanent\n \naccount\n \nnumber\n \n(PAN)\n \ncard\n \nor\n \nother\n \ndocuments\n \nor\n \nsuch\n \nother\n \ninformation,\n",
+          "citation": "Zepto Terms of Use, Page 10.0"
+        },
+        {
+          "rank": 4,
+          "page": 9,
+          "clause": "7.6.1",
+          "source": "Zepto Terms of Use",
+          "preview": "7.6.1. The delivery of alcoholic beverage and tobacco Products to You is subject to the \nfulfillment\n \nof\n \neligibility\n \ncriteria\n \nprescribed\n \nunder\n \nthe\n \napplicable\n \nlaw\n \nin\n \nthis\n \nregard,\n \nwhich\n \nmay\n \nvary\n",
+          "citation": "Zepto Terms of Use, Page 9.0, Clause 7.6.1"
+        },
+        {
+          "rank": 5,
+          "page": 9,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "and\n \ntobacco\n \nProducts.\n \nNotwithstanding\n \nanything\n \ncontained\n \nin\n \nthese\n \nTerms,\n \nthe\n \nordered\n \nalcoholic\n \nbeverage\n \nand\n \ntobacco\n \nProducts\n \nshall\n \nbe\n \ndelivered\n \nonly\n \nto\n \nthe\n \nperson\n \nfrom\n \nwhos",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 9.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_alcohol_eligibility_1",
+      "question": "What age requirement applies when ordering alcoholic beverages or tobacco products?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.6.2",
+      "gold_page": 11,
+      "gold_rank": 4,
+      "mrr": 0.25,
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank_gt3",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 11,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "order\n \nrelating\n \nto\n \nalcoholic\n \nbeverage\n \nand\n \ntobacco\n \nProducts.\n \nYou\n \nfurther\n \nagree\n \nand\n \nundertake\n \nthat\n \nYou\n \ndo\n \nnot\n \nfall\n \nunder\n \nany\n \nof\n \nthe\n \nbelow-mentioned\n \nconditions,\n \nwhenever\n \nYou\n",
+          "citation": "Zepto Terms of Use, Page 11.0"
+        },
+        {
+          "rank": 2,
+          "page": 3,
+          "clause": "3.1",
+          "source": "Zepto Terms of Use",
+          "preview": "3.1. The Products and services are not available to minors i.e., persons under the age of 18 \n(eighteen)\n \nyears,\n \nundischarged\n \ninsolvent,\n \nany\n \nUsers\n \nwho\n \nare\n \nnot\n \ncompetent\n \nto\n \nenter\n \ninto\n \na\n \ncontract",
+          "citation": "Zepto Terms of Use, Page 3, Clause 3.1"
+        },
+        {
+          "rank": 3,
+          "page": 9,
+          "clause": "7.6.1",
+          "source": "Zepto Terms of Use",
+          "preview": "7.6.1. The delivery of alcoholic beverage and tobacco Products to You is subject to the \nfulfillment\n \nof\n \neligibility\n \ncriteria\n \nprescribed\n \nunder\n \nthe\n \napplicable\n \nlaw\n \nin\n \nthis\n \nregard,\n \nwhich\n \nmay\n \nvary\n",
+          "citation": "Zepto Terms of Use, Page 9, Clause 7.6.1"
+        },
+        {
+          "rank": 4,
+          "page": 10,
+          "clause": "7.6.2",
+          "source": "Zepto Terms of Use",
+          "preview": "and\n \ntobacco\n \nProducts\n \nshall\n \nbe\n \ndelivered\n \nonly\n \nto\n \nthe\n \nperson\n \nfrom\n \nwhose\n \naccount\n \nthe\n \norder\n \nhas\n \nbeen\n \nplaced\n \nsubject\n \nto\n \nverification\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nmay\n \nbe\n",
+          "citation": "Zepto Terms of Use, Page 10.0, Clause 7.6.2"
+        },
+        {
+          "rank": 5,
+          "page": 9,
+          "clause": "7.6.2",
+          "source": "Zepto Terms of Use",
+          "preview": "7.6.2. By accessing the alcoholic beverage and tobacco Products category on the Platform, You \nrepresent\n \nthat\n \nYou\n \n(i)\n \ncomply\n \nwith\n \nall\n \nthe\n \neligibility\n \ncriteria\n \nunder\n \napplicable\n \nlaw\n \nincluding\n \nle",
+          "citation": "Zepto Terms of Use, Page 9, Clause 7.6.2"
+        }
+      ]
+    },
+    {
+      "id": "policy_alcohol_public_address_1",
+      "question": "Can I use a public place as the delivery address for an alcohol or tobacco order?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.6.3",
+      "gold_page": 11,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 11,
+          "clause": "7.6.3",
+          "source": "Zepto Terms of Use",
+          "preview": "availing the services from the Platform; (iii) possess necessary permits, if applicable; and (iv) \norder\n \nfor\n \nYour\n \npersonal\n \nconsumption\n \nonly\n \nand\n \nnot\n \nfor\n \nresale.\n \n7.6.3. Important User declaration: You a",
+          "citation": "Zepto Terms of Use, Page 11.0, Clause 7.6.3"
+        },
+        {
+          "rank": 2,
+          "page": 10,
+          "clause": "7.6.3",
+          "source": "Zepto Terms of Use",
+          "preview": "7.6.3. Important User declaration: You agree and undertake to not provide the address of any \npublic\n \nplace,\n \nincluding\n \nbut\n \nnot\n \nlimited\n \nto,\n \neducational\n \ninstitution,\n \nhospital,\n \nand\n \nreligious\n \nplaces\n \n",
+          "citation": "Zepto Terms of Use, Page 10, Clause 7.6.3"
+        },
+        {
+          "rank": 3,
+          "page": 9,
+          "clause": "7.6.1",
+          "source": "Zepto Terms of Use",
+          "preview": "7.6.1. The delivery of alcoholic beverage and tobacco Products to You is subject to the \nfulfillment\n \nof\n \neligibility\n \ncriteria\n \nprescribed\n \nunder\n \nthe\n \napplicable\n \nlaw\n \nin\n \nthis\n \nregard,\n \nwhich\n \nmay\n \nvary\n",
+          "citation": "Zepto Terms of Use, Page 9, Clause 7.6.1"
+        },
+        {
+          "rank": 4,
+          "page": 10,
+          "clause": "7.6.2",
+          "source": "Zepto Terms of Use",
+          "preview": "and\n \ntobacco\n \nProducts\n \nshall\n \nbe\n \ndelivered\n \nonly\n \nto\n \nthe\n \nperson\n \nfrom\n \nwhose\n \naccount\n \nthe\n \norder\n \nhas\n \nbeen\n \nplaced\n \nsubject\n \nto\n \nverification\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nmay\n \nbe\n",
+          "citation": "Zepto Terms of Use, Page 10.0, Clause 7.6.2"
+        },
+        {
+          "rank": 5,
+          "page": 10,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "identification\n \nand\n \nage\n \nproof\n \ndocuments\n \nto\n \nevidence\n \ncompliance\n \nwith\n \nthe\n \naforesaid,\n \nincluding\n \npermanent\n \naccount\n \nnumber\n \n(PAN)\n \ncard\n \nor\n \nother\n \ndocuments\n \nor\n \nsuch\n \nother\n \ninformation,\n",
+          "citation": "Zepto Terms of Use, Page 10.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_pharmacy_responsibility_1",
+      "question": "Who is responsible for verifying and dispensing pharmaceutical products?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.7.1",
+      "gold_page": 11,
+      "gold_rank": null,
+      "mrr": 0.0,
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 0.0,
+      "bucket": "missed_in_top_k",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 11,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "errors,\n \nor\n \nactions\n \nconducted\n \nby\n \nthe\n \nPharmacy\n \nwho\n \nare\n \nsolely\n \nresponsible\n \nfor\n \nthe\n \nverification\n \nand\n \ndispensing\n \nof\n \nPharmaceutical\n \nProducts.\n \nZepto\n \nassumes\n \nno\n \nliability\n \nfor\n \nthe\n ",
+          "citation": "Zepto Terms of Use, Page 11.0"
+        },
+        {
+          "rank": 2,
+          "page": 11,
+          "clause": "7.7.3",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.3 Prescription Requirements Users may purchase certain Pharmaceutical Products, \nherein\n \nreferred\n \nto\n \nas\n \n“Prescription\n \nDrugs”\n \nprovided\n \nthey\n \nsubmit\n \na\n \nprescription.\n \nThese\n \nPrescription\n \nDrugs\n \nar",
+          "citation": "Zepto Terms of Use, Page 11, Clause 7.7.3"
+        },
+        {
+          "rank": 3,
+          "page": 11,
+          "clause": "7.7.2",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.2. Invitation to offer for sale Notwithstanding anything contained elsewhere in these \nTerms,\n \nthe\n \nlisting\n \nof\n \nPharmaceutical\n \nProducts\n \non\n \nthe\n \nPlatform\n \nby\n \nthe\n \nPharmacy\n \nis\n \nmerely\n \nan\n \ninvitati",
+          "citation": "Zepto Terms of Use, Page 11, Clause 7.7.2"
+        },
+        {
+          "rank": 4,
+          "page": 12,
+          "clause": "7.7.4",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.4. Delivery of Drugs You agree to appoint an individual who shall act in the capacity of Your \nagent\n \nand\n \ncollect\n \nthe\n \nPrescription\n \nDrugs\n \nas\n \nrequested\n \nby\n \nYou\n \nfrom\n \nPharmacy\n \non\n \nYour\n \nbehalf\n \n(",
+          "citation": "Zepto Terms of Use, Page 12, Clause 7.7.4"
+        },
+        {
+          "rank": 5,
+          "page": 11,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "Users\n \nand\n \nPharmacy,\n \nand\n \nthat\n \nany\n \norder\n \nor\n \ntransaction\n \nis\n \ngoverned\n \nsolely\n \nbetween\n \nthe\n \nUser\n \nand\n \nthe\n \nPharmacy.\n \nIt\n \nis\n \nhereby\n \nclarified\n \nthat\n \nthat\n \nthe\n \nmanufacturers\n \nthemselve",
+          "citation": "Zepto Terms of Use, Page 11.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_pharmacy_order_acceptance_1",
+      "question": "Who decides whether a pharmaceutical order is accepted?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.7.2",
+      "gold_page": 12,
+      "gold_rank": 2,
+      "mrr": 0.5,
+      "recall@1": 0.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank2_3",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 11,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "Pharmacy\n \nis\n \nmerely\n \nan\n \ninvitation\n \nto\n \noffer\n \nand\n \nnot\n \nan\n \noffer\n \nfor\n \nsale.\n \nWhen\n \nYou\n \nplace\n \nan\n \norder,\n \nit\n \nconstitutes\n \nYour\n \noffer\n \nto\n \nenter\n \ninto\n \nan\n \nagreement\n \nwith\n \nthe\n \nPharma",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 11.0"
+        },
+        {
+          "rank": 2,
+          "page": 11,
+          "clause": "7.7.2",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.2. Invitation to offer for sale Notwithstanding anything contained elsewhere in these \nTerms,\n \nthe\n \nlisting\n \nof\n \nPharmaceutical\n \nProducts\n \non\n \nthe\n \nPlatform\n \nby\n \nthe\n \nPharmacy\n \nis\n \nmerely\n \nan\n \ninvitati",
+          "citation": "Zepto Terms of Use, Page 11, Clause 7.7.2"
+        },
+        {
+          "rank": 3,
+          "page": 11,
+          "clause": "7.7.3",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.3 Prescription Requirements Users may purchase certain Pharmaceutical Products, \nherein\n \nreferred\n \nto\n \nas\n \n“Prescription\n \nDrugs”\n \nprovided\n \nthey\n \nsubmit\n \na\n \nprescription.\n \nThese\n \nPrescription\n \nDrugs\n \nar",
+          "citation": "Zepto Terms of Use, Page 11, Clause 7.7.3"
+        },
+        {
+          "rank": 4,
+          "page": 12,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "must\n \nbe\n \nuploaded\n \non\n \nthe\n \nPlatform\n \nwhere\n \nit\n \nwill\n \nbe\n \ntransmitted\n \nto\n \nthe\n \nPharmacy\n \nfor\n \nvalidation/verification.\n \nInvoices\n \nwill\n \nbe\n \nissued\n \nin\n \nthe\n \nname\n \nappearing\n \non\n \nthe\n \nprescrip",
+          "citation": "Zepto Terms of Use, Page 12.0"
+        },
+        {
+          "rank": 5,
+          "page": 11,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "Users\n \nand\n \nPharmacy,\n \nand\n \nthat\n \nany\n \norder\n \nor\n \ntransaction\n \nis\n \ngoverned\n \nsolely\n \nbetween\n \nthe\n \nUser\n \nand\n \nthe\n \nPharmacy.\n \nIt\n \nis\n \nhereby\n \nclarified\n \nthat\n \nthat\n \nthe\n \nmanufacturers\n \nthemselve",
+          "citation": "Zepto Terms of Use, Page 11.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_prescription_required_1",
+      "question": "Do I need a prescription to purchase prescription drugs through Zepto?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.7.3",
+      "gold_page": 12,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 11,
+          "clause": "7.7.3",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.3 Prescription Requirements Users may purchase certain Pharmaceutical Products, \nherein\n \nreferred\n \nto\n \nas\n \n“Prescription\n \nDrugs”\n \nprovided\n \nthey\n \nsubmit\n \na\n \nprescription.\n \nThese\n \nPrescription\n \nDrugs\n \nar",
+          "citation": "Zepto Terms of Use, Page 11, Clause 7.7.3"
+        },
+        {
+          "rank": 2,
+          "page": 13,
+          "clause": "7.7.5",
+          "source": "Zepto Terms of Use",
+          "preview": "for\n \nthe\n \nactions\n \nof\n \nthe\n \nUser\n \nAgent\n \nin\n \nthe\n \ncollection\n \nor\n \ndelivery\n \nprocess.\n \nUsers\n \nagree\n \nand\n \nundertake\n \nto\n \nensure\n \nthey\n \nshall\n \nupload\n \ngenuine,\n \nuntampered,\n \nlegible\n \nand\n \ncomplete",
+          "citation": "Zepto Terms of Use, Page 13.0, Clause 7.7.5"
+        },
+        {
+          "rank": 3,
+          "page": 10,
+          "clause": "7.7.1",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.1. Zepto’s Role and Disclaimer of Liability Zepto operates solely as a digital marketplace \nPlatform\n \nconnecting\n \nUsers\n \nwith\n \nthird-\n \nparty\n \nSeller(s)\n \n(“Pharmacy”)\n \nfor\n \nthe\n \nsale\n \nand\n \npurchase\n \nof\n \n",
+          "citation": "Zepto Terms of Use, Page 10, Clause 7.7.1"
+        },
+        {
+          "rank": 4,
+          "page": 11,
+          "clause": "7.7.2",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.2. Invitation to offer for sale Notwithstanding anything contained elsewhere in these \nTerms,\n \nthe\n \nlisting\n \nof\n \nPharmaceutical\n \nProducts\n \non\n \nthe\n \nPlatform\n \nby\n \nthe\n \nPharmacy\n \nis\n \nmerely\n \nan\n \ninvitati",
+          "citation": "Zepto Terms of Use, Page 11, Clause 7.7.2"
+        },
+        {
+          "rank": 5,
+          "page": 12,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "any\n \nPrescription\n \nDrugs\n \nor\n \nother\n \nmedications.\n \n \n \n7.7.6.\n \nDrug\n \nSubstitutions\n \n Orders\n \nfor\n \nsubstitutions\n \nof\n \nprescribed\n \nmedications\n \nwill\n \nonly\n \nbe\n \nprocessed\n \nif\n \nthe\n \nprescribing\n \nphysici",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 12.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_prescription_cancel_1",
+      "question": "Can a pharmacy cancel a prescription order if there are discrepancies in the prescription?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.7.3",
+      "gold_page": 12,
+      "gold_rank": null,
+      "mrr": 0.0,
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 0.0,
+      "bucket": "missed_in_top_k",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 12,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "must\n \nbe\n \nuploaded\n \non\n \nthe\n \nPlatform\n \nwhere\n \nit\n \nwill\n \nbe\n \ntransmitted\n \nto\n \nthe\n \nPharmacy\n \nfor\n \nvalidation/verification.\n \nInvoices\n \nwill\n \nbe\n \nissued\n \nin\n \nthe\n \nname\n \nappearing\n \non\n \nthe\n \nprescrip",
+          "citation": "Zepto Terms of Use, Page 12.0"
+        },
+        {
+          "rank": 2,
+          "page": 11,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "Pharmacy\n \nreserves\n \nthe\n \nright\n \nto\n \ncancel\n \nthe\n \norder\n \nimmediately.\n \nPharmacy\n \nretains\n \nthe\n \nright\n \nto\n \nreject\n \nany\n \nprescription\n \norder\n \nif\n \ndiscrepancies\n \nor\n \ninaccuracies\n \nare\n \nidentified.\n \nUs",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 11.0"
+        },
+        {
+          "rank": 3,
+          "page": 11,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "to\n \nas\n \n“Prescription\n \nDrugs”\n \nprovided\n \nthey\n \nsubmit\n \na\n \nprescription.\n \nThese\n \nPrescription\n \nDrugs\n \nare\n \noffered\n \nfor\n \nsale\n \nby\n \nPharmacy\n \nthrough\n \nthe\n \nPlatform.\n \nThe\n \nprescription\n \nmust\n \nbe\n \nu",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 11.0"
+        },
+        {
+          "rank": 4,
+          "page": 11,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "herein\n \nreferred\n \nto\n \nas\n \n“Prescription\n \nDrugs”\n \nprovided\n \nthey\n \nsubmit\n \na\n \nprescription.\n \nThese\n \nPrescription\n \nDrugs\n \nare\n \noffered\n \nfor\n \nsale\n \nby\n \nPharmacy\n \nthrough\n \nthe\n \nPlatform.\n \nThe\n \nprescrip",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 11.0"
+        },
+        {
+          "rank": 5,
+          "page": 12,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "order\n \nif\n \ndiscrepancies\n \nor\n \ninaccuracies\n \nare\n \nidentified.\n \nUsers\n \nshall\n \norder\n \nonly\n \nagainst\n \nthe\n \ngenuine\n \nand\n \nuntampered\n \noriginal\n \nprescription\n \nand\n \nare\n \nsubject\n \nto\n \nverification;\n \nfailur",
+          "citation": "Zepto Terms of Use, Page 12.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_prescription_delivery_1",
+      "question": "Who collects prescription medicines from the pharmacy on my behalf?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.7.4",
+      "gold_page": 13,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 1,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 13,
+          "clause": "7.7.4",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.4. Delivery of Drugs You agree to appoint an individual who shall act in the capacity of Your \nagent\n \nand\n \ncollect\n \nthe\n \nPrescription\n \nDrugs\n \nas\n \nrequested\n \nby\n \nYou\n \nfrom\n \nPharmacy\n \non\n \nYour\n \nbehalf\n \n(",
+          "citation": "Zepto Terms of Use, Page 13.0, Clause 7.7.4"
+        },
+        {
+          "rank": 2,
+          "page": 13,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "by\n \nYou.\n \nYou\n \nfurther\n \nacknowledge\n \nthat\n \nthe\n \nUser\n \nAgent\n \nis\n \nacting\n \nas\n \nYour\n \nauthorized\n \nrepresentative\n \nin\n \nthis\n \narrangement\n \nand\n \ntheir\n \nactions\n \nin\n \ncollecting\n \nand\n \ntransporting\n \nthe\n ",
+          "citation": "Zepto Terms of Use, Page 13.0"
+        },
+        {
+          "rank": 3,
+          "page": 12,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "7.7.4.  Delivery  of  Drugs  You  agree  to  appoint  an  individual  who  shall  act  in  the  capacity  of  Your  \nagent\n \nand\n \ncollect\n \nthe\n \nPrescription\n \nDrugs\n \nas\n \nrequested\n \nby\n \nYou\n \nfrom\n \nPharmacy\n \non\n ",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 12.0"
+        },
+        {
+          "rank": 4,
+          "page": 12,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "7.7.4.  Delivery  of  Drugs  You  agree  to  appoint  an  individual  who  shall  act  in  the  capacity  of  Your  \nagent\n \nand\n \ncollect\n \nthe\n \nPrescription\n \nDrugs\n \nas\n \nrequested\n \nby\n \nYou\n \nfrom\n \nPharmacy\n \non\n ",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 12.0"
+        },
+        {
+          "rank": 5,
+          "page": 12,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "is\n \nacting\n \nas\n \nYour\n \nauthorized\n \nrepresentative\n \nin\n \nthis\n \narrangement\n \nand\n \ntheir\n \nactions\n \nin\n \ncollecting\n \nand\n \ntransporting\n \nthe\n \nPrescription\n \nDrugs\n \nare\n \nundertaken\n \nwith\n \nYour\n \nconsent.\n \nTh",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 12.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_prescription_reuse_1",
+      "question": "Can I reuse a prescription that has already been fulfilled?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.7.5",
+      "gold_page": 13,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 12,
+          "clause": "7.7.5",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.5. Reuse of Prescriptions Users agree and undertake not to reuse prescriptions that have \nalready\n \nbeen\n \nfulfilled.\n \nZepto\n \nbears\n \nno\n \nresponsibility\n \nfor\n \nany\n \nadverse\n \nconsequences\n \nresulting\n \nfrom\n \nth",
+          "citation": "Zepto Terms of Use, Page 12, Clause 7.7.5"
+        },
+        {
+          "rank": 2,
+          "page": 13,
+          "clause": "7.7.5",
+          "source": "Zepto Terms of Use",
+          "preview": "for\n \nthe\n \nactions\n \nof\n \nthe\n \nUser\n \nAgent\n \nin\n \nthe\n \ncollection\n \nor\n \ndelivery\n \nprocess.\n \nUsers\n \nagree\n \nand\n \nundertake\n \nto\n \nensure\n \nthey\n \nshall\n \nupload\n \ngenuine,\n \nuntampered,\n \nlegible\n \nand\n \ncomplete",
+          "citation": "Zepto Terms of Use, Page 13.0, Clause 7.7.5"
+        },
+        {
+          "rank": 3,
+          "page": 12,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "shall\n \nupload\n \ngenuine,\n \nuntampered,\n \nlegible\n \nand\n \ncomplete\n \nprescription\n \nfor\n \npurchase\n \nof\n \nPrescription\n \nDrugs.\n \n7.7.5.  Reuse  of  Prescriptions   Users  agree  and  undertake  not  to  reuse  prescript",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 12.0"
+        },
+        {
+          "rank": 4,
+          "page": 12,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "between\n \nYou\n \nand\n \nthe\n \nUser\n \nAgent\n \nand\n \nit\n \nassumes\n \nno\n \nresponsibility\n \nfor\n \nthe\n \nactions\n \nof\n \nthe\n \nUser\n \nAgent\n \nin\n \nthe\n \ncollection\n \nor\n \ndelivery\n \nprocess.\n \nUsers\n \nagree\n \nand\n \nundertake\n \nt",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 12.0"
+        },
+        {
+          "rank": 5,
+          "page": 13,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "only\n \nbe\n \nprocessed\n \nif\n \nthe\n \nprescribing\n \nphysician\n \nhas\n \nexpressly\n \nauthorized\n \nthe\n \ndispensing\n \nof\n \nan\n \nequivalent\n \ngeneric\n \ndrug\n \nin\n \nplace\n \nof\n \nthe\n \nprescribed\n \nbrand-name\n \ndrug,\n \nif\n \nthe\n \n",
+          "citation": "Zepto Terms of Use, Page 13.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_medicine_substitution_1",
+      "question": "When can a prescribed medicine be substituted with an equivalent generic drug?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.7.6",
+      "gold_page": 13,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 12,
+          "clause": "7.7.6",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.6.\n \nDrug\n \nSubstitutions\n \n Orders\n \nfor\n \nsubstitutions\n \nof\n \nprescribed\n \nmedications\n \nwill\n \nonly\n \nbe\n \nprocessed\n \nif\n \nthe\n \nprescribing\n \nphysician\n \nhas\n \nexpressly\n \nauthorized\n \nthe\n \ndispensing\n \nof\n \na",
+          "citation": "Zepto Terms of Use, Page 12, Clause 7.7.6"
+        },
+        {
+          "rank": 2,
+          "page": 13,
+          "clause": "7.7.6",
+          "source": "Zepto Terms of Use",
+          "preview": "adverse\n \nconsequences\n \nresulting\n \nfrom\n \nthe\n \nUser’s\n \nself-directed\n \nuse\n \nof\n \nmedication\n \nand\n \nUsers\n \nare\n \nadvised\n \nto\n \nconsult\n \na\n \nmedical\n \nprofessional\n \nregarding\n \npotential\n \nside\n \neffects,\n \ndrug\n",
+          "citation": "Zepto Terms of Use, Page 13.0, Clause 7.7.6"
+        },
+        {
+          "rank": 3,
+          "page": 13,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "only\n \nbe\n \nprocessed\n \nif\n \nthe\n \nprescribing\n \nphysician\n \nhas\n \nexpressly\n \nauthorized\n \nthe\n \ndispensing\n \nof\n \nan\n \nequivalent\n \ngeneric\n \ndrug\n \nin\n \nplace\n \nof\n \nthe\n \nprescribed\n \nbrand-name\n \ndrug,\n \nif\n \nthe\n \n",
+          "citation": "Zepto Terms of Use, Page 13.0"
+        },
+        {
+          "rank": 4,
+          "page": 12,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "and\n \nother\n \nrelated\n \ninformation\n \nbefore\n \nconsuming\n \nany\n \nPrescription\n \nDrugs\n \nor\n \nother\n \nmedications.\n \n \n \n7.7.6.\n \nDrug\n \nSubstitutions\n \n Orders\n \nfor\n \nsubstitutions\n \nof\n \nprescribed\n \nmedications\n \nwill",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 12.0"
+        },
+        {
+          "rank": 5,
+          "page": 12,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "before\n \nconsuming\n \nany\n \nPrescription\n \nDrugs\n \nor\n \nother\n \nmedications.\n \n \n \n7.7.6.\n \nDrug\n \nSubstitutions\n \n Orders\n \nfor\n \nsubstitutions\n \nof\n \nprescribed\n \nmedications\n \nwill\n \nonly\n \nbe\n \nprocessed\n \nif\n \nthe\n \n",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 12.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_medical_emergency_1",
+      "question": "What should users do in a medical emergency according to the Terms?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.7.9",
+      "gold_page": 14,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 14,
+          "clause": "7.7.9",
+          "source": "Zepto Terms of Use",
+          "preview": "You\n \ndisclaim\n \nZepto\n \nand\n \nPharmacy\n \nfrom\n \nall\n \nthe\n \nliabilities\n \narising\n \nout\n \nof\n \nsuch\n \nconsultation.\n \n7.7.9. Medical Emergencies Users experiencing medical emergencies should immediately \nseek\n \nprofessi",
+          "citation": "Zepto Terms of Use, Page 14.0, Clause 7.7.9"
+        },
+        {
+          "rank": 2,
+          "page": 13,
+          "clause": "7.7.9",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.9. Medical Emergencies Users experiencing medical emergencies should immediately \nseek\n \nprofessional\n \nmedical\n \nassistance\n \nfrom\n \ntheir\n \nnearest\n \nhealthcare\n \nprovider\n \nor\n \nemergency\n \nservice.\n \nUnder\n \nno\n ",
+          "citation": "Zepto Terms of Use, Page 13, Clause 7.7.9"
+        },
+        {
+          "rank": 3,
+          "page": 13,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "shall\n \nbe\n \nvoluntary\n \nand\n \nYou\n \ndisclaim\n \nZepto\n \nand\n \nPharmacy\n \nfrom\n \nall\n \nthe\n \nliabilities\n \narising\n \nout\n \nof\n \nsuch\n \nconsultation.\n \n7.7.9.  Medical  Emergencies   Users  experiencing  medical  emergenci",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 13.0"
+        },
+        {
+          "rank": 4,
+          "page": 13,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "seek\n \nprofessional\n \nmedical\n \nassistance\n \nfrom\n \ntheir\n \nnearest\n \nhealthcare\n \nprovider\n \nor\n \nemergency\n \nservice.\n \nUnder\n \nno\n \ncircumstances\n \nshould\n \nUsers\n \nrely\n \nsolely\n \non\n \nthe\n \nPlatform\n \nfor\n \nurgent\n ",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 13.0"
+        },
+        {
+          "rank": 5,
+          "page": 14,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "Users are encouraged to consult in-person healthcare service providers as needed to confirm \nany\n \ninformation\n \nor\n \nrecommendations\n \nreceived\n \nfrom\n \nTeleMedicine\n \nConsultants.\n \nPlease note, Zepto does not offer me",
+          "citation": "Zepto Terms of Use, Page 14.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_prescription_records_1",
+      "question": "Can Zepto and the pharmacy retain prescription and transaction records?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "7.7.10",
+      "gold_page": 15,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 1,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 15,
+          "clause": "7.7.10",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.10. Prescription and Transaction Records Zepto and Pharmacy may retain records of \nprescriptions\n \nand\n \ntransaction\n \ndetails\n \nas\n \nmandated\n \nby\n \napplicable\n \nregulations\n \nand\n \nfor\n \nlegitimate\n \noperational\n \n",
+          "citation": "Zepto Terms of Use, Page 15.0, Clause 7.7.10"
+        },
+        {
+          "rank": 2,
+          "page": 14,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "7.7.10.  Prescription  and  Transaction  Records   Zepto  and  Pharmacy  may  retain  records  of  \nprescriptions\n \nand\n \ntransaction\n \ndetails\n \nas\n \nmandated\n \nby\n \napplicable\n \nregulations\n \nand\n \nfor\n \nlegitimate\n \no",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 14.0"
+        },
+        {
+          "rank": 3,
+          "page": 14,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "7.7.10.  Prescription  and  Transaction  Records   Zepto  and  Pharmacy  may  retain  records  of  \nprescriptions\n \nand\n \ntransaction\n \ndetails\n \nas\n \nmandated\n \nby\n \napplicable\n \nregulations\n \nand\n \nfor\n \nlegitimate\n \no",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 14.0"
+        },
+        {
+          "rank": 4,
+          "page": 11,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "errors,\n \nor\n \nactions\n \nconducted\n \nby\n \nthe\n \nPharmacy\n \nwho\n \nare\n \nsolely\n \nresponsible\n \nfor\n \nthe\n \nverification\n \nand\n \ndispensing\n \nof\n \nPharmaceutical\n \nProducts.\n \nZepto\n \nassumes\n \nno\n \nliability\n \nfor\n \nthe\n ",
+          "citation": "Zepto Terms of Use, Page 11.0"
+        },
+        {
+          "rank": 5,
+          "page": 11,
+          "clause": "7.7.3",
+          "source": "Zepto Terms of Use",
+          "preview": "7.7.3 Prescription Requirements Users may purchase certain Pharmaceutical Products, \nherein\n \nreferred\n \nto\n \nas\n \n“Prescription\n \nDrugs”\n \nprovided\n \nthey\n \nsubmit\n \na\n \nprescription.\n \nThese\n \nPrescription\n \nDrugs\n \nar",
+          "citation": "Zepto Terms of Use, Page 11, Clause 7.7.3"
+        }
+      ]
+    },
+    {
+      "id": "policy_return_wrong_item_1",
+      "question": "Can I return a product if I received the wrong item?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "8.1.1.1",
+      "gold_page": 15,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 14,
+          "clause": "8.1.1",
+          "source": "Zepto Terms of Use",
+          "preview": "8.1.1 You may return the Product in an order, subject to the satisfaction of the following \nconditions:\n \n8.1.1.1. wrong item being delivered other than what You had ordered in an order, or",
+          "citation": "Zepto Terms of Use, Page 14, Clause 8.1.1"
+        },
+        {
+          "rank": 2,
+          "page": 15,
+          "clause": "8.1.3",
+          "source": "Zepto Terms of Use",
+          "preview": "the\n \neligible\n \nProducts\n \nby\n \ncontacting\n \nOur\n \ncustomer\n \nsupport\n \nteam.\n \n8.1.3. You may request exchange or return of the eligible Products, purchased from the Sellers \nprovided\n \nthat\n \nthe\n \nProducts\n \nare\n \nse",
+          "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.3"
+        },
+        {
+          "rank": 3,
+          "page": 15,
+          "clause": "8.1.2",
+          "source": "Zepto Terms of Use",
+          "preview": "Items\n \nsubstantially\n \ndamaged\n \nor\n \ndeteriorated\n \nin\n \nquality\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nagree\n \nthat\n \nYou\n \nshall\n \ngive\n \nall\n \nthe\n \nrequisite\n \nproofs\n \nincluding\n \nbut\n \nnot\n \nlimited\n \nto\n \nim",
+          "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.2"
+        },
+        {
+          "rank": 4,
+          "page": 14,
+          "clause": "8.1.3",
+          "source": "Zepto Terms of Use",
+          "preview": "8.1.3. You may request exchange or return of the eligible Products, purchased from the Sellers \nprovided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \n",
+          "citation": "Zepto Terms of Use, Page 14, Clause 8.1.3"
+        },
+        {
+          "rank": 5,
+          "page": 14,
+          "clause": "8.1.2",
+          "source": "Zepto Terms of Use",
+          "preview": "8.1.2. You shall check the Products upon delivery and initiate exchange or return with the \nrequisite\n \nproofs\n \non\n \nthe\n \nPlatform,\n \nas\n \navailable.\n \nYou\n \nmay\n \nalso\n \nexchange\n \nor\n \nreturn\n \nthe\n \neligible\n \nProdu",
+          "citation": "Zepto Terms of Use, Page 14, Clause 8.1.2"
+        }
+      ]
+    },
+    {
+      "id": "policy_return_damaged_1",
+      "question": "Can I return a product that was substantially damaged or deteriorated when delivered?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "8.1.1.2",
+      "gold_page": 15,
+      "gold_rank": 2,
+      "mrr": 0.5,
+      "recall@1": 0.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank2_3",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 15,
+          "clause": "8.1.2",
+          "source": "Zepto Terms of Use",
+          "preview": "Items\n \nsubstantially\n \ndamaged\n \nor\n \ndeteriorated\n \nin\n \nquality\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nagree\n \nthat\n \nYou\n \nshall\n \ngive\n \nall\n \nthe\n \nrequisite\n \nproofs\n \nincluding\n \nbut\n \nnot\n \nlimited\n \nto\n \nim",
+          "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.2"
+        },
+        {
+          "rank": 2,
+          "page": 14,
+          "clause": "8.1.1.2",
+          "source": "Zepto Terms of Use",
+          "preview": "8.1.1.2. \nItems\n \nsubstantially\n \ndamaged\n \nor\n \ndeteriorated\n \nin\n \nquality\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nagree\n \nthat\n \nYou\n \nshall\n \ngive\n \nall\n \nthe\n \nrequisite\n \nproofs\n \nincluding\n \nbut\n \nnot\n \nlimited",
+          "citation": "Zepto Terms of Use, Page 14, Clause 8.1.1.2"
+        },
+        {
+          "rank": 3,
+          "page": 14,
+          "clause": "8.1.2",
+          "source": "Zepto Terms of Use",
+          "preview": "8.1.2. You shall check the Products upon delivery and initiate exchange or return with the \nrequisite\n \nproofs\n \non\n \nthe\n \nPlatform,\n \nas\n \navailable.\n \nYou\n \nmay\n \nalso\n \nexchange\n \nor\n \nreturn\n \nthe\n \neligible\n \nProdu",
+          "citation": "Zepto Terms of Use, Page 14, Clause 8.1.2"
+        },
+        {
+          "rank": 4,
+          "page": 15,
+          "clause": "8.1.3",
+          "source": "Zepto Terms of Use",
+          "preview": "the\n \neligible\n \nProducts\n \nby\n \ncontacting\n \nOur\n \ncustomer\n \nsupport\n \nteam.\n \n8.1.3. You may request exchange or return of the eligible Products, purchased from the Sellers \nprovided\n \nthat\n \nthe\n \nProducts\n \nare\n \nse",
+          "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.3"
+        },
+        {
+          "rank": 5,
+          "page": 14,
+          "clause": "8.1.3",
+          "source": "Zepto Terms of Use",
+          "preview": "8.1.3. You may request exchange or return of the eligible Products, purchased from the Sellers \nprovided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \n",
+          "citation": "Zepto Terms of Use, Page 14, Clause 8.1.3"
+        }
+      ]
+    },
+    {
+      "id": "policy_return_proof_1",
+      "question": "What proof do I need to provide for a damaged or problematic product return?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "8.1.1.2",
+      "gold_page": 15,
+      "gold_rank": 2,
+      "mrr": 0.5,
+      "recall@1": 0.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank2_3",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 15,
+          "clause": "8.1.2",
+          "source": "Zepto Terms of Use",
+          "preview": "Items\n \nsubstantially\n \ndamaged\n \nor\n \ndeteriorated\n \nin\n \nquality\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nagree\n \nthat\n \nYou\n \nshall\n \ngive\n \nall\n \nthe\n \nrequisite\n \nproofs\n \nincluding\n \nbut\n \nnot\n \nlimited\n \nto\n \nim",
+          "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.2"
+        },
+        {
+          "rank": 2,
+          "page": 14,
+          "clause": "8.1.1.2",
+          "source": "Zepto Terms of Use",
+          "preview": "8.1.1.2. \nItems\n \nsubstantially\n \ndamaged\n \nor\n \ndeteriorated\n \nin\n \nquality\n \nat\n \nthe\n \ntime\n \nof\n \ndelivery.\n \nYou\n \nagree\n \nthat\n \nYou\n \nshall\n \ngive\n \nall\n \nthe\n \nrequisite\n \nproofs\n \nincluding\n \nbut\n \nnot\n \nlimited",
+          "citation": "Zepto Terms of Use, Page 14, Clause 8.1.1.2"
+        },
+        {
+          "rank": 3,
+          "page": 14,
+          "clause": "8.1.2",
+          "source": "Zepto Terms of Use",
+          "preview": "8.1.2. You shall check the Products upon delivery and initiate exchange or return with the \nrequisite\n \nproofs\n \non\n \nthe\n \nPlatform,\n \nas\n \navailable.\n \nYou\n \nmay\n \nalso\n \nexchange\n \nor\n \nreturn\n \nthe\n \neligible\n \nProdu",
+          "citation": "Zepto Terms of Use, Page 14, Clause 8.1.2"
+        },
+        {
+          "rank": 4,
+          "page": 15,
+          "clause": "8.1.3",
+          "source": "Zepto Terms of Use",
+          "preview": "the\n \neligible\n \nProducts\n \nby\n \ncontacting\n \nOur\n \ncustomer\n \nsupport\n \nteam.\n \n8.1.3. You may request exchange or return of the eligible Products, purchased from the Sellers \nprovided\n \nthat\n \nthe\n \nProducts\n \nare\n \nse",
+          "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.3"
+        },
+        {
+          "rank": 5,
+          "page": 14,
+          "clause": "8.1.3",
+          "source": "Zepto Terms of Use",
+          "preview": "8.1.3. You may request exchange or return of the eligible Products, purchased from the Sellers \nprovided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \n",
+          "citation": "Zepto Terms of Use, Page 14, Clause 8.1.3"
+        }
+      ]
+    },
+    {
+      "id": "policy_return_timing_1",
+      "question": "How soon do I need to request a return for an eligible unopened product?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "8.1.3",
+      "gold_page": 15,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 15,
+          "clause": "8.1.3",
+          "source": "Zepto Terms of Use",
+          "preview": "the\n \neligible\n \nProducts\n \nby\n \ncontacting\n \nOur\n \ncustomer\n \nsupport\n \nteam.\n \n8.1.3. You may request exchange or return of the eligible Products, purchased from the Sellers \nprovided\n \nthat\n \nthe\n \nProducts\n \nare\n \nse",
+          "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.3"
+        },
+        {
+          "rank": 2,
+          "page": 15,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "any.\n \nPlease\n \nnote,\n \nthe\n \nrequests\n \nfor\n \nexchange\n \nor\n \nreturns\n \nwill\n \nnot\n \nbe\n \naccepted\n \nfrom\n \nthe\n \nday\n \nfollowing\n \nthe\n \nday\n \nwhen\n \nProduct/s\n \nwere\n \ndelivered\n \nto\n \nYou\n \nunless\n \nthere\n \nare\n \ncer",
+          "citation": "Zepto Terms of Use, Page 15.0"
+        },
+        {
+          "rank": 3,
+          "page": 14,
+          "clause": "8.1.3",
+          "source": "Zepto Terms of Use",
+          "preview": "8.1.3. You may request exchange or return of the eligible Products, purchased from the Sellers \nprovided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \n",
+          "citation": "Zepto Terms of Use, Page 14, Clause 8.1.3"
+        },
+        {
+          "rank": 4,
+          "page": 14,
+          "clause": "8.1.2",
+          "source": "Zepto Terms of Use",
+          "preview": "8.1.2. You shall check the Products upon delivery and initiate exchange or return with the \nrequisite\n \nproofs\n \non\n \nthe\n \nPlatform,\n \nas\n \navailable.\n \nYou\n \nmay\n \nalso\n \nexchange\n \nor\n \nreturn\n \nthe\n \neligible\n \nProdu",
+          "citation": "Zepto Terms of Use, Page 14, Clause 8.1.2"
+        },
+        {
+          "rank": 5,
+          "page": 14,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "provided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \nday\n \nof\n \ndelivery/or\n \nas\n \nper\n \nthe\n \nexchange/refund\n \ntimeline\n \nsuggested\n \nby\n \nSeller/\n",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 14.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_return_seller_approval_1",
+      "question": "Does the seller have to accept a return request before it can be processed?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "8.1.3",
+      "gold_page": 15,
+      "gold_rank": 3,
+      "mrr": 0.3333333333333333,
+      "recall@1": 0.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank2_3",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 15,
+          "clause": "8.1.4",
+          "source": "Zepto Terms of Use",
+          "preview": "that\n \nYour\n \nrequest\n \nfor\n \nexchange\n \nor\n \nreturn\n \nof\n \nthe\n \nProducts\n \nshall\n \nonly\n \nbe\n \nprocessed\n \nif\n \nthe\n \nrelevant\n \nSeller\n \naccepts\n \nsuch\n \nrequest.\n \n8.1.4. For digital products, including gift cards an",
+          "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.4"
+        },
+        {
+          "rank": 2,
+          "page": 14,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "higher\n \nreturn\n \nor\n \nexchange\n \nperiod\n \nis\n \nprovided.\n \nYou\n \nare\n \nrequested\n \nto\n \ndispose\n \noff\n \nthe\n \nProducts\n \nfor\n \nwhich\n \nrefund\n \nhas\n \nbeen\n \nprocessed.\n \nIt\n \nis\n \nclarified\n \nthat\n \nYour\n \nrequest\n \nfor",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 14.0"
+        },
+        {
+          "rank": 3,
+          "page": 15,
+          "clause": "8.1.3",
+          "source": "Zepto Terms of Use",
+          "preview": "the\n \neligible\n \nProducts\n \nby\n \ncontacting\n \nOur\n \ncustomer\n \nsupport\n \nteam.\n \n8.1.3. You may request exchange or return of the eligible Products, purchased from the Sellers \nprovided\n \nthat\n \nthe\n \nProducts\n \nare\n \nse",
+          "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.3"
+        },
+        {
+          "rank": 4,
+          "page": 14,
+          "clause": "8.1.3",
+          "source": "Zepto Terms of Use",
+          "preview": "8.1.3. You may request exchange or return of the eligible Products, purchased from the Sellers \nprovided\n \nthat\n \nthe\n \nProducts\n \nare\n \nsealed/unopened/unused\n \nand\n \nin\n \noriginal\n \ncondition\n \nand\n \non\n \nthe\n \nsame\n \n",
+          "citation": "Zepto Terms of Use, Page 14, Clause 8.1.3"
+        },
+        {
+          "rank": 5,
+          "page": 15,
+          "clause": "8.3",
+          "source": "Zepto Terms of Use",
+          "preview": "8.3. Refunds: Please be informed that when You opt to return the Products, upon verification of \nthe\n \nProducts\n \nand\n \nthe\n \ndocuments\n \nrelating\n \nthereto,\n \nthe\n \nrefund\n \namount\n \nfor\n \nsuch\n \nProducts\n \nwhich\n \nare\n",
+          "citation": "Zepto Terms of Use, Page 15, Clause 8.3"
+        }
+      ]
+    },
+    {
+      "id": "policy_digital_refund_1",
+      "question": "Can I return or get a refund for a digital product such as a gift card or voucher?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "8.1.4",
+      "gold_page": 15,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 14,
+          "clause": "8.1.4",
+          "source": "Zepto Terms of Use",
+          "preview": "8.1.4. For digital products, including gift cards and vouchers, no returns or refunds are \npermitted.\n \nIf\n \nYou\n \nencounter\n \nany\n \nissues\n \nrelated\n \nto\n \nvalidity,\n \nusage\n \nrestrictions,\n \nor\n \nredemption,\n \nYou",
+          "citation": "Zepto Terms of Use, Page 14, Clause 8.1.4"
+        },
+        {
+          "rank": 2,
+          "page": 15,
+          "clause": "8.1.4",
+          "source": "Zepto Terms of Use",
+          "preview": "that\n \nYour\n \nrequest\n \nfor\n \nexchange\n \nor\n \nreturn\n \nof\n \nthe\n \nProducts\n \nshall\n \nonly\n \nbe\n \nprocessed\n \nif\n \nthe\n \nrelevant\n \nSeller\n \naccepts\n \nsuch\n \nrequest.\n \n8.1.4. For digital products, including gift cards an",
+          "citation": "Zepto Terms of Use, Page 15.0, Clause 8.1.4"
+        },
+        {
+          "rank": 3,
+          "page": 14,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "higher\n \nreturn\n \nor\n \nexchange\n \nperiod\n \nis\n \nprovided.\n \nYou\n \nare\n \nrequested\n \nto\n \ndispose\n \noff\n \nthe\n \nProducts\n \nfor\n \nwhich\n \nrefund\n \nhas\n \nbeen\n \nprocessed.\n \nIt\n \nis\n \nclarified\n \nthat\n \nYour\n \nrequest\n \nfor",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 14.0"
+        },
+        {
+          "rank": 4,
+          "page": 16,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "the\n \nrefund\n \nvalue\n \nwill\n \nbe\n \ncredited\n \nto\n \nthe\n \nUser’s\n \nZepto\n \nCash\n \naccount\n \nin\n \nthe\n \nform\n \nof\n \na\n \nZepto\n \nGift\n \nCard.\n \nThis\n \nis\n \ndue\n \nto\n \nthe\n \nabsence\n \nof\n \na\n \nsource\n \naccount\n \nfor\n \nsuch\n ",
+          "citation": "Zepto Terms of Use, Page 16.0, refund"
+        },
+        {
+          "rank": 5,
+          "page": 15,
+          "clause": "8.3",
+          "source": "Zepto Terms of Use",
+          "preview": "8.3. Refunds: Please be informed that when You opt to return the Products, upon verification of \nthe\n \nProducts\n \nand\n \nthe\n \ndocuments\n \nrelating\n \nthereto,\n \nthe\n \nrefund\n \namount\n \nfor\n \nsuch\n \nProducts\n \nwhich\n \nare\n",
+          "citation": "Zepto Terms of Use, Page 15, Clause 8.3"
+        }
+      ]
+    },
+    {
+      "id": "policy_cancel_before_acceptance_1",
+      "question": "Can I cancel my order before the seller accepts it?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "8.2",
+      "gold_page": 16,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 1,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 16,
+          "clause": "8.2",
+          "source": "Zepto Terms of Use",
+          "preview": "must contact the respective issuer. Please review the issuer or Platform’s terms and conditions \nwhich\n \napply\n \nalongside\n \nthese\n \nTerms.\n \n8.2. Cancellations: You may cancel an order without charge at any time before ",
+          "citation": "Zepto Terms of Use, Page 16.0, Clause 8.2"
+        },
+        {
+          "rank": 2,
+          "page": 15,
+          "clause": "8.2",
+          "source": "Zepto Terms of Use",
+          "preview": "8.2. Cancellations: You may cancel an order without charge at any time before the Seller \naccepts\n \nthe\n \norder.\n \nYou\n \ncannot\n \ncancel\n \nthe\n \norder\n \npost\n \nacceptance\n \nof\n \norder.\n \nYour\n \norder\n \nmay\n \nbe\n \ncancele",
+          "citation": "Zepto Terms of Use, Page 15, Clause 8.2"
+        },
+        {
+          "rank": 3,
+          "page": 16,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "or\n \nunavailability\n \nof\n \ncertain\n \nProducts\n \nor\n \nforce\n \nmajeure\n \nevents,\n \nnonavailability\n \nof\n \nservices,\n \nunforeseen\n \ncircumstances,\n \ndelivery-related\n \nissues\n \nor\n \nif\n \nthere\n \nare\n \nconcerns\n \nregarding\n ",
+          "citation": "Zepto Terms of Use, Page 16.0"
+        },
+        {
+          "rank": 4,
+          "page": 15,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "must  contact  the  respective  issuer.  Please  review  the  issuer  or  Platform’s  terms  and  conditions  \nwhich\n \napply\n \nalongside\n \nthese\n \nTerms.\n \n8.2.  Cancellations:  You  may  cancel  an  order  without  char",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+        },
+        {
+          "rank": 5,
+          "page": 15,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "must  contact  the  respective  issuer.  Please  review  the  issuer  or  Platform’s  terms  and  conditions  \nwhich\n \napply\n \nalongside\n \nthese\n \nTerms.\n \n8.2.  Cancellations:  You  may  cancel  an  order  without  char",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_cancel_unavailable_1",
+      "question": "Can Zepto cancel an order if a product is unavailable?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "8.2",
+      "gold_page": 16,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 15,
+          "clause": "8.2",
+          "source": "Zepto Terms of Use",
+          "preview": "8.2. Cancellations: You may cancel an order without charge at any time before the Seller \naccepts\n \nthe\n \norder.\n \nYou\n \ncannot\n \ncancel\n \nthe\n \norder\n \npost\n \nacceptance\n \nof\n \norder.\n \nYour\n \norder\n \nmay\n \nbe\n \ncancele",
+          "citation": "Zepto Terms of Use, Page 15, Clause 8.2"
+        },
+        {
+          "rank": 2,
+          "page": 24,
+          "clause": "12.4",
+          "source": "Zepto Terms of Use",
+          "preview": "12.4. Prices for any Product(s) displayed on the Platform may be inaccurate due to technical \nissues,\n \ntypographical\n \nerrors,\n \nor\n \nincorrect\n \ninformation\n \nprovided\n \nby\n \nthe\n \nSeller.\n \nIn\n \nsuch\n \ncases,\n \nthe\n \n",
+          "citation": "Zepto Terms of Use, Page 24.0, Clause 12.4"
+        },
+        {
+          "rank": 3,
+          "page": 4,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "not\n \nliable\n \nfor\n \nany\n \nobligations\n \nrelated\n \nto\n \nnon\n \nperformance\n \nor\n \nbreach\n \nof\n \ncontracts\n \nbetween\n \nUsers\n \nand\n \nSellers\n \nas\n \nthat\n \nis\n \na\n \nbilateral\n \narrangement\n \nbetween\n \nYou\n \nand\n \nSeller.\n \n",
+          "citation": "Zepto Terms of Use, Page 4.0"
+        },
+        {
+          "rank": 4,
+          "page": 10,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "providers\n \nshall\n \nhave\n \nthe\n \nright\n \nto\n \nrefuse\n \ndelivery\n \nof\n \nthe\n \norder\n \nto\n \nYou\n \nif\n \nYou\n \nfail\n \nto\n \nmake\n \nthe\n \ncomplete\n \npayment\n \nand\n \nZepto\n \nshall\n \ntreat\n \nsuch\n \norder\n \nas\n \ncanceled\n \norder\n",
+          "citation": "Zepto Terms of Use, Page 10.0"
+        },
+        {
+          "rank": 5,
+          "page": 18,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "Zepto\n \nmay\n \ndo\n \nsuch\n \nchecks\n \nas\n \nit\n \ndeems\n \nfit\n \nbefore\n \napproving\n \nthe\n \nUser’s\n \norder\n \nfor\n \nsecurity\n \nor\n \nother\n \nreasons\n \nat\n \nthe\n \ndiscretion\n \nof\n \nZepto.\n \nAs\n \na\n \nresult\n \nof\n \nsuch\n \nchecks,\n ",
+          "citation": "Zepto Terms of Use, Page 18.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_refund_timeline_1",
+      "question": "How long does an eligible return refund take to be processed?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "8.3",
+      "gold_page": 16,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 16,
+          "clause": "8.3",
+          "source": "Zepto Terms of Use",
+          "preview": "any\n \npayment\n \nalready\n \nmade,\n \nas\n \nearly\n \nas\n \npractically\n \npossible.\n \n8.3. Refunds: Please be informed that when You opt to return the Products, upon verification of \nthe\n \nProducts\n \nand\n \nthe\n \ndocuments\n \nrela",
+          "citation": "Zepto Terms of Use, Page 16.0, Clause 8.3"
+        },
+        {
+          "rank": 2,
+          "page": 15,
+          "clause": "8.3",
+          "source": "Zepto Terms of Use",
+          "preview": "8.3. Refunds: Please be informed that when You opt to return the Products, upon verification of \nthe\n \nProducts\n \nand\n \nthe\n \ndocuments\n \nrelating\n \nthereto,\n \nthe\n \nrefund\n \namount\n \nfor\n \nsuch\n \nProducts\n \nwhich\n \nare\n",
+          "citation": "Zepto Terms of Use, Page 15, Clause 8.3"
+        },
+        {
+          "rank": 3,
+          "page": 15,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "and\n \nthe\n \ndocuments\n \nrelating\n \nthereto,\n \nthe\n \nrefund\n \namount\n \nfor\n \nsuch\n \nProducts\n \nwhich\n \nare\n \neligible\n \nfor\n \nreturn\n \nas\n \nper\n \nthese\n \nTerms,\n \nwill\n \nbe\n \nprocessed\n \nwithin\n \na\n \nperiod\n \nof\n \nseven\n ",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+        },
+        {
+          "rank": 4,
+          "page": 15,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "the\n \nProducts\n \nand\n \nthe\n \ndocuments\n \nrelating\n \nthereto,\n \nthe\n \nrefund\n \namount\n \nfor\n \nsuch\n \nProducts\n \nwhich\n \nare\n \neligible\n \nfor\n \nreturn\n \nas\n \nper\n \nthese\n \nTerms,\n \nwill\n \nbe\n \nprocessed\n \nwithin\n \na\n \nperi",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+        },
+        {
+          "rank": 5,
+          "page": 16,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "of\n \nverifying\n \nand\n \nconfirming\n \nthe\n \nrefund\n \nrequest.\n \nThe\n \nrefund\n \namount\n \nof\n \nprepaid\n \norders\n \nwill\n \nbe\n \ncredited\n \nto\n \nthe\n \nsource\n \naccount.\n \nRefunds\n \nare\n \nsubject\n \nto\n \nprocessing\n \ntimes\n \nby\n ",
+          "citation": "Zepto Terms of Use, Page 16.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_prepaid_refund_1",
+      "question": "Where is the refund for a prepaid order credited?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "8.3",
+      "gold_page": 16,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 15,
+          "clause": "8.3",
+          "source": "Zepto Terms of Use",
+          "preview": "8.3. Refunds: Please be informed that when You opt to return the Products, upon verification of \nthe\n \nProducts\n \nand\n \nthe\n \ndocuments\n \nrelating\n \nthereto,\n \nthe\n \nrefund\n \namount\n \nfor\n \nsuch\n \nProducts\n \nwhich\n \nare\n",
+          "citation": "Zepto Terms of Use, Page 15, Clause 8.3"
+        },
+        {
+          "rank": 2,
+          "page": 16,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "of\n \nverifying\n \nand\n \nconfirming\n \nthe\n \nrefund\n \nrequest.\n \nThe\n \nrefund\n \namount\n \nof\n \nprepaid\n \norders\n \nwill\n \nbe\n \ncredited\n \nto\n \nthe\n \nsource\n \naccount.\n \nRefunds\n \nare\n \nsubject\n \nto\n \nprocessing\n \ntimes\n \nby\n ",
+          "citation": "Zepto Terms of Use, Page 16.0"
+        },
+        {
+          "rank": 3,
+          "page": 15,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "and\n \nthe\n \ndocuments\n \nrelating\n \nthereto,\n \nthe\n \nrefund\n \namount\n \nfor\n \nsuch\n \nProducts\n \nwhich\n \nare\n \neligible\n \nfor\n \nreturn\n \nas\n \nper\n \nthese\n \nTerms,\n \nwill\n \nbe\n \nprocessed\n \nwithin\n \na\n \nperiod\n \nof\n \nseven\n ",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+        },
+        {
+          "rank": 4,
+          "page": 16,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "the\n \nrefund\n \nvalue\n \nwill\n \nbe\n \ncredited\n \nto\n \nthe\n \nUser’s\n \nZepto\n \nCash\n \naccount\n \nin\n \nthe\n \nform\n \nof\n \na\n \nZepto\n \nGift\n \nCard.\n \nThis\n \nis\n \ndue\n \nto\n \nthe\n \nabsence\n \nof\n \na\n \nsource\n \naccount\n \nfor\n \nsuch\n ",
+          "citation": "Zepto Terms of Use, Page 16.0, refund"
+        },
+        {
+          "rank": 5,
+          "page": 15,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "gateway\n \nservice\n \nprovider.\n \nIt\n \nmay\n \ntake\n \nsome\n \ntime\n \nfor\n \nthe\n \nrefund\n \nto\n \nappear\n \non\n \nyour\n \naccount\n \nstatement.In\n \nthe\n \nevent\n \nof\n \na\n \nrefund\n \nfor\n \ncash-on-delivery\n \norders,\n \nthe\n \nrefund\n \nva",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_cod_refund_1",
+      "question": "How is a refund for a cash-on-delivery order credited?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "8.3",
+      "gold_page": 16,
+      "gold_rank": 5,
+      "mrr": 0.2,
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank_gt3",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 16,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "the\n \nrefund\n \nvalue\n \nwill\n \nbe\n \ncredited\n \nto\n \nthe\n \nUser’s\n \nZepto\n \nCash\n \naccount\n \nin\n \nthe\n \nform\n \nof\n \na\n \nZepto\n \nGift\n \nCard.\n \nThis\n \nis\n \ndue\n \nto\n \nthe\n \nabsence\n \nof\n \na\n \nsource\n \naccount\n \nfor\n \nsuch\n ",
+          "citation": "Zepto Terms of Use, Page 16.0, refund"
+        },
+        {
+          "rank": 2,
+          "page": 16,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "of\n \nverifying\n \nand\n \nconfirming\n \nthe\n \nrefund\n \nrequest.\n \nThe\n \nrefund\n \namount\n \nof\n \nprepaid\n \norders\n \nwill\n \nbe\n \ncredited\n \nto\n \nthe\n \nsource\n \naccount.\n \nRefunds\n \nare\n \nsubject\n \nto\n \nprocessing\n \ntimes\n \nby\n ",
+          "citation": "Zepto Terms of Use, Page 16.0"
+        },
+        {
+          "rank": 3,
+          "page": 15,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "some\n \ntime\n \nfor\n \nthe\n \nrefund\n \nto\n \nappear\n \non\n \nyour\n \naccount\n \nstatement.In\n \nthe\n \nevent\n \nof\n \na\n \nrefund\n \nfor\n \ncash-on-delivery\n \norders,\n \nthe\n \nrefund\n \nvalue\n \nwill\n \nbe\n \ncredited\n \nto\n \nthe\n \nUser’s\n \nZ",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 15.0"
+        },
+        {
+          "rank": 4,
+          "page": 15,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "gateway\n \nservice\n \nprovider.\n \nIt\n \nmay\n \ntake\n \nsome\n \ntime\n \nfor\n \nthe\n \nrefund\n \nto\n \nappear\n \non\n \nyour\n \naccount\n \nstatement.In\n \nthe\n \nevent\n \nof\n \na\n \nrefund\n \nfor\n \ncash-on-delivery\n \norders,\n \nthe\n \nrefund\n \nva",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 15.0"
+        },
+        {
+          "rank": 5,
+          "page": 15,
+          "clause": "8.3",
+          "source": "Zepto Terms of Use",
+          "preview": "8.3. Refunds: Please be informed that when You opt to return the Products, upon verification of \nthe\n \nProducts\n \nand\n \nthe\n \ndocuments\n \nrelating\n \nthereto,\n \nthe\n \nrefund\n \namount\n \nfor\n \nsuch\n \nProducts\n \nwhich\n \nare\n",
+          "citation": "Zepto Terms of Use, Page 15, Clause 8.3"
+        }
+      ]
+    },
+    {
+      "id": "policy_order_support_1",
+      "question": "Where should I go for help with a Zepto order or refund issue?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "9.8",
+      "gold_page": 19,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 19,
+          "clause": "9.8",
+          "source": "Zepto Terms of Use",
+          "preview": "9.8. For assistance on a Zepto order or refund related issues, click on the ‘Get Help’ section on \nthe\n \nApp.\n \n9.9. Please exercise caution to verify the portals/website links claiming to be Zepto or a \nlookalike\n \nor\n ",
+          "citation": "Zepto Terms of Use, Page 19.0, Clause 9.8"
+        },
+        {
+          "rank": 2,
+          "page": 26,
+          "clause": "17.1.1",
+          "source": "Zepto Terms of Use",
+          "preview": "of\n \ncourts\n \nat\n \nBengaluru,\n \nIndia.\n \n17. Grievance Redressal Mechanism \n17.1.1. For any order related issue, You may first reach out to Us via chat support on the Appfor \nreal\n \ntime\n \nbasis\n \nresolution.\n \n17.1.2.\n ",
+          "citation": "Zepto Terms of Use, Page 26.0, Clause 17.1.1"
+        },
+        {
+          "rank": 3,
+          "page": 18,
+          "clause": "9.8",
+          "source": "Zepto Terms of Use",
+          "preview": "9.8. For assistance on a Zepto order or refund related issues, click on the ‘Get Help’ section on \nthe\n \nApp.",
+          "citation": "Zepto Terms of Use, Page 18, Clause 9.8"
+        },
+        {
+          "rank": 4,
+          "page": 25,
+          "clause": "17.1.1",
+          "source": "Zepto Terms of Use",
+          "preview": "17.1.1. For any order related issue, You may first reach out to Us via chat support on the Appfor \nreal\n \ntime\n \nbasis\n \nresolution.",
+          "citation": "Zepto Terms of Use, Page 25, Clause 17.1.1"
+        },
+        {
+          "rank": 5,
+          "page": 25,
+          "clause": "17.1.2",
+          "source": "Zepto Terms of Use",
+          "preview": "17.1.2.\n \nYou\n \nmay\n \nalso\n \nwrite\n \nto\n \nUs\n \nat\n \nsupport@zepto.com\n \nand\n \nWe\n \nwill\n \nstrive\n \nto\n \nresolveYour\n \norder\n \nrelated\n \nissues\n \nwithin\n \nthe\n \ntimelines\n \nprescribed\n \nunder\n \napplicable\n \nlaws.",
+          "citation": "Zepto Terms of Use, Page 25.0, Clause 17.1.2"
+        }
+      ]
+    },
+    {
+      "id": "policy_grievance_contact_1",
+      "question": "How can I contact Zepto about an order-related issue?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "17.1.1",
+      "gold_page": 26,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 0,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 26,
+          "clause": "17.1.1",
+          "source": "Zepto Terms of Use",
+          "preview": "of\n \ncourts\n \nat\n \nBengaluru,\n \nIndia.\n \n17. Grievance Redressal Mechanism \n17.1.1. For any order related issue, You may first reach out to Us via chat support on the Appfor \nreal\n \ntime\n \nbasis\n \nresolution.\n \n17.1.2.\n ",
+          "citation": "Zepto Terms of Use, Page 26.0, Clause 17.1.1"
+        },
+        {
+          "rank": 2,
+          "page": 25,
+          "clause": "17.1.2",
+          "source": "Zepto Terms of Use",
+          "preview": "17.1.2.\n \nYou\n \nmay\n \nalso\n \nwrite\n \nto\n \nUs\n \nat\n \nsupport@zepto.com\n \nand\n \nWe\n \nwill\n \nstrive\n \nto\n \nresolveYour\n \norder\n \nrelated\n \nissues\n \nwithin\n \nthe\n \ntimelines\n \nprescribed\n \nunder\n \napplicable\n \nlaws.",
+          "citation": "Zepto Terms of Use, Page 25, Clause 17.1.2"
+        },
+        {
+          "rank": 3,
+          "page": 25,
+          "clause": "17.1.1",
+          "source": "Zepto Terms of Use",
+          "preview": "17.1.1. For any order related issue, You may first reach out to Us via chat support on the Appfor \nreal\n \ntime\n \nbasis\n \nresolution.",
+          "citation": "Zepto Terms of Use, Page 25, Clause 17.1.1"
+        },
+        {
+          "rank": 4,
+          "page": 19,
+          "clause": "9.8",
+          "source": "Zepto Terms of Use",
+          "preview": "9.8. For assistance on a Zepto order or refund related issues, click on the ‘Get Help’ section on \nthe\n \nApp.\n \n9.9. Please exercise caution to verify the portals/website links claiming to be Zepto or a \nlookalike\n \nor\n ",
+          "citation": "Zepto Terms of Use, Page 19.0, Clause 9.8"
+        },
+        {
+          "rank": 5,
+          "page": 26,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "still\n \nhave\n \nany\n \ngrievances,\n \nor\n \ncomplaints\n \nor\n \nconcerns\n \nwith\n \nrespect\n \nto\n \nthe\n \nPlatformor\n \norder\n \nor\n \nare\n \nnot\n \nsatisfied\n \nwith\n \nthe\n \nresolution,\n \nthe\n \nContent,\n \nor\n \nthe\n \nservices,\n \nYou\n \n",
+          "citation": "Zepto Terms of Use, Page 26.0"
+        }
+      ]
+    },
+    {
+      "id": "policy_grievance_timeline_1",
+      "question": "How long does Zepto have to resolve a grievance after it is submitted?",
+      "answerable": true,
+      "labeled": true,
+      "gold_clause": "17.2",
+      "gold_page": 27,
+      "gold_rank": 1,
+      "mrr": 1.0,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "bucket": "retrieved_rank1",
+      "duplicate_chunks_in_topk": 1,
+      "top_previews": [
+        {
+          "rank": 1,
+          "page": 26,
+          "clause": "17.2",
+          "source": "Zepto Terms of Use",
+          "preview": "Protection\n \n(E-Commerce)\n \nRules\n \n2020,\n \nas\n \namended\n \ntime\n \nto\n \ntime\n \n17.2. The Grievance Officer of Zepto shall endeavour to acknowledge the User grievances, or \ncomplaints\n \nor\n \nconcerns\n \nwith\n \nrespect\n \nto\n",
+          "citation": "Zepto Terms of Use, Page 26.0, Clause 17.2"
+        },
+        {
+          "rank": 2,
+          "page": 25,
+          "clause": "17.2",
+          "source": "Zepto Terms of Use",
+          "preview": "17.2. The Grievance Officer of Zepto shall endeavour to acknowledge the User grievances, or \ncomplaints\n \nor\n \nconcerns\n \nwith\n \nrespect\n \nto\n \nthe\n \nPlatform,\n \nthe\n \nContent,\n \nor\n \nthe\n \nservices,\n \nwithin\n \n48",
+          "citation": "Zepto Terms of Use, Page 25, Clause 17.2"
+        },
+        {
+          "rank": 3,
+          "page": 26,
+          "clause": null,
+          "source": "Zepto_Terms_of_Use.pdf",
+          "preview": "hours  of  receipt  of  the  same  and  shall  endeavour  to  redresses  the  same  at  the  earliest  and  in  no  \nevent\n \nlater\n \nthan\n \n30\n \n(thirty)\n \ndays\n \nof\n \nreceipt\n \nof\n \nsuch\n \nrequest.\n \nBy\n \nlodging\n \na\n \n",
+          "citation": "Zepto_Terms_of_Use.pdf, Page 26.0"
+        },
+        {
+          "rank": 4,
+          "page": 26,
+          "clause": null,
+          "source": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf",
+          "preview": "hours  of  receipt  of  the  same  and  shall  endeavour  to  redresses  the  same  at  the  earliest  and  in  no  \nevent\n \nlater\n \nthan\n \n30\n \n(thirty)\n \ndays\n \nof\n \nreceipt\n \nof\n \nsuch\n \nrequest.\n \nBy\n \nlodging\n \na\n \n",
+          "citation": "D:\\D2C\\attachments\\Zepto Terms of Use.pdf, Page 26.0"
+        },
+        {
+          "rank": 5,
+          "page": 26,
+          "clause": "",
+          "source": "Zepto Terms of Use",
+          "preview": "hours of receipt of the same and shall endeavour to redresses the same at the earliest and in no \nevent\n \nlater\n \nthan\n \n30\n \n(thirty)\n \ndays\n \nof\n \nreceipt\n \nof\n \nsuch\n \nrequest.\n \nBy\n \nlodging\n \na\n \ncomplaint\n \nor\n \ngr",
+          "citation": "Zepto Terms of Use, Page 26, preamble"
+        }
+      ]
+    }
+  ]
+}
