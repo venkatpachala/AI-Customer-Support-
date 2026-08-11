@@ -1,86 +1,100 @@
 import re
 from typing import List, Optional
 from langchain_core.documents import Document
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-def clean_text(text: str) -> str:
-    text = re.sub(r'\n{3,}', '\n\n', text)
-    text = re.sub(r'[ \t]{2,}', ' ', text)
+# Matches clause-like headings:
+# 8.2
+# 8.1.2
+# 7.7.10
+# 2.1. Products
+CLAUSE_HEADING_RE = re.compile(
+    r"(?m)(?P<clause>\d+(?:\.\d+){0,4})\.?\s+(?P<title>[A-Z][^\n]{0,120})"
+)
+
+
+def _clean_text(text: str) -> str:
+    text = text.replace("\x00", " ")
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
 
 
-def extract_clause_number(text: str) -> str:
-    """
-    Detect clause-like numbers:
-    7.7, 7.7.1, 7.7.10, 8.2.3 etc.
-    Returns empty string if not found.
-    """
-    match = re.search(r'\b(\d+\.\d+(?:\.\d+){0,2})\b', text)
-    return match.group(1) if match else ""
+def _page_number(doc: Document) -> Optional[int]:
+    md = doc.metadata or {}
+    page = md.get("page", md.get("page_number", md.get("page_num")))
+    try:
+        return int(float(page)) if page is not None else None
+    except Exception:
+        return None
 
 
-def extract_section_title(text: str) -> str:
-    """
-    Heuristic for section headings.
-    Returns empty string if not found.
-    """
-    lines = text.split("\n")
-    for line in lines[:3]:
-        line = line.strip()
-        if 5 < len(line) < 120 and (
-            line.isupper()
-            or re.match(r'^\d+(\.\d+)*\s+[A-Z]', line)
-            or "return" in line.lower()
-            or "refund" in line.lower()
-            or "cancellation" in line.lower()
-            or "delivery" in line.lower()
-        ):
-            return line
-    return ""
+def split_text_by_clauses(text: str, page: Optional[int]) -> List[Document]:
+    text = _clean_text(text)
+    if not text:
+        return []
 
+    matches = list(CLAUSE_HEADING_RE.finditer(text))
+    if not matches:
+        return [Document(
+            page_content=text,
+            metadata={"page": page if page is not None else "", "clause": "", "section": ""}
+        )]
 
-def create_policy_chunks(documents: List[Document]) -> List[Document]:
-    """
-    Structure-aware chunking for policy / legal PDFs.
-    Preserves page, section, and clause metadata.
-    Pinecone-safe: never stores None.
-    """
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=550,
-        chunk_overlap=80,
-        separators=["\n\n", "\n", ". ", "; ", ", ", " ", ""],
-        length_function=len,
-    )
+    chunks: List[Document] = []
 
-    raw_chunks = splitter.split_documents(documents)
-    final_chunks = []
+    # leading text before first clause (keep if substantial)
+    leading = text[:matches[0].start()].strip()
+    if len(leading) > 80:
+        chunks.append(Document(
+            page_content=leading,
+            metadata={"page": page if page is not None else "", "clause": "", "section": "preamble"}
+        ))
 
-    for i, chunk in enumerate(raw_chunks):
-        content = clean_text(chunk.page_content)
-        if len(content) < 60:
+    for i, m in enumerate(matches):
+        start = m.start()
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+        block = text[start:end].strip()
+        if len(block) < 20:
             continue
 
-        # PyPDFLoader page is usually 0-indexed
-        page = chunk.metadata.get("page", 0)
-        if isinstance(page, int):
-            page = page + 1
-        else:
-            page = 0
+        clause = m.group("clause").rstrip(".")
+        title = (m.group("title") or "").strip()
 
-        clause = extract_clause_number(content)
-        section = extract_section_title(content)
+        chunks.append(Document(
+            page_content=block,
+            metadata={
+                "page": page if page is not None else "",
+                "clause": clause,
+                "section": title[:120],
+            }
+        ))
 
-        chunk.page_content = content
-        chunk.metadata = {
-            "source": "Zepto Terms of Use",
-            "page": page,
-            "section": section,          # always string
-            "clause": clause,            # always string
-            "chunk_id": f"p{page}-c{clause or i}-{i}",
-            "document_type": "official_policy"
-        }
+    return chunks
 
-        final_chunks.append(chunk)
 
-    return final_chunks
+def create_policy_chunks(pages: List[Document]) -> List[Document]:
+    """
+    Production policy chunker:
+    - prefers clause-aligned segments
+    - preserves page metadata
+    - falls back to whole-page chunk if no clause headings found
+    """
+    all_chunks: List[Document] = []
+
+    for page_doc in pages:
+        page = _page_number(page_doc)
+        page_chunks = split_text_by_clauses(page_doc.page_content or "", page)
+        all_chunks.extend(page_chunks)
+
+    # final light cleanup
+    cleaned: List[Document] = []
+    for i, doc in enumerate(all_chunks):
+        content = _clean_text(doc.page_content)
+        if not content:
+            continue
+        md = dict(doc.metadata or {})
+        md["chunk_index_local"] = i
+        cleaned.append(Document(page_content=content, metadata=md))
+
+    return cleaned

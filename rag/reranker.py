@@ -1,92 +1,102 @@
-from typing import List
+import os
+import re
+import json
+from typing import List, Optional
+
 from langchain_core.documents import Document
-from langchain_ollama import ChatOllama
-from typing import List
-from langchain_core.documents import Document
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
+
+
+def _extract_json_array(text: str) -> list:
+    text = (text or "").strip()
+    try:
+        data = json.loads(text)
+        if isinstance(data, list):
+            return data
+    except Exception:
+        pass
+
+    match = re.search(r"\[[\s\S]*\]", text)
+    if not match:
+        return []
+    try:
+        data = json.loads(match.group(0))
+        return data if isinstance(data, list) else []
+    except Exception:
+        return []
+
 
 class SimpleReranker:
-    def __init__(self):
-        self.llm = ChatOllama(
-            model="qwen2.5:7b",
-            base_url="http://127.0.0.1:11434",
-            temperature=0
+    """
+    Listwise reranker: one LLM call ranks all candidates.
+    Compatible method: rerank(query, documents, top_k)
+    """
+
+    def __init__(self, model: Optional[str] = None):
+        self.model = model or os.getenv("RERANK_MODEL", os.getenv("QA_MODEL", "gpt-4o-mini"))
+        self.llm = ChatOpenAI(
+            model=self.model,
+            temperature=0,
+            api_key=os.getenv("OPENAI_API_KEY"),
         )
 
     def rerank(self, query: str, documents: List[Document], top_k: int = 4) -> List[Document]:
-        """
-        Simple relevance reranking using the LLM
-        """
         if not documents:
             return []
+        if len(documents) == 1:
+            return documents[:top_k]
 
-        scored = []
+        numbered = []
+        for i, doc in enumerate(documents):
+            md = doc.metadata or {}
+            clause = md.get("clause") or ""
+            page = md.get("page") or ""
+            preview = re.sub(r"\s+", " ", doc.page_content or "").strip()[:500]
+            numbered.append(f"[{i}] clause={clause} page={page}\n{preview}")
 
-        for doc in documents:
-            prompt = f"""Rate how relevant this document is to the user query.
-Score from 0 to 10. Only return the number.
+        prompt = f"""You are a retrieval reranker for policy documents.
+Rank candidates from most relevant to least relevant for the question.
 
-Query: {query}
+Return ONLY a JSON array of indices best-to-worst.
+Example: [2, 0, 4, 1, 3]
 
-Document:
-{doc.page_content[:600]}
+Question:
+{query}
 
-Relevance score:"""
+Candidates:
+{chr(10).join(numbered)}
+"""
 
+        try:
+            raw = self.llm.invoke(prompt)
+            content = raw.content if hasattr(raw, "content") else str(raw)
+            order = _extract_json_array(content)
+        except Exception:
+            order = []
+
+        used = set()
+        ranked: List[Document] = []
+
+        for idx in order:
             try:
-                response = self.llm.invoke(prompt)
-                score_text = response.content.strip()
-                score = float(score_text) if score_text.replace(".", "").isdigit() else 5.0
+                i = int(idx)
             except Exception:
-                score = 5.0
+                continue
+            if 0 <= i < len(documents) and i not in used:
+                documents[i].metadata["rerank_rank"] = len(ranked) + 1
+                ranked.append(documents[i])
+                used.add(i)
 
-            doc.metadata["rerank_score"] = score
-            scored.append(doc)
+        # keep any missing docs in original order
+        for i, doc in enumerate(documents):
+            if i not in used:
+                doc.metadata["rerank_rank"] = len(ranked) + 1
+                ranked.append(doc)
 
-        # Sort by rerank score
-        scored = sorted(scored, key=lambda x: x.metadata.get("rerank_score", 0), reverse=True)
+        return ranked[:top_k]
 
-        return scored[:top_k]
 
-class SimpleReranker:
-    def __init__(self):
-        self.llm = ChatOllama(
-            model="qwen2.5:7b",
-            base_url="http://127.0.0.1:11434",
-            temperature=0
-        )
-
-    def rerank(self, query: str, documents: List[Document], top_k: int = 4) -> List[Document]:
-        """
-        Simple relevance reranking using the LLM
-        """
-        if not documents:
-            return []
-
-        scored = []
-
-        for doc in documents:
-            prompt = f"""Rate how relevant this document is to the user query.
-Score from 0 to 10. Only return the number.
-
-Query: {query}
-
-Document:
-{doc.page_content[:600]}
-
-Relevance score:"""
-
-            try:
-                response = self.llm.invoke(prompt)
-                score_text = response.content.strip()
-                score = float(score_text) if score_text.replace(".", "").isdigit() else 5.0
-            except Exception:
-                score = 5.0
-
-            doc.metadata["rerank_score"] = score
-            scored.append(doc)
-
-        # Sort by rerank score
-        scored = sorted(scored, key=lambda x: x.metadata.get("rerank_score", 0), reverse=True)
-
-        return scored[:top_k]
+def rerank_documents(query: str, docs: List[Document], top_n: Optional[int] = None) -> List[Document]:
+    """Functional helper used by retrieval.py"""
+    top_n = top_n or len(docs)
+    return SimpleReranker().rerank(query, docs, top_k=top_n)

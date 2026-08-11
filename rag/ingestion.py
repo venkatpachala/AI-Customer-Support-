@@ -1,17 +1,23 @@
 import os
 import pickle
 from pathlib import Path
+from typing import List
 
+from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
+from langchain_core.documents import Document
+
 from rag.chunking import create_policy_chunks
 from rag.retrieval import AdvancedRAGRetriever
-from dotenv import load_dotenv
 
 load_dotenv()
 
-# Update this path if needed
-PDF_PATH = r"D:\D2C\attachments\Zepto Terms of Use.pdf"
+# Canonical single source
+PDF_PATH = Path("attachments/Zepto Terms of Use.pdf")
 BM25_CORPUS_PATH = Path("rag/bm25_corpus.pkl")
+
+SOURCE_ID = "zepto_terms_v1"
+SOURCE_NAME = "Zepto Terms of Use"
 
 
 def sanitize_metadata(metadata: dict) -> dict:
@@ -27,42 +33,99 @@ def sanitize_metadata(metadata: dict) -> dict:
         elif isinstance(value, (str, int, float, bool)):
             clean[key] = value
         elif isinstance(value, list):
-            clean[key] = [str(v) for v in value]
+            clean[key] = [str(v) for v in value if v is not None]
         else:
             clean[key] = str(value)
     return clean
 
 
-def ingest_zepto_policy():
-    if not os.path.exists(PDF_PATH):
-        print(f"PDF not found at: {PDF_PATH}")
-        return
+def normalize_chunks(chunks: List[Document]) -> List[Document]:
+    """
+    Enforce canonical source identity + stable chunk_id + Pinecone-safe metadata.
+    """
+    normalized: List[Document] = []
 
-    print("Loading Zepto Terms of Use...")
-    loader = PyPDFLoader(PDF_PATH)
-    pages = loader.load()
-    print(f"Loaded {len(pages)} pages")
+    for i, doc in enumerate(chunks):
+        md = dict(doc.metadata or {})
 
-    # Structure-aware chunking
-    chunks = create_policy_chunks(pages)
-    print(f"Created {len(chunks)} optimized chunks")
+        page = md.get("page", md.get("page_number", ""))
+        clause = md.get("clause", "") or ""
+        section = md.get("section", "") or ""
 
-    # Final safety sanitize for Pinecone
-    for chunk in chunks:
-        chunk.metadata = sanitize_metadata(chunk.metadata)
+        # Prefer existing clause-aware id if present; otherwise build stable id
+        chunk_id = md.get("chunk_id") or f"{SOURCE_ID}:p{page}:{clause or 'noclause'}:c{i}"
 
-    # 1. Ingest into Pinecone
-    retriever = AdvancedRAGRetriever()
-    retriever.vectorstore.add_documents(chunks)
-    print(f"Successfully ingested {len(chunks)} chunks into Pinecone")
+        new_md = {
+            "source_id": SOURCE_ID,
+            "source": SOURCE_NAME,
+            "page": page if page is not None else "",
+            "clause": clause,
+            "section": section,
+            "chunk_id": chunk_id,
+            "chunk_index": i,
+        }
 
-    # 2. Save local corpus for BM25 / hybrid search
+        # keep any extra useful metadata, but overwrite identity fields
+        for k, v in md.items():
+            if k not in new_md:
+                new_md[k] = v
+
+        normalized.append(
+            Document(
+                page_content=(doc.page_content or "").strip(),
+                metadata=sanitize_metadata(new_md),
+            )
+        )
+
+    # drop empty chunks
+    normalized = [d for d in normalized if d.page_content]
+    return normalized
+
+
+def save_bm25_corpus(chunks: List[Document]) -> None:
     BM25_CORPUS_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(BM25_CORPUS_PATH, "wb") as f:
         pickle.dump(chunks, f)
+    print(f"Saved BM25 corpus: {BM25_CORPUS_PATH} ({len(chunks)} chunks)")
 
-    print(f"Saved BM25 corpus to {BM25_CORPUS_PATH}")
-    print("Ingestion complete.")
+
+def ingest_zepto_policy() -> None:
+    if not PDF_PATH.exists():
+        raise FileNotFoundError(f"Policy PDF not found: {PDF_PATH.resolve()}")
+
+    print(f"Loading single canonical PDF: {PDF_PATH}")
+    loader = PyPDFLoader(str(PDF_PATH))
+    pages = loader.load()
+    print(f"Loaded {len(pages)} pages")
+
+    # Production chunker (clause/section aware)
+    raw_chunks = create_policy_chunks(pages)
+    print(f"Created {len(raw_chunks)} policy chunks")
+
+    chunks = normalize_chunks(raw_chunks)
+    print(f"Normalized {len(chunks)} chunks with canonical metadata")
+
+    # Diagnostics
+    with_clause = sum(1 for c in chunks if c.metadata.get("clause"))
+    print(f"Chunks with clause metadata: {with_clause}/{len(chunks)}")
+    for c in chunks[:5]:
+        preview = c.page_content[:90].replace("\n", " ")
+        print(f"  - {c.metadata.get('chunk_id')} | {preview}")
+
+    # Upsert to vector DB
+    print("Upserting chunks to Pinecone...")
+    retriever = AdvancedRAGRetriever()
+    retriever.add_documents(chunks)
+    print(f"Pinecone upsert complete: {len(chunks)} chunks")
+
+    # Save exact same chunks for BM25/hybrid
+    save_bm25_corpus(chunks)
+
+    print("Ingestion complete")
+    print(f"  source_id = {SOURCE_ID}")
+    print(f"  source    = {SOURCE_NAME}")
+    print(f"  chunks    = {len(chunks)}")
+    print(f"  bm25      = {BM25_CORPUS_PATH}")
 
 
 if __name__ == "__main__":
