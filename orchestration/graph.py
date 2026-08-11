@@ -11,15 +11,18 @@ from identity.gate import identity_gate_node
 from agents.qa import qa_node
 
 
-def after_identity_route(state: AgentState) -> str:
-    """
-    If identity is required and not satisfied, go straight to QA
-    to ask for order_id/contact or report mismatch.
-    Otherwise continue normal planner/HITL routing.
-    """
-    if state.get("needs_identity"):
+def after_identity_route(state):
+    if state.get("identity_blocked") and state.get("needs_escalation"):
+        return "end"          # or hitl/end escalated
+    if state.get("identity_blocked"):
+        return "qa"           # challenge message via QA/short-circuit
+    if state.get("needs_identity") and state.get("identity_challenge"):
         return "qa"
-    return after_supervisor_route(state)
+    # else normal
+    intent = (state.get("intent") or "").lower()
+    if any(x in intent for x in ["return", "refund", "cancel", "replace"]):
+        return "planner"
+    return "hitl_check"  # or policy path you already use
 
 
 def build_graph():

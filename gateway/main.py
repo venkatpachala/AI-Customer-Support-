@@ -3,6 +3,7 @@ import re
 import time
 import json
 from typing import Optional, List
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -21,7 +22,7 @@ from fastapi.responses import StreamingResponse
 from tools.bootstrap import register_default_tools
 register_default_tools()
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from orchestration.graph import compiled_graph
 from langchain_core.messages import HumanMessage
 from common.messages import get_message_content
@@ -39,11 +40,19 @@ from memory.service import MemoryService
 from interactions.service import InteractionService
 from security.output_guard import apply_output_guard
 from rag.policy_cache import policy_cache
+from db.session import init_db
 
 from langsmith import traceable
 from langsmith.run_helpers import get_current_run_tree
 
-app = FastAPI(title="D2C AI Support Agent")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(title="D2C AI Support Agent", lifespan=lifespan)
 memory_service = MemoryService()
 interaction_service = InteractionService()
 
@@ -53,8 +62,24 @@ class ChatRequest(BaseModel):
     customer_id: str = "default"
     tenant_id: str = "zepto"
     session_id: Optional[str] = None
+
+    # Trusted identity context from backend/app (preferred)
+    auth_level: str = "anonymous"  # anonymous | identified | verified
+    verified: bool = False
+    verified_order_ids: List[str] = Field(default_factory=list)
+
+    # Backward-compatible aliases
     verified_customer: bool = False
-    contact: Optional[str] = None
+    contact: Optional[str] = None  # ignored for identity; kept for compatibility
+
+
+def normalize_auth_level(auth_level: str, verified: bool = False, verified_customer: bool = False) -> str:
+    level = (auth_level or "anonymous").lower().strip()
+    if verified or verified_customer or level == "verified":
+        return "verified"
+    if level in {"anonymous", "identified", "verified"}:
+        return level
+    return "anonymous"
 
 
 def extract_order_id(text: str) -> Optional[str]:
@@ -143,11 +168,14 @@ def run_graph(inputs: dict, tenant_id: str, customer_id: str):
             "customer_id": customer_id,
             "request_id": inputs.get("request_id"),
             "session_id": inputs.get("session_id"),
-            "case_id": inputs.get("case_id")
+            "case_id": inputs.get("case_id"),
+            "auth_level": inputs.get("auth_level"),
+            "verified": inputs.get("verified"),
         })
         run.add_tags([
             f"tenant:{tenant_id}",
-            f"customer:{customer_id}"
+            f"customer:{customer_id}",
+            f"auth:{inputs.get('auth_level', 'anonymous')}",
         ])
     return compiled_graph.invoke(inputs)
 
@@ -192,12 +220,22 @@ async def chat(request: ChatRequest):
     ACTIVE_REQUESTS.inc()
     start_time = time.time()
 
+    auth_level = normalize_auth_level(
+        request.auth_level,
+        verified=request.verified,
+        verified_customer=request.verified_customer,
+    )
+    is_verified = auth_level == "verified"
+    verified_order_ids = list(request.verified_order_ids or [])
+
     log_event("request_received", request_id, data={
         "tenant_id": request.tenant_id,
         "customer_id": request.customer_id,
         "session_id": request.session_id,
         "message": request.message,
-        "verified_customer": request.verified_customer,
+        "auth_level": auth_level,
+        "verified": is_verified,
+        "verified_order_ids": verified_order_ids,
     })
 
     # -------- Load tenant config --------
@@ -222,6 +260,7 @@ async def chat(request: ChatRequest):
             cached = dict(cached)
             cached["request_id"] = request_id
             cached["cached"] = True
+            cached["auth_level"] = auth_level
             return cached
 
     # -------- Load / create memory --------
@@ -277,7 +316,10 @@ async def chat(request: ChatRequest):
                 latency_ms=round(latency * 1000.0, 2),
                 status="escalated",
                 request_id=request_id,
-                metadata={"short_circuit": "already_escalated"},
+                metadata={
+                    "short_circuit": "already_escalated",
+                    "auth_level": auth_level,
+                },
             )
         except Exception as e:
             log_event("interaction_log_failed", request_id, data={"error": str(e)}, level="warning")
@@ -295,13 +337,15 @@ async def chat(request: ChatRequest):
             "session_id": session.session_id,
             "case_id": case.case_id,
             "missing_inputs": case.missing_inputs or [],
+            "auth_level": auth_level,
+            "identity_blocked": False,
         }
 
-    # -------- Sensitive action verification --------
-    if requires_verified_customer(request.message, tenant_config_dict) and not request.verified_customer:
+    # -------- Gateway high-value short-circuit if not verified --------
+    if requires_verified_customer(request.message, tenant_config_dict) and not is_verified:
         response_text = (
-            "For security, high-value refund or account-sensitive requests require customer verification. "
-            "Please verify your account or contact support so an agent can assist securely."
+            "For security, high-value refund or account-sensitive requests require account verification. "
+            "Please continue from your logged-in/verified account or contact support."
         )
 
         memory_service.append_message(session, role="user", content=request.message)
@@ -356,7 +400,10 @@ async def chat(request: ChatRequest):
                 latency_ms=round(latency * 1000.0, 2),
                 status="escalated",
                 request_id=request_id,
-                metadata={"reason": "unverified_sensitive_action"},
+                metadata={
+                    "reason": "unverified_sensitive_action",
+                    "auth_level": auth_level,
+                },
             )
         except Exception as e:
             log_event("interaction_log_failed", request_id, data={"error": str(e)}, level="warning")
@@ -374,6 +421,8 @@ async def chat(request: ChatRequest):
             "session_id": session.session_id,
             "case_id": case.case_id,
             "missing_inputs": case.missing_inputs or [],
+            "auth_level": auth_level,
+            "identity_blocked": True,
         }
 
     # Append user message
@@ -392,7 +441,9 @@ async def chat(request: ChatRequest):
             status="open" if case.status == "waiting_customer" else case.status,
         )
 
-    memory_context = memory_service.to_state_context(session, case)
+    memory_context = memory_service.to_state_context(session, case) or {}
+    memory_context["auth_level"] = auth_level
+    memory_context["verified_order_ids"] = verified_order_ids
 
     inputs = {
         "messages": [HumanMessage(content=request.message)],
@@ -402,9 +453,17 @@ async def chat(request: ChatRequest):
         "request_id": request_id,
         "session_id": session.session_id,
         "case_id": case.case_id,
+
+        # Trusted identity context for identity_gate_node
+        "auth_level": auth_level,
+        "verified": is_verified,
+        "verified_order_ids": verified_order_ids,
         "customer_context": {
-            "verified_customer": request.verified_customer,
+            "verified_customer": is_verified,
+            "auth_level": auth_level,
+            "verified_order_ids": verified_order_ids,
         },
+
         "memory_context": memory_context,
         "current_plan": None,
         "workflow_steps": [],
@@ -435,6 +494,100 @@ async def chat(request: ChatRequest):
 
         blocked = bool(result.get("blocked", False))
         escalated = bool(result.get("needs_escalation", False))
+        identity_blocked = bool(result.get("identity_blocked", False))
+        identity_challenge = result.get("identity_challenge") or {}
+        result_auth_level = result.get("auth_level") or auth_level
+
+        # -------- Identity challenge short-circuit --------
+        if identity_blocked and identity_challenge.get("message"):
+            response_text = identity_challenge["message"]
+            escalated = escalated or bool(result.get("needs_escalation", False))
+
+            try:
+                if escalated:
+                    ESCALATION_COUNT.labels(
+                        tenant_id=request.tenant_id,
+                        reason=(result.get("escalation_reason") or "identity_blocked")[:50]
+                    ).inc()
+                    REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
+                else:
+                    REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="success").inc()
+                REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(latency)
+            except Exception:
+                pass
+
+            memory_service.append_message(session, role="assistant", content=response_text)
+
+            order_id = (
+                result.get("resolved_order_id")
+                or case.order_id
+                or extract_order_id(request.message)
+            )
+
+            status = "escalated" if escalated else "waiting_customer"
+            try:
+                memory_service.update_case_from_result(
+                    case,
+                    order_id=order_id,
+                    issue_type=result.get("intent") or case.issue_type,
+                    missing_inputs=result.get("missing_inputs") or case.missing_inputs or [],
+                    escalated=escalated,
+                    escalation_reason=result.get("escalation_reason") if escalated else case.escalation_reason,
+                    last_agent_action="identity_challenge",
+                    status=status,
+                )
+            except Exception:
+                pass
+
+            payload = {
+                "response": response_text,
+                "confidence": 1.0,
+                "citations": [],
+                "escalated": escalated,
+                "blocked": False,
+                "reason": result.get("escalation_reason") if escalated else identity_challenge.get("type"),
+                "tool_results": result.get("tool_results") or {},
+                "request_id": request_id,
+                "session_id": session.session_id,
+                "case_id": case.case_id,
+                "missing_inputs": result.get("missing_inputs") or [],
+                "auth_level": result_auth_level,
+                "identity_blocked": True,
+            }
+
+            try:
+                interaction_service.log_chat_turn(
+                    conversation_id=session.session_id,
+                    case_id=case.case_id,
+                    tenant_id=request.tenant_id,
+                    customer_id=request.customer_id,
+                    message=request.message,
+                    response=response_text,
+                    intent=result.get("intent") or case.issue_type,
+                    risk_level=result.get("risk_level") or "low",
+                    order_id=order_id,
+                    missing_inputs=result.get("missing_inputs") or [],
+                    photos_requested=bool(getattr(case, "photos_requested", False)),
+                    photos_received=bool(getattr(case, "photos_received", False)),
+                    tool_results=result.get("tool_results") or {},
+                    escalated=escalated,
+                    blocked=False,
+                    escalation_reason=result.get("escalation_reason") if escalated else None,
+                    citations=[],
+                    confidence=1.0,
+                    latency_ms=round(latency * 1000.0, 2),
+                    status=status,
+                    request_id=request_id,
+                    metadata={
+                        "identity_blocked": True,
+                        "identity_challenge": identity_challenge,
+                        "auth_level": result_auth_level,
+                    },
+                )
+            except Exception as e:
+                log_event("interaction_log_failed", request_id, data={"error": str(e)}, level="warning")
+
+            return payload
 
         try:
             if blocked:
@@ -565,6 +718,8 @@ async def chat(request: ChatRequest):
             "session_id": session.session_id,
             "case_id": case.case_id,
             "missing_inputs": missing_inputs,
+            "auth_level": result_auth_level,
+            "identity_blocked": identity_blocked,
         }
 
         # -------- Cache policy answers --------
@@ -602,7 +757,9 @@ async def chat(request: ChatRequest):
                 metadata={
                     "tools_mode": os.getenv("TOOLS_MODE", "mock"),
                     "verification_passed": result.get("verification_passed", True),
-                    "verified_customer": request.verified_customer,
+                    "auth_level": result_auth_level,
+                    "verified": is_verified,
+                    "identity_blocked": identity_blocked,
                 },
             )
         except Exception as e:
@@ -619,6 +776,8 @@ async def chat(request: ChatRequest):
             "missing_inputs": missing_inputs,
             "status": status,
             "order_id": order_id,
+            "auth_level": result_auth_level,
+            "identity_blocked": identity_blocked,
         })
 
         return response_payload
@@ -645,7 +804,6 @@ async def chat_stream(request: ChatRequest):
     Streams final response text.
     Uses cache when available; otherwise runs full /chat then streams the result.
     """
-    # Cache-first streaming for policy FAQs
     if looks_like_policy_query(request.message):
         cached = policy_cache.get(request.tenant_id, request.message)
         if cached and cached.get("response"):
@@ -658,7 +816,6 @@ async def chat_stream(request: ChatRequest):
 
             return StreamingResponse(cached_gen(), media_type="text/plain")
 
-    # Fallback: full chat then stream final text
     result = await chat(request)
     if isinstance(result, dict) and result.get("response"):
         text = result["response"]

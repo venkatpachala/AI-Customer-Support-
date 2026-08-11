@@ -3503,5 +3503,105 @@
     "active_case_id": "ede1e602-76a4-42c4-aa67-7446d2c7094f",
     "created_at": "2026-08-11 14:03:16.693323",
     "updated_at": "2026-08-11 14:03:31.581640"
+  },
+  "df178bed-d3dd-469c-ae0f-a155f47176ba": {
+    "session_id": "df178bed-d3dd-469c-ae0f-a155f47176ba",
+    "customer_id": "c1",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the return policy?",
+        "timestamp": "2026-08-11T14:59:23.421232"
+      },
+      {
+        "role": "assistant",
+        "content": "Our return policy allows you to request an exchange or return of eligible products purchased from our sellers, provided that the products are sealed, unopened, unused, and in their original condition. You must initiate the return on the same day of delivery or within the timeline suggested by the seller.\n\nPlease note that requests for exchange or return will not be accepted after the day following delivery, unless specified otherwise for certain product categories. Additionally, if a refund has been processed, you are required to dispose of the returned products.\n\nIf you have any specific items in mind, please let me know, and I can assist you further!",
+        "timestamp": "2026-08-11T14:59:39.354030"
+      }
+    ],
+    "active_case_id": "369cb8f2-c1a5-4ebb-aced-f55f19120a3f",
+    "created_at": "2026-08-11 14:59:23.336520",
+    "updated_at": "2026-08-11 14:59:39.354030"
+  },
+  "6d989c32-41dd-418c-b2a8-0f15d9a17a77": {
+    "session_id": "6d989c32-41dd-418c-b2a8-0f15d9a17a77",
+    "customer_id": "c2",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want to return my damaged order #12345",
+        "timestamp": "2026-08-11T14:59:55.061666"
+      },
+      {
+        "role": "assistant",
+        "content": "To proceed with your return request for the damaged order, I need to verify your ownership of the order. Please provide the Order ID and the phone number or email address used for the order. Once I have this information, I can assist you further. Thank you for your understanding.",
+        "timestamp": "2026-08-11T14:59:59.582135"
+      }
+    ],
+    "active_case_id": "b25ac2b0-b12e-4f96-9d5c-36f2992444da",
+    "created_at": "2026-08-11 14:59:54.972947",
+    "updated_at": "2026-08-11 14:59:59.582135"
+  },
+  "2b4ff14c-5f9c-42fc-98e7-29855248bd28": {
+    "session_id": "2b4ff14c-5f9c-42fc-98e7-29855248bd28",
+    "customer_id": "c3",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "My order #12345 is damaged. I want to return it.",
+        "timestamp": "2026-08-11T15:00:23.015260"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for reaching out regarding your order #12345. To proceed with the return of the damaged item, please provide clear photos of the damage. This will help us process your request efficiently. Once we receive the photos, we can assist you further.",
+        "timestamp": "2026-08-11T15:00:26.883730"
+      }
+    ],
+    "active_case_id": "5aa2bf60-322f-4cd9-b78c-a9393d257e76",
+    "created_at": "2026-08-11 15:00:22.945906",
+    "updated_at": "2026-08-11 15:00:26.883730"
+  },
+  "67e5b604-3c11-4e03-82a1-24e54bf37aa0": {
+    "session_id": "67e5b604-3c11-4e03-82a1-24e54bf37aa0",
+    "customer_id": "c4",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a refund of 2500 for damaged order #12345",
+        "timestamp": "2026-08-11T15:01:20.785454"
+      },
+      {
+        "role": "assistant",
+        "content": "For security, high-value refund or account-sensitive requests require account verification. Please continue from your logged-in/verified account or contact support.",
+        "timestamp": "2026-08-11T15:01:20.819669"
+      }
+    ],
+    "active_case_id": "93acd22a-686a-4eb0-9ac5-2dcf524c19bd",
+    "created_at": "2026-08-11 15:01:20.695137",
+    "updated_at": "2026-08-11 15:01:20.819669"
+  },
+  "0cf20745-3254-431c-b6ae-3b016a00db49": {
+    "session_id": "0cf20745-3254-431c-b6ae-3b016a00db49",
+    "customer_id": "c5",
+    "tenant_id": "zepto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Refund order #99999 please",
+        "timestamp": "2026-08-11T15:01:59.627087"
+      },
+      {
+        "role": "assistant",
+        "content": "To assist you with the refund for order #99999, I will need to verify your ownership of the order. Please provide the phone number or email address used for this order. Once verified, I can guide you through the next steps. Thank you for your understanding.",
+        "timestamp": "2026-08-11T15:02:04.896738"
+      }
+    ],
+    "active_case_id": "537356e8-267b-454d-8d75-6ac74f82266b",
+    "created_at": "2026-08-11 15:01:59.543649",
+    "updated_at": "2026-08-11 15:02:04.896738"
   }
 }
