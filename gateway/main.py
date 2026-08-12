@@ -184,6 +184,14 @@ def run_graph(inputs: dict, tenant_id: str, customer_id: str):
 def metrics():
     return metrics_endpoint()
 
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "service": "d2c-support-agent",
+        "tools_mode": os.getenv("TOOLS_MODE", "mock"),
+    }
+
 
 @app.get("/interactions/recent")
 def get_recent_interactions(

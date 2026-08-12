@@ -1,0 +1,11 @@
+.venv
+__pycache__
+*.pyc
+.git
+.gitignore
+memory/data
+interactions/data
+evaluation/reports
+*.md
+.pytest_cache
+data/*.db

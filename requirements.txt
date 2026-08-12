@@ -7,10 +7,16 @@ langchain-community
 pinecone-client
 psycopg2-binary
 redis
-shopify
+ShopifyAPI
 stripe
 python-dotenv
 pydantic-settings
 langsmith
 ollama  # for Qwen fallback
 presidio-analyzer  # PII (optional)
+httpx
+langchain-ollama
+langchain-pinecone
+rank_bm25
+prometheus-client
+langsmith
