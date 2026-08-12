@@ -121,3 +121,34 @@ class InteractionRow(Base):
 
     metadata_json: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
+
+class ToolCallRow(Base):
+    __tablename__ = "tool_calls"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    tool_call_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    idempotency_key: Mapped[Optional[str]] = mapped_column(String(128), nullable=True, index=True)
+
+    request_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
+    session_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
+    case_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
+    tenant_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
+    customer_id: Mapped[Optional[str]] = mapped_column(String(128), nullable=True, index=True)
+
+    tool_name: Mapped[str] = mapped_column(String(128), index=True)
+    provider: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    operation: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+
+    params_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    status: Mapped[str] = mapped_column(String(32), default="started", index=True)  # started|success|error|skipped
+    result_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_code: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+
+    attempts: Mapped[int] = mapped_column(Integer, default=1)
+    latency_ms: Mapped[float] = mapped_column(Float, default=0.0)
+    side_effecting: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)

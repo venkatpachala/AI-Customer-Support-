@@ -7,8 +7,15 @@ from orchestration.state import AgentState
 from tools.registry import TOOL_REGISTRY
 from tools.base.context import ToolContext
 from tools.base.response import ToolResponse
+from tools.audit import (
+    ToolAuditService,
+    is_side_effecting,
+    build_idempotency_key,
+)
 from observability.logging import log_event
 from observability.metrics import TOOL_COUNT, NODE_LATENCY
+
+audit_service = ToolAuditService()
 
 
 def extract_order_id(text: str) -> Optional[str]:
@@ -89,7 +96,6 @@ def normalize_tool_result(result: Any) -> Dict[str, Any]:
         }
 
     if isinstance(result, dict):
-        # already normalized
         if "status" in result:
             return result
         return {
@@ -123,20 +129,17 @@ def build_tool_params(
         params["reason"] = "damaged"
 
     if tool_name == "stripe_refund":
-        # Stripe expects minor units
         amount_major_safe = amount_major if amount_major > 0 else 0
         params["amount"] = to_minor_units(amount_major_safe, "inr") if amount_major_safe > 0 else 0
         params["currency"] = "inr"
         params["reason"] = "requested_by_customer"
 
-        # Optional high-value gate inside tool
         tenant_config = state.get("tenant_config") or {}
         approval = tenant_config.get("approval", {})
         high_value_limit_major = int(approval.get("high_value_refund_limit", 2000))
         params["high_value_limit"] = to_minor_units(high_value_limit_major, "inr")
         params["require_approval_above_limit"] = True
 
-        # If you later store mapping in memory/state, pass it here
         memory_context = state.get("memory_context") or {}
         payment_intent_id = memory_context.get("payment_intent_id")
         charge_id = memory_context.get("charge_id")
@@ -145,17 +148,19 @@ def build_tool_params(
         if charge_id:
             params["charge_id"] = charge_id
 
-    if tool_name in ["gmail_send_email", "gmail_send_escalation"]:
-        # usually not planned directly by default; support if present
-        params = params
-
     return params
 
 
-def invoke_registry_tool(tool_name: str, params: Dict[str, Any], context: ToolContext) -> Dict[str, Any]:
+def invoke_registry_tool(
+    tool_name: str,
+    params: Dict[str, Any],
+    context: ToolContext,
+) -> Dict[str, Any]:
     """
-    Invoke enterprise BaseTool from registry.
-    Retries/timeouts/auth are handled inside BaseTool.
+    Invoke enterprise BaseTool from registry with:
+    - audit logging
+    - idempotent replay for side-effecting tools (refunds etc.)
+    Retries/timeouts/auth remain inside BaseTool.
     """
     tool = TOOL_REGISTRY.get(tool_name)
     if tool is None:
@@ -165,32 +170,109 @@ def invoke_registry_tool(tool_name: str, params: Dict[str, Any], context: ToolCo
             "error_code": "tool_not_registered",
         }
 
-    # New SDK style
-    if hasattr(tool, "execute"):
-        result = tool.execute(params, context)
-        return normalize_tool_result(result)
+    provider = getattr(tool, "provider", None) or tool_name.split("_")[0]
+    idem_key = None
 
-    # Backward compatibility for old-style specs, if any remain
-    if hasattr(tool, "function"):
-        try:
-            data = tool.function(**params)
-            return {
-                "status": "success",
-                "data": data,
-                "attempts": 1,
-            }
-        except Exception as e:
-            return {
+    # Idempotency for side-effecting tools
+    if is_side_effecting(tool_name):
+        idem_key = build_idempotency_key(
+            tool_name=tool_name,
+            params=params,
+            tenant_id=context.tenant_id or "",
+            customer_id=context.customer_id or "",
+            case_id=context.case_id or "",
+        )
+        prior = audit_service.get_by_idempotency_key(idem_key)
+        if prior is not None and prior.result_json:
+            cached = dict(prior.result_json)
+            cached["idempotent_replay"] = True
+            cached["tool_call_id"] = prior.tool_call_id
+            cached["idempotency_key"] = idem_key
+            print(f" ide mpotent replay for {tool_name} key={idem_key[:12]}...")
+            return cached
+
+    tool_call_id = audit_service.start(
+        tool_name=tool_name,
+        params=params,
+        request_id=context.request_id,
+        session_id=context.session_id,
+        case_id=context.case_id,
+        tenant_id=context.tenant_id,
+        customer_id=context.customer_id,
+        provider=provider,
+        operation=tool_name,
+        idempotency_key=idem_key,
+    )
+
+    t0 = time.time()
+    try:
+        # New SDK style
+        if hasattr(tool, "execute"):
+            raw = tool.execute(params, context)
+            result = normalize_tool_result(raw)
+        # Backward compatibility for old-style specs
+        elif hasattr(tool, "function"):
+            try:
+                data = tool.function(**params)
+                result = {
+                    "status": "success",
+                    "data": data,
+                    "attempts": 1,
+                }
+            except Exception as e:
+                result = {
+                    "status": "error",
+                    "error": str(e),
+                    "error_code": "legacy_tool_error",
+                }
+        else:
+            result = {
                 "status": "error",
-                "error": str(e),
-                "error_code": "legacy_tool_error",
+                "error": f"Unsupported tool object for '{tool_name}'",
+                "error_code": "unsupported_tool",
             }
 
-    return {
-        "status": "error",
-        "error": f"Unsupported tool object for '{tool_name}'",
-        "error_code": "unsupported_tool",
-    }
+        latency_ms = (time.time() - t0) * 1000.0
+        status = result.get("status", "success")
+        if status not in ("success", "error", "skipped", "requires_approval"):
+            status = "success"
+
+        audit_service.finish(
+            tool_call_id,
+            status="success" if status in ("success", "requires_approval") else status,
+            result=result,
+            error=result.get("error"),
+            error_code=result.get("error_code"),
+            latency_ms=latency_ms,
+            attempts=int(result.get("attempts") or 1),
+        )
+
+        result["tool_call_id"] = tool_call_id
+        if idem_key:
+            result["idempotency_key"] = idem_key
+        if "latency_ms" not in result:
+            result["latency_ms"] = latency_ms
+        return result
+
+    except Exception as e:
+        latency_ms = (time.time() - t0) * 1000.0
+        err = {
+            "status": "error",
+            "error": str(e),
+            "error_code": "executor_invoke_error",
+            "tool_call_id": tool_call_id,
+            "idempotency_key": idem_key,
+            "latency_ms": latency_ms,
+        }
+        audit_service.finish(
+            tool_call_id,
+            status="error",
+            result=err,
+            error=str(e),
+            error_code="executor_invoke_error",
+            latency_ms=latency_ms,
+        )
+        return err
 
 
 def execution_engine_node(state: AgentState) -> Dict:
@@ -207,7 +289,6 @@ def execution_engine_node(state: AgentState) -> Dict:
         last = messages[-1]
         last_query = last.content if hasattr(last, "content") else str(last)
 
-    # Prefer order ID from memory, fallback to extraction
     order_id = memory_context.get("active_order_id") or extract_order_id(last_query)
     amount_major = extract_amount(last_query)
 
@@ -238,7 +319,6 @@ def execution_engine_node(state: AgentState) -> Dict:
 
         for step in remaining_steps:
             depends_on = step.get("depends_on") or []
-            # depends_on may be step numbers
             if all(dep in completed_steps for dep in depends_on):
                 ready_steps.append(step)
             else:
@@ -328,7 +408,6 @@ def execution_engine_node(state: AgentState) -> Dict:
                     print(f"Skipped {tool_name} - missing order_id")
                     continue
 
-                # Registry lookup
                 if TOOL_REGISTRY.get(tool_name) is None:
                     tool_results[tool_name] = {
                         "status": "error",
@@ -402,7 +481,8 @@ def execution_engine_node(state: AgentState) -> Dict:
                     if status in ["success", "requires_approval", "skipped"]:
                         if isinstance(step_num, int):
                             completed_steps.add(step_num)
-                        print(f"Completed: {tool_name} [{status}]")
+                        replay = " (idempotent_replay)" if result.get("idempotent_replay") else ""
+                        print(f"Completed: {tool_name} [{status}]{replay}")
                     else:
                         print(f"Failed: {tool_name} [{status}]")
 
@@ -429,6 +509,11 @@ def execution_engine_node(state: AgentState) -> Dict:
     log_event("executor_completed", request_id, node="executor", data={
         "tools_executed": list(tool_results.keys()),
         "tool_statuses": {k: v.get("status") for k, v in tool_results.items()},
+        "tool_call_ids": {
+            k: v.get("tool_call_id")
+            for k, v in tool_results.items()
+            if isinstance(v, dict) and v.get("tool_call_id")
+        },
         "order_id": order_id,
         "duration": round(duration, 3),
     })

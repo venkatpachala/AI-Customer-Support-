@@ -28,8 +28,10 @@ def extract_amount_from_messages(messages) -> int:
 
     return 0
 
+from orchestration.escalation_policy import evaluate_escalation
 
 def check_escalation(state: AgentState) -> Dict:
+    needs, reason, codes = evaluate_escalation(state)
     """
     Escalate only for strong reasons:
     - already escalated case
@@ -127,6 +129,7 @@ def check_escalation(state: AgentState) -> Dict:
     })
 
     return {
-        "needs_escalation": needs_escalation,
-        "escalation_reason": reason
+        "needs_escalation": bool(needs),
+        "escalation_reason": reason,
+        "escalation_codes": codes,
     }

@@ -11,18 +11,36 @@ from identity.gate import identity_gate_node
 from agents.qa import qa_node
 
 
-def after_identity_route(state):
+def after_identity_route(state: AgentState) -> str:
+    """
+    Identity first, then reuse policy/action router.
+
+    Critical:
+    - if identity blocks → qa/end
+    - else decide planner vs hitl using after_supervisor_route
+      (includes hard action text signals even when intent is empty)
+    """
+    if state.get("blocked"):
+        return "end"
+
+    # Hard identity failures that should stop the graph
     if state.get("identity_blocked") and state.get("needs_escalation"):
-        return "end"          # or hitl/end escalated
+        return "end"
+
+    # Soft identity challenges (login required / missing order id message)
     if state.get("identity_blocked"):
-        return "qa"           # challenge message via QA/short-circuit
+        return "qa"
+
     if state.get("needs_identity") and state.get("identity_challenge"):
         return "qa"
-    # else normal
-    intent = (state.get("intent") or "").lower()
-    if any(x in intent for x in ["return", "refund", "cancel", "replace"]):
-        return "planner"
-    return "hitl_check"  # or policy path you already use
+
+    # Normal path: policy fast-path vs action planner
+    # This uses hard action signals in message text, so empty intent still works
+    route = after_supervisor_route(state)
+    if route not in {"planner", "hitl_check", "end"}:
+        # safety fallback
+        return "hitl_check"
+    return route
 
 
 def build_graph():
@@ -52,14 +70,14 @@ def build_graph():
     # Supervisor → Identity Gate
     graph.add_edge("supervisor", "identity_gate")
 
-    # Identity Gate → QA challenge OR normal route
+    # Identity Gate → challenge QA / planner / policy HITL / end
     graph.add_conditional_edges(
         "identity_gate",
         after_identity_route,
         {
-            "qa": "qa",                 # ask for ownership details / mismatch
-            "planner": "planner",       # action path
-            "hitl_check": "hitl_check", # policy fast path
+            "qa": "qa",
+            "planner": "planner",
+            "hitl_check": "hitl_check",
             "end": END,
         },
     )
