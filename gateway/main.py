@@ -192,6 +192,15 @@ def health():
         "tools_mode": os.getenv("TOOLS_MODE", "mock"),
     }
 
+@app.get("/")
+def root():
+    return {
+        "service": "D2C AI Support Agent",
+        "status": "live",
+        "docs": "/docs",
+        "health": "/health",
+        "chat": "POST /chat"
+    }
 
 @app.get("/interactions/recent")
 def get_recent_interactions(
