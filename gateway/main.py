@@ -2,13 +2,12 @@ import os
 import re
 import time
 import json
-from typing import Optional, List
+from typing import Optional, List, Any, Dict
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-# Enable LangSmith tracing
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT", "d2c-support-agent")
 
@@ -34,7 +33,7 @@ from observability.metrics import (
     BLOCK_COUNT,
     REQUEST_LATENCY,
     ACTIVE_REQUESTS,
-    metrics_endpoint
+    metrics_endpoint,
 )
 from memory.service import MemoryService
 from interactions.service import InteractionService
@@ -44,6 +43,8 @@ from db.session import init_db
 
 from langsmith import traceable
 from langsmith.run_helpers import get_current_run_tree
+
+from runtime import SupportRuntime, RequestContext, AuthContext
 
 
 @asynccontextmanager
@@ -63,14 +64,54 @@ class ChatRequest(BaseModel):
     tenant_id: str = "zepto"
     session_id: Optional[str] = None
 
-    # Trusted identity context from backend/app (preferred)
     auth_level: str = "anonymous"  # anonymous | identified | verified
     verified: bool = False
     verified_order_ids: List[str] = Field(default_factory=list)
 
-    # Backward-compatible aliases
     verified_customer: bool = False
-    contact: Optional[str] = None  # ignored for identity; kept for compatibility
+    contact: Optional[str] = None
+
+
+@traceable(name="d2c_chat_request")
+def run_graph(inputs: dict, tenant_id: str, customer_id: str):
+    run = get_current_run_tree()
+    if run:
+        run.add_metadata({
+            "tenant_id": tenant_id,
+            "customer_id": customer_id,
+            "request_id": inputs.get("request_id"),
+            "session_id": inputs.get("session_id"),
+            "case_id": inputs.get("case_id"),
+            "auth_level": inputs.get("auth_level"),
+            "verified": inputs.get("verified"),
+            "channel": inputs.get("channel", "chat"),
+        })
+        run.add_tags([
+            f"tenant:{tenant_id}",
+            f"customer:{customer_id}",
+            f"auth:{inputs.get('auth_level', 'anonymous')}",
+            f"channel:{inputs.get('channel', 'chat')}",
+        ])
+    return compiled_graph.invoke(inputs)
+
+
+def _invoke_graph(inputs: dict):
+    return run_graph(
+        inputs,
+        tenant_id=inputs.get("tenant_id", "zepto"),
+        customer_id=inputs.get("customer_id", "default"),
+    )
+
+
+support_runtime = SupportRuntime(
+    graph_invoker=_invoke_graph,
+    memory_service=memory_service,
+    interaction_service=interaction_service,
+    load_tenant_config=load_tenant_config,
+    new_request_id=new_request_id,
+    log_event=log_event,
+    apply_output_guard=lambda text: text,  # full guard applied below with tool context
+)
 
 
 def normalize_auth_level(auth_level: str, verified: bool = False, verified_customer: bool = False) -> str:
@@ -97,24 +138,16 @@ def extract_order_id(text: str) -> Optional[str]:
 def detect_photos_received(message: str) -> bool:
     msg = (message or "").lower()
     triggers = [
-        "uploaded the photo",
-        "uploaded photos",
-        "uploaded the photos",
-        "shared the photo",
-        "shared photos",
-        "shared the photos",
-        "attached photo",
-        "attached photos",
-        "here are the photos",
-        "photo uploaded",
-        "photos uploaded",
+        "uploaded the photo", "uploaded photos", "uploaded the photos",
+        "shared the photo", "shared photos", "shared the photos",
+        "attached photo", "attached photos", "here are the photos",
+        "photo uploaded", "photos uploaded",
     ]
     return any(t in msg for t in triggers)
 
 
 def requires_verified_customer(message: str, tenant_config: dict) -> bool:
     msg = (message or "").lower()
-
     amount = 0
     m = re.search(
         r'(?:refund|amount|pay|paid|worth|value)\s*(?:of|is|for)?\s*(?:₹|rs\.?|inr)?\s*(\d{3,6})',
@@ -124,7 +157,6 @@ def requires_verified_customer(message: str, tenant_config: dict) -> bool:
         m = re.search(r'(?:₹|rs\.?|inr)\s*(\d{3,6})', msg)
     if m:
         amount = int(m.group(1))
-
     approval = (tenant_config or {}).get("approval", {})
     high_value_limit = float(approval.get("high_value_refund_limit", 2000))
     return amount >= high_value_limit
@@ -133,56 +165,53 @@ def requires_verified_customer(message: str, tenant_config: dict) -> bool:
 def looks_like_policy_query(message: str) -> bool:
     text = (message or "").lower()
     policy_signals = [
-        "policy",
-        "return policy",
-        "refund policy",
-        "cancellation policy",
-        "what is the",
-        "how long does",
-        "how many days",
-        "do you accept returns",
-        "terms of use",
+        "policy", "return policy", "refund policy", "cancellation policy",
+        "what is the", "how long does", "how many days",
+        "do you accept returns", "terms of use",
     ]
     hard_action_signals = [
-        "order #",
-        "order id",
-        "my order",
-        "refund of",
-        "i want a refund",
-        "cancel my order",
-        "arrived damaged",
-        "is damaged",
-        "received damaged",
+        "order #", "order id", "my order", "refund of", "i want a refund",
+        "cancel my order", "arrived damaged", "is damaged", "received damaged",
     ]
     if any(k in text for k in hard_action_signals):
         return False
     return any(k in text for k in policy_signals)
 
+def seed_missing_photos(message: str, case, photos_received: bool) -> bool:
+    """
+    Seed missing_photos for damaged return/refund flows.
+    Handles multi-turn: return intent on case + damage on later turn.
+    """
+    if photos_received:
+        return False
 
-@traceable(name="d2c_chat_request")
-def run_graph(inputs: dict, tenant_id: str, customer_id: str):
-    run = get_current_run_tree()
-    if run:
-        run.add_metadata({
-            "tenant_id": tenant_id,
-            "customer_id": customer_id,
-            "request_id": inputs.get("request_id"),
-            "session_id": inputs.get("session_id"),
-            "case_id": inputs.get("case_id"),
-            "auth_level": inputs.get("auth_level"),
-            "verified": inputs.get("verified"),
-        })
-        run.add_tags([
-            f"tenant:{tenant_id}",
-            f"customer:{customer_id}",
-            f"auth:{inputs.get('auth_level', 'anonymous')}",
-        ])
-    return compiled_graph.invoke(inputs)
+    case_missing = list(getattr(case, "missing_inputs", None) or [])
+    if "photos" in case_missing:
+        return True
 
+    msg = (message or "").lower()
+    damage_signals = ["damaged", "broken", "defective", "cracked", "spoiled"]
+    action_signals = ["return", "refund", "replace", "replacement", "exchange"]
+
+    has_damage = any(w in msg for w in damage_signals)
+    has_action = any(w in msg for w in action_signals)
+
+    issue = str(getattr(case, "issue_type", "") or "").lower()
+    case_is_returnish = any(
+        x in issue for x in ["return", "refund", "replace", "replacement", "exchange"]
+    )
+
+    # Single-turn: "damaged" + return/refund
+    # Multi-turn: prior case is return + this turn says damaged (with/without order id)
+    if has_damage and (has_action or case_is_returnish or "order" in msg):
+        return True
+
+    return False
 
 @app.get("/metrics")
 def metrics():
     return metrics_endpoint()
+
 
 @app.get("/health")
 def health():
@@ -192,6 +221,7 @@ def health():
         "tools_mode": os.getenv("TOOLS_MODE", "mock"),
     }
 
+
 @app.get("/")
 def root():
     return {
@@ -199,8 +229,9 @@ def root():
         "status": "live",
         "docs": "/docs",
         "health": "/health",
-        "chat": "POST /chat"
+        "chat": "POST /chat",
     }
+
 
 @app.get("/interactions/recent")
 def get_recent_interactions(
@@ -215,10 +246,7 @@ def get_recent_interactions(
         customer_id=customer_id,
         escalated=escalated,
     )
-    return {
-        "count": len(records),
-        "items": [r.dict() for r in records],
-    }
+    return {"count": len(records), "items": [r.dict() for r in records]}
 
 
 @app.get("/interactions/conversation/{conversation_id}")
@@ -233,9 +261,16 @@ def get_conversation_interactions(conversation_id: str):
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
+    """
+    Phase 0:
+    - Gateway keeps HTTP, metrics, and R1 short-circuits (cache / sticky escalation / verify).
+    - Core agent path is invoked through SupportRuntime (channel-agnostic entry).
+    """
     request_id = new_request_id()
     ACTIVE_REQUESTS.inc()
     start_time = time.time()
+    session = None
+    case = None
 
     auth_level = normalize_auth_level(
         request.auth_level,
@@ -253,255 +288,263 @@ async def chat(request: ChatRequest):
         "auth_level": auth_level,
         "verified": is_verified,
         "verified_order_ids": verified_order_ids,
+        "channel": "chat",
     })
 
-    # -------- Load tenant config --------
     try:
-        tenant_config = load_tenant_config(request.tenant_id)
-        tenant_config_dict = tenant_config.dict() if hasattr(tenant_config, "dict") else tenant_config
-    except Exception as e:
-        REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="error").inc()
-        ACTIVE_REQUESTS.dec()
-        return {"error": f"Invalid tenant: {str(e)}"}
+        # -------- tenant config --------
+        try:
+            tenant_config = load_tenant_config(request.tenant_id)
+            tenant_config_dict = tenant_config.dict() if hasattr(tenant_config, "dict") else tenant_config
+        except Exception as e:
+            REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="error").inc()
+            return {"error": f"Invalid tenant: {str(e)}", "request_id": request_id}
 
-    # -------- Policy cache short-circuit --------
-    if looks_like_policy_query(request.message):
-        cached = policy_cache.get(request.tenant_id, request.message)
-        if cached:
+        # -------- policy cache short-circuit --------
+        if looks_like_policy_query(request.message):
+            cached = policy_cache.get(request.tenant_id, request.message)
+            if cached:
+                try:
+                    REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="success").inc()
+                    REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(time.time() - start_time)
+                except Exception:
+                    pass
+                cached = dict(cached)
+                cached["request_id"] = request_id
+                cached["cached"] = True
+                cached["auth_level"] = auth_level
+                return cached
+
+        # -------- memory bootstrap --------
+        session = memory_service.get_or_create_session(
+            customer_id=request.customer_id,
+            tenant_id=request.tenant_id,
+            session_id=request.session_id,
+        )
+        case = memory_service.get_or_create_active_case(session)
+
+        # -------- sticky escalation --------
+        if case.status == "escalated":
+            memory_service.append_message(session, role="user", content=request.message)
+            response_text = (
+                "This case has already been escalated to a human support agent. "
+                "They will review it and get back to you shortly."
+            )
+            memory_service.append_message(session, role="assistant", content=response_text)
+
+            latency = time.time() - start_time
             try:
-                REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="success").inc()
-                REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(time.time() - start_time)
+                REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(latency)
+                ESCALATION_COUNT.labels(
+                    tenant_id=request.tenant_id,
+                    reason=(case.escalation_reason or "already_escalated")[:50],
+                ).inc()
+                REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
             except Exception:
                 pass
-            ACTIVE_REQUESTS.dec()
-            cached = dict(cached)
-            cached["request_id"] = request_id
-            cached["cached"] = True
-            cached["auth_level"] = auth_level
-            return cached
 
-    # -------- Load / create memory --------
-    session = memory_service.get_or_create_session(
-        customer_id=request.customer_id,
-        tenant_id=request.tenant_id,
-        session_id=request.session_id
-    )
-    case = memory_service.get_or_create_active_case(session)
+            resolved_order_id = case.order_id or extract_order_id(request.message)
+            try:
+                interaction_service.log_chat_turn(
+                    conversation_id=session.session_id,
+                    case_id=case.case_id,
+                    tenant_id=request.tenant_id,
+                    customer_id=request.customer_id,
+                    message=request.message,
+                    response=response_text,
+                    intent=case.issue_type,
+                    risk_level="high",
+                    order_id=resolved_order_id,
+                    missing_inputs=case.missing_inputs or [],
+                    photos_requested=bool(case.photos_requested),
+                    photos_received=bool(case.photos_received),
+                    tool_results={},
+                    escalated=True,
+                    blocked=False,
+                    escalation_reason=case.escalation_reason,
+                    citations=case.policy_citations or [],
+                    confidence=1.0,
+                    latency_ms=round(latency * 1000.0, 2),
+                    status="escalated",
+                    request_id=request_id,
+                    metadata={"short_circuit": "already_escalated", "auth_level": auth_level, "channel": "chat"},
+                )
+            except Exception as e:
+                log_event("interaction_log_failed", request_id, data={"error": str(e)}, level="warning")
 
-    # -------- Sticky escalation short-circuit (FIRST) --------
-    if case.status == "escalated":
-        memory_service.append_message(session, role="user", content=request.message)
-        response_text = (
-            "This case has already been escalated to a human support agent. "
-            "They will review it and get back to you shortly."
-        )
-        memory_service.append_message(session, role="assistant", content=response_text)
+            return {
+                "response": response_text,
+                "confidence": 1.0,
+                "citations": case.policy_citations or [],
+                "escalated": True,
+                "blocked": False,
+                "reason": case.escalation_reason or "Case already escalated",
+                "tool_results": {},
+                "request_id": request_id,
+                "session_id": session.session_id,
+                "case_id": case.case_id,
+                "missing_inputs": case.missing_inputs or [],
+                "auth_level": auth_level,
+                "identity_blocked": False,
+            }
 
-        latency = time.time() - start_time
-        try:
-            REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(latency)
-            ESCALATION_COUNT.labels(
-                tenant_id=request.tenant_id,
-                reason=(case.escalation_reason or "already_escalated")[:50]
-            ).inc()
-            REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
-        except Exception:
-            pass
-
-        resolved_order_id = case.order_id or extract_order_id(request.message)
-
-        try:
-            interaction_service.log_chat_turn(
-                conversation_id=session.session_id,
-                case_id=case.case_id,
-                tenant_id=request.tenant_id,
-                customer_id=request.customer_id,
-                message=request.message,
-                response=response_text,
-                intent=case.issue_type,
-                risk_level="high",
-                order_id=resolved_order_id,
-                missing_inputs=case.missing_inputs or [],
-                photos_requested=bool(case.photos_requested),
-                photos_received=bool(case.photos_received),
-                tool_results={},
-                escalated=True,
-                blocked=False,
-                escalation_reason=case.escalation_reason,
-                citations=case.policy_citations or [],
-                confidence=1.0,
-                latency_ms=round(latency * 1000.0, 2),
-                status="escalated",
-                request_id=request_id,
-                metadata={
-                    "short_circuit": "already_escalated",
-                    "auth_level": auth_level,
-                },
+        # -------- high-value requires verified --------
+        if requires_verified_customer(request.message, tenant_config_dict) and not is_verified:
+            response_text = (
+                "For security, high-value refund or account-sensitive requests require account verification. "
+                "Please continue from your logged-in/verified account or contact support."
             )
-        except Exception as e:
-            log_event("interaction_log_failed", request_id, data={"error": str(e)}, level="warning")
+            memory_service.append_message(session, role="user", content=request.message)
+            memory_service.append_message(session, role="assistant", content=response_text)
 
-        ACTIVE_REQUESTS.dec()
-        return {
-            "response": response_text,
-            "confidence": 1.0,
-            "citations": case.policy_citations or [],
-            "escalated": True,
-            "blocked": False,
-            "reason": case.escalation_reason or "Case already escalated",
-            "tool_results": {},
-            "request_id": request_id,
-            "session_id": session.session_id,
-            "case_id": case.case_id,
-            "missing_inputs": case.missing_inputs or [],
-            "auth_level": auth_level,
-            "identity_blocked": False,
-        }
+            latency = time.time() - start_time
+            try:
+                REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(latency)
+                ESCALATION_COUNT.labels(
+                    tenant_id=request.tenant_id,
+                    reason="unverified_sensitive_action"[:50],
+                ).inc()
+                REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
+            except Exception:
+                pass
 
-    # -------- Gateway high-value short-circuit if not verified --------
-    if requires_verified_customer(request.message, tenant_config_dict) and not is_verified:
-        response_text = (
-            "For security, high-value refund or account-sensitive requests require account verification. "
-            "Please continue from your logged-in/verified account or contact support."
-        )
+            order_id = case.order_id or extract_order_id(request.message)
+            try:
+                memory_service.update_case_from_result(
+                    case,
+                    order_id=order_id,
+                    issue_type="refund",
+                    escalated=True,
+                    escalation_reason="Unverified customer attempted sensitive/high-value action",
+                    status="escalated",
+                    last_agent_action="verification_required",
+                )
+            except Exception:
+                pass
 
+            try:
+                interaction_service.log_chat_turn(
+                    conversation_id=session.session_id,
+                    case_id=case.case_id,
+                    tenant_id=request.tenant_id,
+                    customer_id=request.customer_id,
+                    message=request.message,
+                    response=response_text,
+                    intent="refund",
+                    risk_level="high",
+                    order_id=order_id,
+                    missing_inputs=case.missing_inputs or [],
+                    photos_requested=bool(getattr(case, "photos_requested", False)),
+                    photos_received=bool(getattr(case, "photos_received", False)),
+                    tool_results={},
+                    escalated=True,
+                    blocked=False,
+                    escalation_reason="Unverified customer attempted sensitive/high-value action",
+                    citations=[],
+                    confidence=1.0,
+                    latency_ms=round(latency * 1000.0, 2),
+                    status="escalated",
+                    request_id=request_id,
+                    metadata={"reason": "unverified_sensitive_action", "auth_level": auth_level, "channel": "chat"},
+                )
+            except Exception as e:
+                log_event("interaction_log_failed", request_id, data={"error": str(e)}, level="warning")
+
+            return {
+                "response": response_text,
+                "confidence": 1.0,
+                "citations": [],
+                "escalated": True,
+                "blocked": False,
+                "reason": "Unverified customer attempted sensitive/high-value action",
+                "tool_results": {},
+                "request_id": request_id,
+                "session_id": session.session_id,
+                "case_id": case.case_id,
+                "missing_inputs": case.missing_inputs or [],
+                "auth_level": auth_level,
+                "identity_blocked": True,
+            }
+
+        # -------- user message + photo follow-up --------
         memory_service.append_message(session, role="user", content=request.message)
-        memory_service.append_message(session, role="assistant", content=response_text)
 
-        latency = time.time() - start_time
-        try:
-            REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(latency)
-            ESCALATION_COUNT.labels(
-                tenant_id=request.tenant_id,
-                reason="unverified_sensitive_action"[:50]
-            ).inc()
-            REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
-        except Exception:
-            pass
-
-        order_id = case.order_id or extract_order_id(request.message)
-
-        try:
-            memory_service.update_case_from_result(
+        photos_received = bool(case.photos_received)
+        missing_inputs: List[str] = list(case.missing_inputs or [])
+        if detect_photos_received(request.message):
+            photos_received = True
+            missing_inputs = [m for m in missing_inputs if m != "photos"]
+            case = memory_service.update_case_from_result(
                 case,
-                order_id=order_id,
-                issue_type="refund",
-                escalated=True,
-                escalation_reason="Unverified customer attempted sensitive/high-value action",
-                status="escalated",
-                last_agent_action="verification_required",
+                photos_received=True,
+                missing_inputs=missing_inputs,
+                status="open" if case.status == "waiting_customer" else case.status,
             )
-        except Exception:
-            pass
 
-        try:
-            interaction_service.log_chat_turn(
-                conversation_id=session.session_id,
-                case_id=case.case_id,
-                tenant_id=request.tenant_id,
-                customer_id=request.customer_id,
-                message=request.message,
-                response=response_text,
-                intent="refund",
-                risk_level="high",
-                order_id=order_id,
-                missing_inputs=case.missing_inputs or [],
-                photos_requested=bool(getattr(case, "photos_requested", False)),
-                photos_received=bool(getattr(case, "photos_received", False)),
-                tool_results={},
-                escalated=True,
-                blocked=False,
-                escalation_reason="Unverified customer attempted sensitive/high-value action",
-                citations=[],
-                confidence=1.0,
-                latency_ms=round(latency * 1000.0, 2),
-                status="escalated",
-                request_id=request_id,
-                metadata={
-                    "reason": "unverified_sensitive_action",
-                    "auth_level": auth_level,
-                },
-            )
-        except Exception as e:
-            log_event("interaction_log_failed", request_id, data={"error": str(e)}, level="warning")
+        memory_context = memory_service.to_state_context(session, case) or {}
+        memory_context["auth_level"] = auth_level
+        memory_context["verified_order_ids"] = verified_order_ids
 
-        ACTIVE_REQUESTS.dec()
-        return {
-            "response": response_text,
-            "confidence": 1.0,
-            "citations": [],
-            "escalated": True,
-            "blocked": False,
-            "reason": "Unverified customer attempted sensitive/high-value action",
-            "tool_results": {},
+        # -------- channel-agnostic context (R2 entry object) --------
+        ctx = RequestContext(
+            message=request.message,
+            tenant_id=request.tenant_id,
+            customer_id=request.customer_id,
+            session_id=session.session_id,
+            case_id=case.case_id,
+            channel="chat",
+            request_id=request_id,
+            auth=AuthContext(
+                auth_level=auth_level,
+                verified=is_verified,
+                verified_order_ids=verified_order_ids,
+                verified_customer=is_verified,
+                contact=request.contact,
+            ),
+            metadata={"photos_received": photos_received},
+        )
+
+        missing_photos_seed = seed_missing_photos(
+            request.message,
+            case,
+            photos_received=photos_received,
+        )
+
+        inputs: Dict[str, Any] = {
+            "messages": [HumanMessage(content=request.message)],
+            "customer_id": request.customer_id,
+            "tenant_id": request.tenant_id,
+            "tenant_config": tenant_config_dict,
             "request_id": request_id,
             "session_id": session.session_id,
             "case_id": case.case_id,
-            "missing_inputs": case.missing_inputs or [],
+            "channel": "chat",
             "auth_level": auth_level,
-            "identity_blocked": True,
+            "verified": is_verified,
+            "verified_order_ids": verified_order_ids,
+            "customer_context": {
+                "verified_customer": is_verified,
+                "auth_level": auth_level,
+                "verified_order_ids": verified_order_ids,
+            },
+            "memory_context": memory_context,
+            "current_plan": None,
+            "workflow_steps": [],
+            "tool_results": {},
+            "confidence": 0.0,
+            "citations": [],
+            "memory_retrieved": memory_context.get("recent_messages", []),
+            "risk_level": "low",
+            "needs_escalation": False,
+            "escalation_reason": "",
+            "verification_passed": True,
+            "verification_issues": [],
+            "missing_photos": missing_photos_seed,
         }
 
-    # Append user message
-    memory_service.append_message(session, role="user", content=request.message)
-
-    # Photo received detection on follow-up
-    photos_received = case.photos_received
-    missing_inputs: List[str] = list(case.missing_inputs or [])
-    if detect_photos_received(request.message):
-        photos_received = True
-        missing_inputs = [m for m in missing_inputs if m != "photos"]
-        case = memory_service.update_case_from_result(
-            case,
-            photos_received=True,
-            missing_inputs=missing_inputs,
-            status="open" if case.status == "waiting_customer" else case.status,
-        )
-
-    memory_context = memory_service.to_state_context(session, case) or {}
-    memory_context["auth_level"] = auth_level
-    memory_context["verified_order_ids"] = verified_order_ids
-
-    inputs = {
-        "messages": [HumanMessage(content=request.message)],
-        "customer_id": request.customer_id,
-        "tenant_id": request.tenant_id,
-        "tenant_config": tenant_config_dict,
-        "request_id": request_id,
-        "session_id": session.session_id,
-        "case_id": case.case_id,
-
-        # Trusted identity context for identity_gate_node
-        "auth_level": auth_level,
-        "verified": is_verified,
-        "verified_order_ids": verified_order_ids,
-        "customer_context": {
-            "verified_customer": is_verified,
-            "auth_level": auth_level,
-            "verified_order_ids": verified_order_ids,
-        },
-
-        "memory_context": memory_context,
-        "current_plan": None,
-        "workflow_steps": [],
-        "tool_results": {},
-        "confidence": 0.0,
-        "citations": [],
-        "memory_retrieved": memory_context.get("recent_messages", []),
-        "risk_level": "low",
-        "needs_escalation": False,
-        "escalation_reason": "",
-        "verification_passed": True,
-        "verification_issues": [],
-        "missing_photos": ("photos" in (case.missing_inputs or [])) and not case.photos_received,
-    }
-
-    try:
-        result = run_graph(
-            inputs,
-            tenant_id=request.tenant_id,
-            customer_id=request.customer_id
-        )
+        # -------- CORE: SupportRuntime invokes shared agent brain --------
+        runtime_result = support_runtime.invoke_agent(ctx, inputs)
+        result = runtime_result.raw or {}
 
         latency = time.time() - start_time
         try:
@@ -515,7 +558,7 @@ async def chat(request: ChatRequest):
         identity_challenge = result.get("identity_challenge") or {}
         result_auth_level = result.get("auth_level") or auth_level
 
-        # -------- Identity challenge short-circuit --------
+        # -------- identity challenge --------
         if identity_blocked and identity_challenge.get("message"):
             response_text = identity_challenge["message"]
             escalated = escalated or bool(result.get("needs_escalation", False))
@@ -524,23 +567,16 @@ async def chat(request: ChatRequest):
                 if escalated:
                     ESCALATION_COUNT.labels(
                         tenant_id=request.tenant_id,
-                        reason=(result.get("escalation_reason") or "identity_blocked")[:50]
+                        reason=(result.get("escalation_reason") or "identity_blocked")[:50],
                     ).inc()
                     REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
                 else:
                     REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="success").inc()
-                REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(latency)
             except Exception:
                 pass
 
             memory_service.append_message(session, role="assistant", content=response_text)
-
-            order_id = (
-                result.get("resolved_order_id")
-                or case.order_id
-                or extract_order_id(request.message)
-            )
-
+            order_id = result.get("resolved_order_id") or case.order_id or extract_order_id(request.message)
             status = "escalated" if escalated else "waiting_customer"
             try:
                 memory_service.update_case_from_result(
@@ -571,7 +607,6 @@ async def chat(request: ChatRequest):
                 "auth_level": result_auth_level,
                 "identity_blocked": True,
             }
-
             try:
                 interaction_service.log_chat_turn(
                     conversation_id=session.session_id,
@@ -599,11 +634,12 @@ async def chat(request: ChatRequest):
                         "identity_blocked": True,
                         "identity_challenge": identity_challenge,
                         "auth_level": result_auth_level,
+                        "channel": "chat",
+                        "via": "support_runtime",
                     },
                 )
             except Exception as e:
                 log_event("interaction_log_failed", request_id, data={"error": str(e)}, level="warning")
-
             return payload
 
         try:
@@ -613,7 +649,7 @@ async def chat(request: ChatRequest):
             elif escalated:
                 ESCALATION_COUNT.labels(
                     tenant_id=request.tenant_id,
-                    reason=(result.get("escalation_reason") or "unknown")[:50]
+                    reason=(result.get("escalation_reason") or "unknown")[:50],
                 ).inc()
                 REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
             else:
@@ -621,11 +657,11 @@ async def chat(request: ChatRequest):
         except Exception:
             pass
 
-        # -------- Prepare response text --------
+        # -------- response text --------
         if blocked:
             response_text = result.get(
                 "error",
-                "I can only assist with Zepto-related customer support queries."
+                "I can only assist with Zepto-related customer support queries.",
             )
         elif result.get("verification_passed") is False:
             response_text = (
@@ -651,7 +687,6 @@ async def chat(request: ChatRequest):
                     )
                     blocked = True
 
-        # -------- Output hallucination guard --------
         guard = apply_output_guard(
             response_text,
             tool_results=result.get("tool_results") or {},
@@ -667,7 +702,6 @@ async def chat(request: ChatRequest):
                 level="warning",
             )
 
-        # -------- Write memory back --------
         plan = result.get("current_plan") or {}
         tool_results = result.get("tool_results") or {}
         citations = result.get("citations") or []
@@ -677,7 +711,8 @@ async def chat(request: ChatRequest):
 
         if result.get("missing_photos") and "photos" not in missing_inputs and not photos_received:
             missing_inputs.append("photos")
-
+        if missing_photos_seed and "photos" not in missing_inputs and not photos_received:
+            missing_inputs.append("photos")
         if photos_received:
             missing_inputs = [m for m in missing_inputs if m != "photos"]
 
@@ -685,16 +720,36 @@ async def chat(request: ChatRequest):
             case.photos_requested
             or ("photos" in missing_inputs)
             or result.get("missing_photos", False)
+            or missing_photos_seed
         )
-
         issue_type = plan.get("intent") or result.get("intent") or case.issue_type
-
         order_id = (
             result.get("resolved_order_id")
             or case.order_id
             or memory_context.get("active_order_id")
             or extract_order_id(request.message)
         )
+
+        # -------- Photo-ask safety net (eval + product behavior) --------
+        needs_photos = (
+            bool(result.get("missing_photos"))
+            or missing_photos_seed
+            or ("photos" in missing_inputs)
+            or ("photos" in plan_missing)
+        ) and not photos_received
+
+        if needs_photos and not escalated and not blocked:
+            photo_markers = ("photo", "image", "picture", "upload", "attach")
+            if not any(m in (response_text or "").lower() for m in photo_markers):
+                order_bit = f" for order #{order_id}" if order_id else ""
+                response_text = (
+                    f"We're sorry that your item arrived damaged{order_bit}. "
+                    "To proceed with the return, please upload clear photos of the damaged product. "
+                    "Once we receive the photos, we can continue the return process."
+                )
+            if "photos" not in missing_inputs:
+                missing_inputs.append("photos")
+            photos_requested = True
 
         if blocked:
             status = "blocked"
@@ -706,7 +761,6 @@ async def chat(request: ChatRequest):
             status = "open"
 
         memory_service.append_message(session, role="assistant", content=response_text)
-
         memory_service.update_case_from_result(
             case,
             order_id=order_id,
@@ -720,7 +774,7 @@ async def chat(request: ChatRequest):
             escalated=escalated,
             escalation_reason=result.get("escalation_reason") if escalated else case.escalation_reason,
             last_agent_action="responded",
-            status=status if status != "blocked" else case.status
+            status=status if status != "blocked" else case.status,
         )
 
         response_payload = {
@@ -739,15 +793,9 @@ async def chat(request: ChatRequest):
             "identity_blocked": identity_blocked,
         }
 
-        # -------- Cache policy answers --------
-        if (
-            not escalated
-            and not blocked
-            and looks_like_policy_query(request.message)
-        ):
+        if not escalated and not blocked and looks_like_policy_query(request.message):
             policy_cache.set(request.tenant_id, request.message, response_payload)
 
-        # -------- Persist interaction intelligence --------
         try:
             interaction_service.log_chat_turn(
                 conversation_id=session.session_id,
@@ -777,6 +825,9 @@ async def chat(request: ChatRequest):
                     "auth_level": result_auth_level,
                     "verified": is_verified,
                     "identity_blocked": identity_blocked,
+                    "channel": "chat",
+                    "via": "support_runtime",
+                    "missing_photos_seed": missing_photos_seed,
                 },
             )
         except Exception as e:
@@ -795,6 +846,7 @@ async def chat(request: ChatRequest):
             "order_id": order_id,
             "auth_level": result_auth_level,
             "identity_blocked": identity_blocked,
+            "via": "support_runtime",
         })
 
         return response_payload
@@ -809,7 +861,7 @@ async def chat(request: ChatRequest):
             "error": str(e),
             "escalated": False,
             "request_id": request_id,
-            "session_id": session.session_id if session else None
+            "session_id": session.session_id if session else request.session_id,
         }
     finally:
         ACTIVE_REQUESTS.dec()
@@ -817,10 +869,6 @@ async def chat(request: ChatRequest):
 
 @app.post("/chat/stream")
 async def chat_stream(request: ChatRequest):
-    """
-    Streams final response text.
-    Uses cache when available; otherwise runs full /chat then streams the result.
-    """
     if looks_like_policy_query(request.message):
         cached = policy_cache.get(request.tenant_id, request.message)
         if cached and cached.get("response"):
