@@ -1,0 +1,1 @@
+"""Phase 1 Pipecat voice foundation (standalone)."""
