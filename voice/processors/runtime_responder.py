@@ -94,10 +94,8 @@ class SupportRuntimeResponder(FrameProcessor):
         if isinstance(frame, InterruptionFrame):
             if self.state != TurnState.IDLE:
                 self.session.interruption_count += 1
-                logger.info(
-                    f"[responder] INTERRUPTION — was={self.state} "
-                    f"total_interruptions={self.session.interruption_count}"
-                )
+                from voice.observability import VoiceObserver
+                VoiceObserver.log_interruption(str(self.state.value), self.session.interruption_count)
             self._reset_turn()
             await self.push_frame(frame, direction)
             return
@@ -112,23 +110,30 @@ class SupportRuntimeResponder(FrameProcessor):
             self._latest_text = ""
             self._turn_start_ts = time.time()
             self.session.begin_turn()
-            logger.debug("[responder] USER_SPEAKING")
+            from voice.observability import VoiceObserver
+            VoiceObserver.log_turn_start(self.session.turn_count + 1, self.session.call_id, self.session.session_id)
+            VoiceObserver.log_vad("start")
             await self.push_frame(frame, direction)
             return
 
         # ─── STT result: PRIMARY trigger ────────────────────────────────────
         if isinstance(frame, TranscriptionFrame):
             text = (getattr(frame, "text", None) or "").strip()
-            logger.info(
-                f"[STT] text={text!r} state={self.state} "
-                f"emitted={self._emitted_this_turn}"
-            )
             if not text:
                 return  # never forward empty transcripts
 
             # Mark STT final timestamp (T1)
             self.session.mark_stt_final()
             self._latest_text = text
+
+            stt_latency = None
+            if self.session.current_latency.t_user_turn_ended:
+                stt_latency = (time.time() - self.session.current_latency.t_user_turn_ended) * 1000.0
+            elif self._turn_start_ts:
+                stt_latency = (time.time() - self._turn_start_ts) * 1000.0
+
+            from voice.observability import VoiceObserver
+            VoiceObserver.log_stt(text, stt_latency)
 
             if not self._emitted_this_turn and self.state != TurnState.PROCESSING:
                 await self._run_turn(text, direction)
@@ -141,7 +146,8 @@ class SupportRuntimeResponder(FrameProcessor):
         ):
             # Mark turn-end timestamp (T0)
             self.session.mark_turn_ended()
-            logger.debug(f"[responder] USER_STOPPED text_buffered={self._latest_text!r}")
+            from voice.observability import VoiceObserver
+            VoiceObserver.log_vad("stop")
             await self.push_frame(frame, direction)
 
             text = self._latest_text.strip()
@@ -218,16 +224,27 @@ class SupportRuntimeResponder(FrameProcessor):
             self.session.mark_tts_start()
             self.state = TurnState.RESPONDING
 
+            from voice.observability import VoiceObserver
+            VoiceObserver.log_tts_start()
+
             await self.push_frame(LLMFullResponseStartFrame(), direction)
             await self.push_frame(TextFrame(text=reply), direction)
             await self.push_frame(LLMFullResponseEndFrame(), direction)
 
             self.session.complete_turn()
 
-            ttfa = self.session.latency_history[-1].ttfa_ms if self.session.latency_history else None
-            logger.info(
-                f"[turn] DONE ttfa={ttfa:.0f}ms" if ttfa else "[turn] DONE ttfa=unknown"
-            )
+            last_rec = self.session.latency_history[-1] if self.session.latency_history else None
+            if last_rec:
+                # If first audio hasn't fired yet from sink, use current time as first audio out
+                if last_rec.t_first_audio is None:
+                    last_rec.t_first_audio = time.time()
+                VoiceObserver.log_audio_out()
+                VoiceObserver.log_ttfa(
+                    ttfa_ms=last_rec.ttfa_ms,
+                    stt_ms=last_rec.stt_latency_ms,
+                    runtime_ms=last_rec.runtime_latency_ms,
+                    tts_ms=last_rec.tts_latency_ms,
+                )
 
         except Exception as exc:
             logger.exception(f"[turn] runtime error: {exc}")

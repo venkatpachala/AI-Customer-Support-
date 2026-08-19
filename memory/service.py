@@ -125,10 +125,10 @@ class MemoryService:
                 session.active_case_id = case_row.case_id
             return session
 
-    def create_session(self, customer_id: str, tenant_id: str) -> SessionMemory:
+    def create_session(self, customer_id: str, tenant_id: str, session_id: Optional[str] = None) -> SessionMemory:
         with SessionLocal() as db:
             row = SessionRow(
-                session_id=_new_id(),
+                session_id=session_id or _new_id(),
                 customer_id=customer_id,
                 tenant_id=tenant_id,
                 status="active",
@@ -148,6 +148,7 @@ class MemoryService:
             existing = self.get_session(session_id)
             if existing:
                 return existing
+            return self.create_session(customer_id=customer_id, tenant_id=tenant_id, session_id=session_id)
         return self.create_session(customer_id=customer_id, tenant_id=tenant_id)
 
     def save_session(self, session: SessionMemory):

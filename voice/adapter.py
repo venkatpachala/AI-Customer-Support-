@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 import re
+import time
 from typing import Any, Dict, Optional
 
 from loguru import logger
@@ -84,7 +83,10 @@ class SupportRuntimeAdapter:
         session.normalize_auth()
 
         # Orders
-        oid = result.order_id or raw.get("resolved_order_id")
+        from identity.service import extract_order_id, extract_contact
+        oid = result.order_id or raw.get("resolved_order_id") or raw.get("order_id") or raw.get("pending_order_id")
+        if not oid:
+            oid = extract_order_id(raw.get("message") or "")
         if oid:
             session.pending_order_id = str(oid)
             if session.auth_level in ("identified", "verified"):
@@ -92,7 +94,9 @@ class SupportRuntimeAdapter:
                     session.verified_order_ids.append(str(oid))
 
         # Contact: candidate vs established
-        contact = raw.get("customer_contact")
+        contact = raw.get("customer_contact") or raw.get("pending_contact")
+        if not contact:
+            contact = extract_contact(raw.get("message") or "")
         if contact:
             session.pending_contact = str(contact)
             if session.auth_level in ("identified", "verified"):
@@ -169,20 +173,36 @@ class SupportRuntimeAdapter:
 
         if self._is_greeting(text):
             logger.info(f"[adapter] greeting short-circuit text={text!r}")
-            return self._greeting_response(session)
+            from voice.observability import VoiceObserver
+            resp = self._greeting_response(session)
+            VoiceObserver.log_runtime_reply(resp.response, latency_ms=1.0, intent="greeting")
+            VoiceObserver.log_writeback(session)
+            return resp
 
         ctx = self._build_context(text, session)
-        logger.info(
-            f"[voice→runtime] msg={text!r} auth={session.auth_level} "
-            f"pending_order={session.pending_order_id} needs_identity={session.needs_identity}"
-        )
+        from voice.observability import VoiceObserver
+        VoiceObserver.log_context(ctx)
+        VoiceObserver.log_runtime_start()
 
+        from identity.service import extract_order_id, extract_contact
+        extracted_oid = extract_order_id(text)
+        if extracted_oid:
+            session.pending_order_id = str(extracted_oid)
+        extracted_contact = extract_contact(text)
+        if extracted_contact:
+            session.pending_contact = str(extracted_contact)
+
+        t_r0 = time.time()
         result = self.runtime.handle(ctx)
+        t_runtime_ms = (time.time() - t_r0) * 1000.0
+
         self._write_back_session(session, result)
 
         result.response = self._shape_for_tts(
             self._ensure_response_text(result, text)
         )
+        VoiceObserver.log_runtime_reply(result.response, latency_ms=t_runtime_ms, intent=result.intent)
+        VoiceObserver.log_writeback(session)
         logger.info(f"[runtime→voice] reply={result.response!r}")
         return result
 

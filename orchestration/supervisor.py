@@ -13,14 +13,21 @@ llm = get_supervisor_llm()
 supervisor_prompt = ChatPromptTemplate.from_template(
     """You are a supervisor for Zepto customer support.
 
-Classify the user query. Be conservative with risk.
-Only mark risk as "high" for clear fraud, threat, or abuse.
+Classify the user query into ONE of these intents:
+- "policy_query": Informational questions about store policies, return windows, refund rules, damage policies, delivery terms, guidelines (e.g. "What is your return policy?", "Can I return a defective product?", "How long do I have to return something?", "What are your delivery policies?").
+- "return": Action requests to return an order/item (e.g. "I want to return my order", "My order is damaged, I want to return it").
+- "refund": Action requests to issue/process a refund (e.g. "I want a refund", "Refund my order").
+- "cancel": Action requests to cancel an order (e.g. "Cancel my order").
+- "track": Action requests to track an order (e.g. "Where is my order?", "Track my package").
+- "general": General greetings or small talk (e.g. "Hi", "Hello").
+
+Be conservative with risk. Only mark risk as "high" for clear fraud, threat, or abuse.
 
 Query: {query}
 
 Return ONLY valid JSON:
 {{
-  "intent": "return|refund|cancel|track|general",
+  "intent": "policy_query|return|refund|cancel|track|general",
   "risk": "low|medium|high",
   "needs_escalation": false
 }}
@@ -45,6 +52,19 @@ def supervisor_node(state: AgentState) -> Dict:
         intent = data.get("intent", "general")
         risk = data.get("risk", "low")
         needs_escalation = data.get("needs_escalation", False)
+
+        from identity.service import is_policy_or_info_query, is_action_request
+        if is_policy_or_info_query(query, intent):
+            intent = "policy_query"
+        elif is_action_request(query, intent) and intent == "general":
+            if "return" in query.lower():
+                intent = "return"
+            elif "refund" in query.lower():
+                intent = "refund"
+            elif "cancel" in query.lower():
+                intent = "cancel"
+            elif "track" in query.lower() or "where is" in query.lower():
+                intent = "track"
 
         dangerous_keywords = ["fraud", "scam", "hack", "threat", "kill", "bomb", "abuse"]
         if risk == "high" and not any(k in query.lower() for k in dangerous_keywords):

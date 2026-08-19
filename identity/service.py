@@ -65,6 +65,55 @@ def user_has_no_order_id(text: str) -> bool:
     return any(p in t for p in phrases)
 
 
+def is_policy_or_info_query(text: str, intent: str = "") -> bool:
+    t = (text or "").lower().strip()
+    if intent in ("policy_query", "faq", "policy"):
+        return True
+
+    # Check for policy/info queries
+    policy_phrases = [
+        "what is", "what's", "how long do i have", "can i return a",
+        "what are the", "what are your", "tell me the policy",
+        "return policy", "refund policy", "damage policy", "delivery policy",
+        "cancellation policy", "damaged products", "defective product"
+    ]
+    if any(p in t for p in policy_phrases) and "policy" in t:
+        return True
+
+    if any(p in t for p in ["how long do i have to return", "can i return a defective", "what are your delivery policies"]):
+        return True
+
+    if (t.startswith("what") or t.startswith("how") or t.startswith("can i")) and not any(
+        a in t for a in ["my order", "cancel my", "track my", "i want to", "where is my"]
+    ):
+        return True
+
+    return False
+
+
+def is_action_request(text: str, intent: str = "") -> bool:
+    t = (text or "").lower().strip()
+    action_phrases = [
+        "i want to return",
+        "i want a refund",
+        "i want to cancel",
+        "cancel my order",
+        "cancel this order",
+        "where is my order",
+        "track my order",
+        "track order",
+        "i need a refund",
+        "please refund",
+        "please return",
+        "i want to replace",
+        "return my order",
+        "refund my money",
+        "order is damaged, i want to return",
+        "is damaged, i want to return",
+    ]
+    return any(p in t for p in action_phrases)
+
+
 def identity_required(
     intent: str,
     risk_level: str,
@@ -74,28 +123,20 @@ def identity_required(
     intent = (intent or "").lower().strip()
     auth_level = (auth_level or "anonymous").lower().strip()
     risk_level = (risk_level or "low").lower().strip()
-    message = (message or "").lower()
+    message = (message or "").lower().strip()
 
     if auth_level in ("identified", "verified"):
         return False
 
-    if any(s in intent for s in SENSITIVE_INTENTS):
+    # Policy / info questions NEVER require customer identity
+    if is_policy_or_info_query(message, intent):
+        return False
+
+    # Action requests on orders/accounts REQUIRE identity
+    if is_action_request(message, intent):
         return True
 
-    # Fallback when supervisor intent is missing/empty at gate time
-    if any(
-        k in message
-        for k in (
-            "return",
-            "refund",
-            "cancel",
-            "replacement",
-            "replace",
-            "damaged",
-            "order status",
-            "track my order",
-        )
-    ):
+    if any(s in intent for s in SENSITIVE_INTENTS) and not is_policy_or_info_query(message, intent):
         return True
 
     if risk_level in ("high", "critical"):

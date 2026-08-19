@@ -10,6 +10,8 @@ from identity.service import (
     extract_contact,
     identify_order_ownership,
     user_has_no_order_id,
+    is_policy_or_info_query,
+    is_action_request,
 )
 from common.messages import get_last_user_message
 
@@ -74,14 +76,19 @@ def identity_gate_node(state: Dict[str, Any]) -> Dict[str, Any]:
         or memory.get("pending_contact")
     )
 
+    is_policy = is_policy_or_info_query(message, intent)
+
     # CRITICAL: must run BEFORE "if not required" return
-    if auth_level in (AuthLevel.ANONYMOUS.value, "anonymous"):
+    if auth_level in (AuthLevel.ANONYMOUS.value, "anonymous") and not is_policy:
         if order_id or contact:
             pending = True
 
+    if is_policy:
+        pending = False
+
     print(
         f"[IDENTITY] intent={intent!r} risk={risk_level!r} auth={auth_level!r} "
-        f"pending={pending} order_id={order_id!r} contact={contact!r} "
+        f"pending={pending} is_policy={is_policy} order_id={order_id!r} contact={contact!r} "
         f"msg={message[:80]!r}"
     )
 
@@ -108,12 +115,12 @@ def identity_gate_node(state: Dict[str, Any]) -> Dict[str, Any]:
             "missing_inputs": ["order_id"],
         }
 
-    required = identity_required(
+    required = (identity_required(
         intent,
         risk_level,
         auth_level,
         message=message,
-    ) or pending
+    ) or pending) and not is_policy
 
     if not required:
         print("[IDENTITY] not required")
