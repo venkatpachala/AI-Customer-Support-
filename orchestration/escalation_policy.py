@@ -117,10 +117,11 @@ def evaluate_escalation(state: Dict[str, Any]) -> Tuple[bool, Optional[str], Lis
     if confidence and confidence < float(tenant.get("min_confidence_to_auto_resolve", 0.45)):
         matched.append("low_confidence")
 
-    # 9) policy ambiguity: action/policy answer with no citations and no tools
+    # 9) policy ambiguity: action/policy answer with no citations, no prefetched docs, and no tools
     citations = state.get("citations") or []
+    prefetched_docs = state.get("prefetched_docs") or []
     tool_results = state.get("tool_results") or {}
-    if not citations and not tool_results and any(k in text for k in ["policy", "allowed", "can i return", "refund policy"]):
+    if not citations and not prefetched_docs and not tool_results and any(k in text for k in ["policy", "allowed", "can i return", "refund policy"]):
         matched.append("policy_ambiguity")
 
     # 10) repeated failure from memory/tools

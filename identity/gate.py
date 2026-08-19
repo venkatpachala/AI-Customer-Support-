@@ -1,109 +1,92 @@
-from typing import Dict, Any, List, Optional
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional
 
 from identity.models import AuthLevel
+from identity.service import (
+    identity_required,
+    build_challenge,
+    extract_order_id,
+    extract_contact,
+    identify_order_ownership,
+    user_has_no_order_id,
+)
 from common.messages import get_last_user_message
 
-try:
-    # optional helpers if present
-    from identity.service import extract_order_id
-except Exception:  # pragma: no cover
-    import re
 
-    def extract_order_id(text: str) -> Optional[str]:
-        match = re.search(r"(?:order\s*#?|#)?(\d{5,})", text or "", re.IGNORECASE)
-        return match.group(1) if match else None
-
-
-SENSITIVE_KEYWORDS = [
-    "return",
-    "refund",
-    "cancel",
-    "replacement",
-    "replace",
-    "damaged",
-    "order status",
-    "track my order",
-]
-
-_LEVEL = {
-    AuthLevel.ANONYMOUS.value: 0,
-    "anonymous": 0,
-    AuthLevel.IDENTIFIED.value: 1,
-    "identified": 1,
-    AuthLevel.VERIFIED.value: 2,
-    "verified": 2,
-}
-
-
-def _message_looks_sensitive(message: str) -> bool:
-    text = (message or "").lower()
-    return any(k in text for k in SENSITIVE_KEYWORDS)
-
-
-def _is_sensitive_intent(intent: str) -> bool:
-    intent = (intent or "").lower()
-    return any(k in intent for k in ["return", "refund", "cancel", "replace", "replacement"])
-
-
-def _has_sufficient_auth(current: str, required: str) -> bool:
-    return _LEVEL.get((current or "anonymous").lower(), 0) >= _LEVEL.get((required or "anonymous").lower(), 0)
+def _challenge_dict(challenge) -> Dict[str, Any]:
+    if hasattr(challenge, "dict"):
+        return challenge.dict()
+    if hasattr(challenge, "model_dump"):
+        return challenge.model_dump()
+    return {
+        "required": getattr(challenge, "required", True),
+        "reason": getattr(challenge, "reason", ""),
+        "required_fields": getattr(challenge, "required_fields", []),
+        "message": getattr(challenge, "message", ""),
+    }
 
 
 def identity_gate_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Trusted-context identity gate.
-
-    Production model:
-    - Do NOT collect phone/email in free-text chat
-    - Rely on gateway/backend auth context:
-        auth_level: anonymous | identified | verified
-        verified: bool
-        verified_order_ids: list[str]
-    - Sensitive actions require minimum auth
-    - High-value actions require verified
+    Phase 2.3 multi-turn order ownership gate.
     """
-    intent = (state.get("intent") or "").lower().strip()
-    risk_level = (state.get("risk_level") or "low").lower().strip()
     memory = state.get("memory_context") or {}
     message = get_last_user_message(state.get("messages", [])) or ""
 
-    # Prefer explicit request auth context, then memory
-    auth_level = (
+    intent = (
+        state.get("intent")
+        or (state.get("current_plan") or {}).get("intent")
+        or memory.get("issue_type")
+        or memory.get("intent")
+        or ""
+    )
+    intent = str(intent).lower().strip()
+
+    risk_level = str(state.get("risk_level") or memory.get("risk_level") or "low").lower().strip()
+
+    auth_level = str(
         state.get("auth_level")
         or memory.get("auth_level")
         or AuthLevel.ANONYMOUS.value
-    )
-    auth_level = str(auth_level).lower().strip()
+    ).lower().strip()
 
-    verified = bool(state.get("verified") or auth_level == AuthLevel.VERIFIED.value)
-    if verified:
-        auth_level = AuthLevel.VERIFIED.value
-
-    verified_order_ids: List[str] = list(
-        state.get("verified_order_ids")
-        or memory.get("verified_order_ids")
-        or []
-    )
-
-    tenant_config = state.get("tenant_config") or {}
-    refund_limit = float(tenant_config.get("refund_auto_limit", 2000))
-    amount = float(state.get("refund_amount") or state.get("amount") or 0)
-
+    # Resolve fields first (this turn + sticky memory)
     order_id = (
-        state.get("resolved_order_id")
+        extract_order_id(message)
+        or state.get("resolved_order_id")
         or memory.get("active_order_id")
-        or extract_order_id(message)
+        or memory.get("pending_order_id")
+    )
+    contact = (
+        extract_contact(message)
+        or state.get("customer_contact")
+        or memory.get("customer_contact")
+        or memory.get("pending_contact")
     )
 
-    sensitive = _is_sensitive_intent(intent) or _message_looks_sensitive(message)
+    pending = bool(
+        state.get("needs_identity")
+        or memory.get("needs_identity")
+        or state.get("identity_challenge")
+        or memory.get("identity_challenge")
+        or memory.get("pending_order_id")
+        or memory.get("pending_contact")
+    )
+
+    # CRITICAL: must run BEFORE "if not required" return
+    if auth_level in (AuthLevel.ANONYMOUS.value, "anonymous"):
+        if order_id or contact:
+            pending = True
 
     print(
         f"[IDENTITY] intent={intent!r} risk={risk_level!r} auth={auth_level!r} "
-        f"verified={verified} sensitive={sensitive} amount={amount} order_id={order_id!r}"
+        f"pending={pending} order_id={order_id!r} contact={contact!r} "
+        f"msg={message[:80]!r}"
     )
 
-    # Non-sensitive (policy FAQs etc.) → pass
-    if not sensitive:
+    if auth_level in (AuthLevel.IDENTIFIED.value, AuthLevel.VERIFIED.value):
+        print(f"[IDENTITY] skip: already {auth_level}")
         return {
             "needs_identity": False,
             "identity_blocked": False,
@@ -112,100 +95,108 @@ def identity_gate_node(state: Dict[str, Any]) -> Dict[str, Any]:
             "resolved_order_id": order_id,
         }
 
-    # Already good enough and no order mismatch checks needed
-    # Determine required auth
-    if amount >= refund_limit or risk_level in ("high", "critical"):
-        required = AuthLevel.VERIFIED.value
-    else:
-        required = AuthLevel.IDENTIFIED.value
-
-    # High-value / high-risk must be verified
-    if required == AuthLevel.VERIFIED.value and not _has_sufficient_auth(auth_level, required):
-        msg = (
-            "For security, high-value or high-risk refund/return requests require a verified account. "
-            "Please continue from your logged-in account or contact support."
-        )
-        print("[IDENTITY] blocked: verified required")
+    if pending and user_has_no_order_id(message):
+        challenge = build_challenge("no_order_id")
+        print("[IDENTITY] user has no order id → escalate")
         return {
             "needs_identity": True,
             "identity_blocked": True,
             "needs_escalation": True,
-            "escalation_reason": "Sensitive high-value action requires verified customer context",
-            "auth_level": auth_level,
-            "resolved_order_id": order_id,
-            "identity_challenge": {
-                "type": "verification_required",
-                "message": msg,
-            },
+            "escalation_reason": "Customer cannot provide order ID for ownership verification",
+            "identity_challenge": _challenge_dict(challenge),
+            "auth_level": AuthLevel.ANONYMOUS.value,
+            "missing_inputs": ["order_id"],
         }
 
-    # Normal sensitive actions require at least identified
-    if not _has_sufficient_auth(auth_level, required):
-        msg = (
-            "To proceed with this request, please continue from your logged-in account "
-            "so we can securely match your order."
-        )
-        print("[IDENTITY] blocked: identified required")
-        return {
-            "needs_identity": True,
-            "identity_blocked": True,
-            "needs_escalation": False,
-            "auth_level": auth_level,
-            "resolved_order_id": order_id,
-            "missing_inputs": ["login"],
-            "identity_challenge": {
-                "type": "login_required",
-                "message": msg,
-            },
-        }
+    required = identity_required(
+        intent,
+        risk_level,
+        auth_level,
+        message=message,
+    ) or pending
 
-    # If backend provided verified order list, enforce membership when order_id known
-    if order_id and verified_order_ids:
-        if str(order_id) not in set(str(x) for x in verified_order_ids):
-            msg = (
-                "We could not match that order to your verified account. "
-                "Please check the order ID or contact support."
-            )
-            print("[IDENTITY] blocked: order not in verified_order_ids")
-            return {
-                "needs_identity": True,
-                "identity_blocked": True,
-                "needs_escalation": True,
-                "escalation_reason": "Order not linked to verified customer context",
-                "auth_level": auth_level,
-                "resolved_order_id": order_id,
-                "identity_challenge": {
-                    "type": "order_mismatch",
-                    "message": msg,
-                },
-            }
-
-    # If sensitive but no order id yet, allow flow to continue and ask for order id
-    # (do not ask for phone/email contact in chat)
-    missing: List[str] = []
-    if not order_id:
-        missing.append("order_id")
-
-    if missing:
-        print(f"[IDENTITY] pass with missing inputs: {missing}")
+    if not required:
+        print("[IDENTITY] not required")
         return {
             "needs_identity": False,
             "identity_blocked": False,
             "auth_level": auth_level,
-            "resolved_order_id": order_id,
-            "missing_inputs": missing,
-            "identity_challenge": {
-                "type": "missing_order_id",
-                "message": "Please share your Order ID so we can continue with this request.",
-            },
+            "identity_challenge": None,
         }
 
-    print(f"[IDENTITY] pass auth_level={auth_level}")
+    missing: List[str] = []
+    if not order_id:
+        missing.append("order_id")
+    if not contact:
+        missing.append("contact")
+
+    if missing:
+        challenge = build_challenge("missing_identity_fields")
+        if missing == ["contact"]:
+            challenge.message = (
+                f"Thanks, I have order {order_id}. "
+                "Please share the phone number or email used when placing the order."
+            )
+        elif missing == ["order_id"]:
+            challenge.message = (
+                "Please share your Order ID "
+                "(and the phone or email used on the order if you haven't already)."
+            )
+        else:
+            challenge.message = (
+                "To continue with your return, please provide your Order ID "
+                "and the phone number or email used for the order."
+            )
+
+        print(f"[IDENTITY] still missing: {missing}")
+        return {
+            "needs_identity": True,
+            "identity_blocked": True,
+            "identity_challenge": _challenge_dict(challenge),
+            "missing_inputs": missing,
+            "auth_level": AuthLevel.ANONYMOUS.value,
+            "resolved_order_id": order_id,
+            "customer_contact": contact,
+            "pending_order_id": order_id,
+            "pending_contact": contact,
+        }
+
+    result = identify_order_ownership(order_id, contact)
+    print(f"[IDENTITY] ownership success={result.success} error={result.error_code}")
+
+    identity_payload = (
+        result.dict()
+        if hasattr(result, "dict")
+        else (result.model_dump() if hasattr(result, "model_dump") else result.__dict__)
+    )
+
+    if not result.success:
+        challenge = build_challenge(result.error_code or "ownership_failed")
+        challenge.message = (
+            "We could not verify order ownership with those details. "
+            "Please re-check the Order ID and the phone/email used on the order."
+        )
+        return {
+            "needs_identity": True,
+            "identity_blocked": True,
+            "identity_result": identity_payload,
+            "identity_challenge": _challenge_dict(challenge),
+            "auth_level": AuthLevel.ANONYMOUS.value,
+            "resolved_order_id": order_id,
+            "customer_contact": contact,
+            "pending_order_id": order_id,
+            "pending_contact": contact,
+        }
+
     return {
         "needs_identity": False,
         "identity_blocked": False,
-        "auth_level": auth_level,
+        "identity_result": identity_payload,
         "identity_challenge": None,
+        "auth_level": AuthLevel.IDENTIFIED.value,
         "resolved_order_id": order_id,
-        "verified_order_ids": verified_order_ids,
+        "customer_contact": contact,
+        "missing_inputs": [],
+        "pending_order_id": None,
+        "pending_contact": None,
     }

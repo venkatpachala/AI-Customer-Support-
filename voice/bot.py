@@ -1,53 +1,96 @@
 """
-Phase 1 voice bot — standalone Pipecat hello path.
+voice/bot.py — Pipecat runner entry point for voice bot.
 
-Run:
-  python -m voice.bot
+This runs via the Pipecat development runner:
+  python -m voice.bot [--transport webrtc] [--host localhost] [--port 7860]
 
-Then open the runner UI (typically http://localhost:7860/client),
-allow mic, and talk.
+The runner auto-wires:
+  CLI args → SmallWebRTCRunnerArguments → create_transport()
+  → transport + callback → bot(runner_args) → run_bot()
 
-Does NOT call SupportRuntime / LangGraph.
+For production use, prefer voice/server.py (full FastAPI integration).
+For quick prototyping / Pipecat CLI, use this file.
 """
-
 from __future__ import annotations
 
-import os
 from dotenv import load_dotenv
 from loguru import logger
 
 load_dotenv(override=True)
 
+# Register tools before importing graph
+from tools.bootstrap import register_default_tools
+register_default_tools()
+
+from config.loaders import load_tenant_config
+from interactions.service import InteractionService
+from memory.service import MemoryService
+from observability.logging import log_event, new_request_id
+from orchestration.graph import compiled_graph
+from runtime.support_runtime import SupportRuntime
+
+from voice.adapter import SupportRuntimeAdapter
+from voice.config import voice_config
+from voice.context import VoiceSession
+from voice.pipeline import build_pipeline_task, build_transport_params
+
 from pipecat.pipeline.runner import PipelineRunner
-from pipecat.pipeline.task import PipelineParams, PipelineTask
 from pipecat.runner.types import RunnerArguments
 from pipecat.runner.utils import create_transport
 from pipecat.transports.base_transport import TransportParams
 
-from voice.pipeline import build_phase1_pipeline
+
+def _invoke_graph(inputs: dict) -> dict:
+    return compiled_graph.invoke(inputs)
+
+
+def _build_runtime() -> SupportRuntime:
+    def _load_tenant(tenant_id: str):
+        cfg = load_tenant_config(tenant_id)
+        return cfg.dict() if hasattr(cfg, "dict") else (
+            cfg.model_dump() if hasattr(cfg, "model_dump") else cfg
+        )
+
+    return SupportRuntime(
+        graph_invoker=_invoke_graph,
+        memory_service=MemoryService(),
+        interaction_service=InteractionService(),
+        load_tenant_config=_load_tenant,
+        new_request_id=new_request_id,
+        log_event=log_event,
+        apply_output_guard=lambda text: text or "",
+    )
 
 
 async def run_bot(transport, runner_args: RunnerArguments):
-    logger.info("Phase 1 voice bot starting (no SupportRuntime)")
-    pipeline, _, _ = build_phase1_pipeline(transport)
+    """Run one voice call pipeline."""
+    logger.info("[bot] Phase 2 voice pipeline starting")
+    voice_config.validate()
 
-    task = PipelineTask(
-        pipeline,
-        params=PipelineParams(
-            allow_interruptions=True,
-            enable_metrics=True,
-        ),
+    runtime = _build_runtime()
+    adapter = SupportRuntimeAdapter(runtime)
+
+    session = VoiceSession(
+        tenant_id="zepto",
+        customer_id="bot_demo_user",
+        auth_level="anonymous",
     )
-    runner = PipelineRunner(handle_sigint=runner_args.handle_sigint)
+    logger.info(f"[bot] VoiceSession call_id={session.call_id} customer={session.customer_id}")
+
+    task = build_pipeline_task(transport, adapter, session, voice_config)
+
+    runner = PipelineRunner(handle_sigint=True)
     await runner.run(task)
+
+    logger.info(f"[bot] Call ended. Turns={session.turn_count} avg_ttfa={session.avg_ttfa_ms()}")
 
 
 async def bot(runner_args: RunnerArguments):
+    """
+    Pipecat bot entry point — called by the runner for each connection.
+    """
     transport_params = {
-        "webrtc": lambda: TransportParams(
-            audio_in_enabled=True,
-            audio_out_enabled=True,
-        ),
+        "webrtc": lambda: build_transport_params(voice_config),
     }
     transport = await create_transport(runner_args, transport_params)
     await run_bot(transport, runner_args)
@@ -55,5 +98,4 @@ async def bot(runner_args: RunnerArguments):
 
 if __name__ == "__main__":
     from pipecat.runner.run import main
-
     main()

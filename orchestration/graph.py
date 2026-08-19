@@ -11,36 +11,43 @@ from identity.gate import identity_gate_node
 from agents.qa import qa_node
 
 
-def after_identity_route(state: AgentState) -> str:
-    """
-    Identity first, then reuse policy/action router.
-
-    Critical:
-    - if identity blocks → qa/end
-    - else decide planner vs hitl using after_supervisor_route
-      (includes hard action text signals even when intent is empty)
-    """
-    if state.get("blocked"):
-        return "end"
-
-    # Hard identity failures that should stop the graph
+def after_identity_route(state):
     if state.get("identity_blocked") and state.get("needs_escalation"):
         return "end"
 
-    # Soft identity challenges (login required / missing order id message)
-    if state.get("identity_blocked"):
+    # Still collecting identity → speak challenge
+    if state.get("identity_blocked") or (
+        state.get("needs_identity") and state.get("identity_challenge")
+    ):
         return "qa"
 
-    if state.get("needs_identity") and state.get("identity_challenge"):
-        return "qa"
+    memory = state.get("memory_context") or {}
+    intent = (
+        state.get("intent")
+        or (state.get("current_plan") or {}).get("intent")
+        or memory.get("issue_type")
+        or memory.get("intent")
+        or ""
+    )
+    intent = str(intent).lower().strip()
 
-    # Normal path: policy fast-path vs action planner
-    # This uses hard action signals in message text, so empty intent still works
-    route = after_supervisor_route(state)
-    if route not in {"planner", "hitl_check", "end"}:
-        # safety fallback
-        return "hitl_check"
-    return route
+    auth = str(state.get("auth_level") or memory.get("auth_level") or "").lower()
+
+    # Just identified on a contact-only turn — continue the return/refund case
+    action_intents = ("return", "refund", "cancel", "replace", "replacement", "track")
+    if auth in ("identified", "verified") and any(a in intent for a in action_intents):
+        return "planner"
+
+    # Fallback: if we have a resolved order and were in identity flow, still act
+    if auth in ("identified", "verified") and (
+        state.get("resolved_order_id") or memory.get("pending_order_id") or memory.get("active_order_id")
+    ):
+        return "planner"
+
+    if any(a in intent for a in action_intents):
+        return "planner"
+
+    return "hitl_check"
 
 
 def build_graph():

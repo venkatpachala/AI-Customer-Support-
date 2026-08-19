@@ -3,6 +3,8 @@ from pathlib import Path
 import pickle
 from typing import Dict, Any, List
 
+from langchain_core.messages import AIMessage
+
 from orchestration.state import AgentState
 from common.messages import get_last_user_message
 from observability.logging import log_event
@@ -33,12 +35,46 @@ def _as_list(value: Any) -> List[str]:
     return [str(value)]
 
 
+def _challenge_message(challenge: Any) -> str:
+    if not challenge:
+        return ""
+    if isinstance(challenge, dict):
+        return (challenge.get("message") or "").strip()
+    return (getattr(challenge, "message", None) or "").strip()
+
+
 def qa_node(state: AgentState) -> Dict:
     request_id = state.get("request_id", "unknown")
     tenant_id = state.get("tenant_id", "unknown")
     start_time = time.time()
 
     log_event("qa_started", request_id, node="qa")
+
+    # --- Identity challenge short-circuit (Phase 2.3) ---
+    challenge = state.get("identity_challenge")
+    if state.get("needs_identity") and isinstance(challenge, dict) and challenge.get("message"):
+        from langchain_core.messages import AIMessage
+
+        msg = str(challenge["message"]).strip()
+        log_event(
+            "qa_identity_challenge",
+            request_id,
+            node="qa",
+            data={"challenge_keys": list(challenge.keys())},
+        )
+        try:
+            NODE_LATENCY.labels(node="qa").observe(time.time() - start_time)
+        except Exception:
+            pass
+
+        return {
+            "messages": [AIMessage(content=msg)],
+            "confidence": 1.0,
+            "citations": [],
+            "needs_identity": True,
+            "identity_challenge": challenge,
+            "missing_inputs": list(state.get("missing_inputs") or challenge.get("missing") or []),
+        }
 
     query = get_last_user_message(state.get("messages", []))
     memory_context = state.get("memory_context") or {}
@@ -47,11 +83,51 @@ def qa_node(state: AgentState) -> Dict:
         "missing_inputs": [],
     }
 
+    auth_level = (
+        state.get("auth_level")
+        or memory_context.get("auth_level")
+        or "anonymous"
+    )
+    needs_identity = bool(
+        state.get("needs_identity", False)
+        or memory_context.get("needs_identity", False)
+    )
+    identity_challenge = state.get("identity_challenge") or memory_context.get("identity_challenge") or {}
+    identity_result = state.get("identity_result") or {}
+    challenge_msg = _challenge_message(identity_challenge)
+
+    # -------- Phase 2.3: speak identity challenge, skip LLM --------
+    if needs_identity and challenge_msg:
+        log_event(
+            "qa_identity_challenge",
+            request_id,
+            node="qa",
+            data={
+                "missing_inputs": state.get("missing_inputs"),
+                "auth_level": auth_level,
+            },
+        )
+        duration = time.time() - start_time
+        try:
+            NODE_LATENCY.labels(node="qa").observe(duration)
+        except Exception:
+            pass
+        return {
+            "messages": [AIMessage(content=challenge_msg)],
+            "citations": [],
+            "confidence": 1.0,
+            "missing_inputs": _as_list(state.get("missing_inputs")),
+            "missing_photos": False,
+            "auth_level": auth_level,
+            "needs_identity": True,
+        }
+
     # ---------------- RAG (prefer prefetched docs) ----------------
     prefetched_docs = state.get("prefetched_docs") or []
     prefetched_citations = state.get("prefetched_citations") or []
     docs = []
     used_prefetch = False
+    citations: List[str] = []
 
     if prefetched_docs:
         used_prefetch = True
@@ -130,15 +206,6 @@ def qa_node(state: AgentState) -> Dict:
     photos_received = bool(memory_context.get("photos_received", False))
     case_status = memory_context.get("case_status") or "open"
 
-    auth_level = (
-        state.get("auth_level")
-        or memory_context.get("auth_level")
-        or "anonymous"
-    )
-    needs_identity = bool(state.get("needs_identity", False))
-    identity_challenge = state.get("identity_challenge") or {}
-    identity_result = state.get("identity_result") or {}
-
     missing_photos = bool(
         state.get("missing_photos", False)
         or ("photos" in missing_inputs)
@@ -161,19 +228,22 @@ Do not promise refund completion, return labels, or timelines.
 Do not ask for more tools to be run.
 """
     elif needs_identity:
-        challenge_msg = identity_challenge.get("message") or (
+        # Fallback if challenge message was empty
+        fallback_challenge = (
             "Please share your Order ID and the phone number or email used while placing the order."
         )
-        identity_error = identity_result.get("error") or identity_result.get("error_code")
+        identity_error = ""
+        if isinstance(identity_result, dict):
+            identity_error = identity_result.get("error") or identity_result.get("error_code") or ""
         extra_instruction = f"""
 IMPORTANT:
-Order ownership verification is required before proceeding with this request.
+Order ownership verification is required before proceeding.
 Do NOT process refund/return/cancel actions yet.
 Do NOT invent order details.
-Ask clearly for any missing ownership details.
+Ask clearly for missing ownership details only.
 
-Challenge message to convey:
-{challenge_msg}
+Challenge to convey:
+{challenge_msg or fallback_challenge}
 
 Identity error (if any): {identity_error}
 Missing inputs: {missing_inputs}
@@ -183,7 +253,7 @@ Missing inputs: {missing_inputs}
         extra_instruction = f"""
 IMPORTANT:
 Photos are required before we can proceed with return/refund for {order_ref}.
-You must explicitly ask the customer to upload clear photos of the damaged product.
+Explicitly ask the customer to upload clear photos of the damaged product.
 Mention the order ID if known.
 Do NOT escalate.
 Do NOT invent return labels, shipping addresses, pickup slots, or refund timelines.
@@ -214,6 +284,7 @@ STRICT RULES:
 6. If case is escalated, tell the user a human agent will review it.
 7. If tools failed due to system issues, still help with policy guidance and next required customer action.
 8. Keep responses concise and operational.
+9. Never repeat the customer's message back as your answer.
 
 MEMORY:
 - active_order_id: {active_order_id}

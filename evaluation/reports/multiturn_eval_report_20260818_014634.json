@@ -1,0 +1,162 @@
+{
+  "summary": {
+    "total": 4,
+    "passed": 3,
+    "failed": 1,
+    "pass_rate": 75.0
+  },
+  "results": [
+    {
+      "id": "multiturn_damaged_photos_1",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 1,
+          "message": "My order #12345 is damaged. I want to return it.",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "PASS",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "39525903-c07d-4b70-8eec-ec037f54647a",
+          "case_id": "4f98ad5e-6adf-43de-960e-8d4e1150f5cf",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "We're sorry that your item arrived damaged for order #12345. To proceed with the return, please upload clear photos of the damaged product. Once we receive the photos, we can continue the return process."
+        },
+        {
+          "turn": 2,
+          "message": "I have uploaded the photos just now",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "39525903-c07d-4b70-8eec-ec037f54647a",
+          "case_id": "4f98ad5e-6adf-43de-960e-8d4e1150f5cf",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Thank you for your message. However, it appears that we have not yet received the photos of the damaged product. Please upload clear photos so we can proceed with your return/refund. If you need assistance with the uploa"
+        }
+      ]
+    },
+    {
+      "id": "multiturn_order_id_then_return_1",
+      "passed": false,
+      "turns": [
+        {
+          "turn": 1,
+          "message": "I want to return my order",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "e7c9309b-2427-4f99-9b8c-0a9b7f05ca58",
+          "case_id": "736f6cca-ad38-40f6-84ff-2c622fcaff53",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "To proceed with your return request, I need to verify your order ownership. Please provide your Order ID and the phone number or email address used for the order. Once I have this information, I can assist you further. T"
+        },
+        {
+          "turn": 2,
+          "message": "Order id is 12345 and it is damaged",
+          "passed": false,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "FAIL (did not ask for photos)",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "e7c9309b-2427-4f99-9b8c-0a9b7f05ca58",
+          "case_id": "736f6cca-ad38-40f6-84ff-2c622fcaff53",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "To proceed with your request regarding the damaged order, please provide the phone number or email address associated with the order ID 12345. This will help us securely verify your ownership before taking further action"
+        }
+      ]
+    },
+    {
+      "id": "multiturn_high_value_1",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 1,
+          "message": "I want a refund of 2500 for damaged order #12345",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "3306b5e0-11a8-418a-9d58-478394ac579e",
+          "case_id": "40eada02-60a0-4271-b4a9-a60d207d4fc7",
+          "escalated": true,
+          "blocked": false,
+          "response_preview": "For security, high-value refund or account-sensitive requests require account verification. Please continue from your logged-in/verified account or contact support."
+        },
+        {
+          "turn": 2,
+          "message": "Please process it quickly",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "3306b5e0-11a8-418a-9d58-478394ac579e",
+          "case_id": "40eada02-60a0-4271-b4a9-a60d207d4fc7",
+          "escalated": true,
+          "blocked": false,
+          "response_preview": "This case has already been escalated to a human support agent. They will review it and get back to you shortly."
+        }
+      ]
+    },
+    {
+      "id": "multiturn_preference_1",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 1,
+          "message": "I didn\u2019t like the color of the product",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "85c91571-9487-49a6-87c1-9dad43a1f40c",
+          "case_id": "cd6f0fe2-c54e-46d3-801c-c49a498066e8",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "Thank you for reaching out. I understand that you are not satisfied with the color of the product. To assist you further with a return or refund, we require clear photos of the product. Please upload the photos at your e"
+        },
+        {
+          "turn": 2,
+          "message": "So can I return it?",
+          "passed": true,
+          "checks": {
+            "block": "PASS",
+            "escalate": "PASS",
+            "ask_for_photos": "SKIP",
+            "hallucination_or_regression": "PASS"
+          },
+          "session_id": "85c91571-9487-49a6-87c1-9dad43a1f40c",
+          "case_id": "cd6f0fe2-c54e-46d3-801c-c49a498066e8",
+          "escalated": false,
+          "blocked": false,
+          "response_preview": "We're sorry that your item arrived damaged. To proceed with the return, please upload clear photos of the damaged product. Once we receive the photos, we can continue the return process."
+        }
+      ]
+    }
+  ]
+}

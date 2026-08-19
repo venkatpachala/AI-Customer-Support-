@@ -4,13 +4,12 @@ from common.messages import get_last_user_message
 
 def detect_pii(text: str) -> Tuple[bool, str]:
     patterns = {
-        "email": r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
-        "phone": r'\b\d{10}\b',
-        "card": r'\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b'
+        "card": r'\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b',
+        "ssn": r'\b\d{3}-\d{2}-\d{4}\b',
     }
     for name, pattern in patterns.items():
         if re.search(pattern, text):
-            return True, f"PII detected: {name}"
+            return True, f"Sensitive data detected: {name}. Please do not share payment card numbers or SSN."
     return False, ""
 
 def detect_injection(text: str) -> bool:

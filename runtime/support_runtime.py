@@ -16,7 +16,7 @@ class SupportRuntime:
 
     Phase 0:
     - invoke_agent(ctx, inputs): gateway-owned short-circuits + shared graph invoke
-    - handle(ctx): fuller path for future channels (voice can start here later)
+    - handle(ctx): fuller path for voice / future channels
     """
 
     def __init__(
@@ -57,20 +57,92 @@ class SupportRuntime:
     def clear_events(self) -> None:
         self._events.clear()
 
+    @staticmethod
+    def _merge_memory_context(
+        base: Optional[Dict[str, Any]],
+        extra: Optional[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        merged: Dict[str, Any] = {}
+        if isinstance(base, dict):
+            merged.update(base)
+        if isinstance(extra, dict):
+            for k, v in extra.items():
+                if v is not None:
+                    merged[k] = v
+        return merged
+
+    @staticmethod
+    def _extract_assistant_text(result: Dict[str, Any], user_text: str) -> str:
+        """
+        Prefer a real assistant reply. Never treat the user utterance as the response.
+        """
+        user_text = (user_text or "").strip()
+        messages = result.get("messages") or []
+
+        for m in reversed(messages):
+            content = (getattr(m, "content", None) or str(m) or "").strip()
+            if not content:
+                continue
+            if user_text and content == user_text:
+                continue
+            msg_type = (getattr(m, "type", None) or getattr(m, "role", None) or "").lower()
+            if msg_type in ("human", "user"):
+                continue
+            return content
+
+        # Identity challenge body (gate / QA may set this without a new AI message)
+        chal = result.get("identity_challenge")
+        if isinstance(chal, dict):
+            msg = (chal.get("message") or "").strip()
+            if msg and msg != user_text:
+                return msg
+
+        return ""
+
+    def _build_runtime_response(
+        self,
+        *,
+        request_id: str,
+        ctx: RequestContext,
+        result: Dict[str, Any],
+        response_text: str = "",
+        status: Optional[str] = None,
+    ) -> RuntimeResponse:
+        escalated = bool(result.get("needs_escalation") or result.get("escalated"))
+        blocked = bool(result.get("blocked"))
+        intent = result.get("intent") or (result.get("current_plan") or {}).get("intent")
+        missing_inputs = list(result.get("missing_inputs") or [])
+        order_id = result.get("resolved_order_id") or result.get("order_id")
+
+        if status is None:
+            status = "escalated" if escalated else ("blocked" if blocked else "open")
+            if missing_inputs:
+                status = "waiting_customer"
+
+        return RuntimeResponse(
+            response=response_text,
+            confidence=float(result.get("confidence") or 0.0),
+            citations=list(result.get("citations") or []),
+            escalated=escalated,
+            blocked=blocked,
+            reason=result.get("escalation_reason"),
+            tool_results=result.get("tool_results") or {},
+            request_id=request_id,
+            session_id=ctx.session_id,
+            case_id=ctx.case_id,
+            missing_inputs=missing_inputs,
+            auth_level=result.get("auth_level") or ctx.auth.auth_level,
+            identity_blocked=bool(result.get("identity_blocked")),
+            needs_identity=bool(result.get("needs_identity")),
+            identity_challenge=result.get("identity_challenge"),
+            intent=intent,
+            risk_level=result.get("risk_level"),
+            status=status,
+            order_id=order_id,
+            raw=result if isinstance(result, dict) else {},
+        )
+
     def invoke_agent(self, ctx: RequestContext, inputs: Dict[str, Any]) -> RuntimeResponse:
-        """
-        Phase 0 core path used by gateway /chat.
-
-        Gateway owns:
-        - policy cache
-        - sticky escalation
-        - high-value verification short-circuit
-        - detailed memory writeback / response formatting
-
-        Runtime owns:
-        - channel-agnostic graph invocation
-        - runtime events around the agent brain
-        """
         request_id = ctx.request_id or self.new_request_id()
         ctx.request_id = request_id
 
@@ -84,10 +156,15 @@ class SupportRuntime:
         if ctx.case_id:
             inputs.setdefault("case_id", ctx.case_id)
 
-        # Ensure auth fields are present for identity_gate
         inputs.setdefault("auth_level", ctx.auth.auth_level)
         inputs.setdefault("verified", ctx.auth.verified)
         inputs.setdefault("verified_order_ids", list(ctx.auth.verified_order_ids or []))
+
+        base_mc = inputs.get("memory_context") or {}
+        inputs["memory_context"] = self._merge_memory_context(
+            base_mc,
+            getattr(ctx, "memory_context", None) or {},
+        )
 
         self._emit(
             RuntimeEvent(
@@ -100,54 +177,47 @@ class SupportRuntime:
                     "via": "invoke_agent",
                     "customer_id": ctx.customer_id,
                     "message_preview": (ctx.message or "")[:120],
+                    "needs_identity": bool(
+                        (inputs.get("memory_context") or {}).get("needs_identity")
+                    ),
                 },
             )
         )
 
         try:
             result = self.graph_invoker(inputs) or {}
+            if not isinstance(result, dict):
+                result = {}
 
-            escalated = bool(result.get("needs_escalation") or result.get("escalated"))
-            blocked = bool(result.get("blocked"))
-            intent = result.get("intent") or (result.get("current_plan") or {}).get("intent")
+            resp = self._build_runtime_response(
+                request_id=request_id,
+                ctx=ctx,
+                result=result,
+                response_text="",
+            )
+            if not resp.session_id:
+                resp.session_id = ctx.session_id or inputs.get("session_id")
+            if not resp.case_id:
+                resp.case_id = ctx.case_id or inputs.get("case_id")
 
             self._emit(
                 RuntimeEvent(
                     type=RuntimeEventType.RESPONSE_READY,
                     request_id=request_id,
-                    session_id=ctx.session_id or inputs.get("session_id"),
+                    session_id=resp.session_id,
                     tenant_id=ctx.tenant_id,
                     channel=ctx.channel,
                     data={
                         "via": "invoke_agent",
-                        "escalated": escalated,
-                        "blocked": blocked,
-                        "intent": intent,
-                        "identity_blocked": bool(result.get("identity_blocked")),
+                        "escalated": resp.escalated,
+                        "blocked": resp.blocked,
+                        "intent": resp.intent,
+                        "identity_blocked": resp.identity_blocked,
+                        "needs_identity": resp.needs_identity,
                     },
                 )
             )
-
-            return RuntimeResponse(
-                response="",  # gateway formats final customer text in Phase 0
-                confidence=float(result.get("confidence") or 0.0),
-                citations=list(result.get("citations") or []),
-                escalated=escalated,
-                blocked=blocked,
-                reason=result.get("escalation_reason"),
-                tool_results=result.get("tool_results") or {},
-                request_id=request_id,
-                session_id=ctx.session_id or inputs.get("session_id"),
-                case_id=ctx.case_id or inputs.get("case_id"),
-                missing_inputs=list(result.get("missing_inputs") or []),
-                auth_level=result.get("auth_level") or ctx.auth.auth_level,
-                identity_blocked=bool(result.get("identity_blocked")),
-                intent=intent,
-                risk_level=result.get("risk_level"),
-                status=None,
-                order_id=result.get("resolved_order_id") or result.get("order_id"),
-                raw=result,
-            )
+            return resp
 
         except Exception as e:
             self._emit(
@@ -163,10 +233,6 @@ class SupportRuntime:
             raise
 
     def handle(self, ctx: RequestContext) -> RuntimeResponse:
-        """
-        Fuller channel entry (future voice/WhatsApp can use this).
-        Phase 0 chat prefers invoke_agent() so gateway can keep R1 short-circuits.
-        """
         started = time.time()
         request_id = ctx.request_id or self.new_request_id()
         ctx.request_id = request_id
@@ -178,7 +244,11 @@ class SupportRuntime:
                 session_id=ctx.session_id,
                 tenant_id=ctx.tenant_id,
                 channel=ctx.channel,
-                data={"via": "handle", "message": ctx.message, "customer_id": ctx.customer_id},
+                data={
+                    "via": "handle",
+                    "message": ctx.message,
+                    "customer_id": ctx.customer_id,
+                },
             )
         )
 
@@ -187,7 +257,6 @@ class SupportRuntime:
 
         try:
             if self.memory_service is not None:
-                # Compatible with current MemoryService signatures
                 try:
                     session = self.memory_service.get_or_create_session(
                         customer_id=ctx.customer_id,
@@ -230,12 +299,21 @@ class SupportRuntime:
             else:
                 memory_context = {}
 
+            memory_context = self._merge_memory_context(
+                memory_context,
+                getattr(ctx, "memory_context", None) or {},
+            )
             memory_context["auth_level"] = ctx.auth.auth_level
             memory_context["verified_order_ids"] = list(ctx.auth.verified_order_ids or [])
+            if getattr(ctx.auth, "contact", None):
+                memory_context.setdefault("customer_contact", ctx.auth.contact)
+                memory_context.setdefault("pending_contact", ctx.auth.contact)
 
             tenant_config = self.load_tenant_config(ctx.tenant_id) or {}
             if hasattr(tenant_config, "dict"):
                 tenant_config = tenant_config.dict()
+            elif hasattr(tenant_config, "model_dump"):
+                tenant_config = tenant_config.model_dump()
 
             inputs: Dict[str, Any] = {
                 "messages": [HumanMessage(content=ctx.message)],
@@ -253,18 +331,41 @@ class SupportRuntime:
                 "verification_issues": [],
                 **ctx.to_graph_seed(),
             }
+            inputs["memory_context"] = memory_context
 
-            # Reuse invoke_agent for the actual brain call
             runtime_result = self.invoke_agent(ctx, inputs)
             result = runtime_result.raw or {}
 
-            response_text = ""
-            messages = result.get("messages") or []
-            if messages:
-                last = messages[-1]
-                response_text = getattr(last, "content", None) or str(last)
+            # --- Fix: never treat user text as the assistant reply ---
+            response_text = self._extract_assistant_text(result, ctx.message or "")
             response_text = self.apply_output_guard(response_text or "")
-
+            if not response_text:
+                chal = result.get("identity_challenge")
+                if isinstance(chal, dict) and (chal.get("message") or "").strip():
+                    response_text = chal["message"].strip()
+                elif bool(result.get("needs_identity")):
+                    response_text = (
+                        "Please share your Order ID and the phone or email "
+                        "used when placing the order."
+                    )
+                elif (result.get("auth_level") or "").lower() in ("identified", "verified"):
+                    oid = result.get("resolved_order_id") or result.get("order_id")
+                    prefix = f"Thanks, I verified order {oid}. " if oid else "Thanks, I verified your order. "
+                    response_text = (
+                        prefix
+                        + "Please upload clear photos of the damage so we can continue."
+                    )
+                elif "photos" in (result.get("missing_inputs") or []):
+                    response_text = (
+                        "Please upload clear photos of the damaged product "
+                        "so we can proceed with the return."
+                    )
+                elif bool(result.get("needs_escalation") or result.get("escalated")):
+                    reason = result.get("escalation_reason") or "Your request requires review by our human support team."
+                    response_text = f"This case has been escalated to our support team. {reason}"
+                elif bool(result.get("blocked")):
+                    err = result.get("error") or "This request cannot be processed."
+                    response_text = f"{err}"
             escalated = bool(result.get("needs_escalation") or result.get("escalated"))
             blocked = bool(result.get("blocked"))
             missing_inputs = list(result.get("missing_inputs") or [])
@@ -273,9 +374,12 @@ class SupportRuntime:
             confidence = float(result.get("confidence") or 0.0)
             intent = result.get("intent") or (result.get("current_plan") or {}).get("intent")
             order_id = result.get("resolved_order_id") or result.get("order_id")
+            auth_level = result.get("auth_level") or ctx.auth.auth_level
+            needs_identity = bool(result.get("needs_identity"))
+            identity_challenge = result.get("identity_challenge")
 
             status = "escalated" if escalated else ("blocked" if blocked else "open")
-            if missing_inputs:
+            if missing_inputs or needs_identity:
                 status = "waiting_customer"
 
             if self.memory_service is not None and case is not None:
@@ -300,18 +404,21 @@ class SupportRuntime:
                 except Exception:
                     pass
 
-                try:
-                    self.memory_service.append_message(session, role="assistant", content=response_text)
-                except TypeError:
+                if response_text:
                     try:
                         self.memory_service.append_message(
-                            session_id=ctx.session_id,
-                            case_id=ctx.case_id,
-                            role="assistant",
-                            content=response_text,
+                            session, role="assistant", content=response_text
                         )
-                    except Exception:
-                        pass
+                    except TypeError:
+                        try:
+                            self.memory_service.append_message(
+                                session_id=ctx.session_id,
+                                case_id=ctx.case_id,
+                                role="assistant",
+                                content=response_text,
+                            )
+                        except Exception:
+                            pass
 
             latency_ms = (time.time() - started) * 1000.0
             if self.interaction_service is not None and ctx.session_id:
@@ -355,6 +462,8 @@ class SupportRuntime:
                         "escalated": escalated,
                         "blocked": blocked,
                         "intent": intent,
+                        "needs_identity": needs_identity,
+                        "auth_level": auth_level,
                         "latency_ms": round(latency_ms, 2),
                     },
                 )
@@ -372,8 +481,10 @@ class SupportRuntime:
                 session_id=ctx.session_id,
                 case_id=ctx.case_id,
                 missing_inputs=missing_inputs,
-                auth_level=result.get("auth_level") or ctx.auth.auth_level,
+                auth_level=auth_level,
                 identity_blocked=bool(result.get("identity_blocked")),
+                needs_identity=needs_identity,
+                identity_challenge=identity_challenge,
                 intent=intent,
                 risk_level=result.get("risk_level"),
                 status=status,

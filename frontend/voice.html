@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D2C Voice Support — Phase 2</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2d3048;
+      --accent: #4f8ef7;
+      --accent-hover: #3a7de0;
+      --danger: #e74c3c;
+      --success: #27ae60;
+      --warn: #f39c12;
+      --text: #e2e6f3;
+      --text-dim: #7b82a4;
+      --user-bubble: #1e2a4a;
+      --bot-bubble: #1f2937;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+    }
+
+    header h1 { font-size: 18px; font-weight: 600; }
+    header .subtitle { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+    /* ─── Status badge ── */
+    #status-badge {
+      margin-left: auto;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      background: var(--border);
+      color: var(--text-dim);
+      transition: all 0.3s;
+    }
+    #status-badge.connecting  { background: #2d3048; color: var(--warn); }
+    #status-badge.connected   { background: #1a2e1a; color: var(--success); }
+    #status-badge.listening   { background: #1a2e1a; color: var(--success); }
+    #status-badge.user_speaking { background: #2a1e0a; color: var(--warn); animation: pulse 1s infinite; }
+    #status-badge.processing  { background: #1e2a4a; color: var(--accent); animation: pulse 0.8s infinite; }
+    #status-badge.assistant_speaking { background: #1a2e1a; color: var(--success); }
+    #status-badge.ended, #status-badge.error { background: #2a1010; color: var(--danger); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* ─── Transcript area ── */
+    #transcript {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      line-height: 1.6;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user {
+      background: var(--user-bubble);
+      border: 1px solid #2d4080;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.assistant {
+      background: var(--bot-bubble);
+      border: 1px solid var(--border);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message .role {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      opacity: 0.6;
+    }
+
+    .message.user .role { color: var(--accent); }
+    .message.assistant .role { color: var(--success); }
+
+    /* ─── Partial transcript ── */
+    #partial {
+      font-size: 13px;
+      color: var(--text-dim);
+      font-style: italic;
+      padding: 8px 24px;
+      min-height: 28px;
+      transition: opacity 0.2s;
+    }
+
+    /* ─── Controls ── */
+    #controls {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    button {
+      padding: 12px 28px;
+      border-radius: var(--radius);
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #btn-start {
+      background: var(--accent);
+      color: white;
+    }
+    #btn-start:hover { background: var(--accent-hover); }
+    #btn-start:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #btn-stop {
+      background: var(--danger);
+      color: white;
+      display: none;
+    }
+    #btn-stop:hover { background: #c0392b; }
+
+    /* ─── Metrics panel ── */
+    #metrics {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--text-dim);
+      text-align: right;
+      line-height: 1.8;
+    }
+
+    /* ─── Context inputs ── */
+    .context-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-wrap: wrap;
+    }
+
+    .context-row label {
+      font-size: 11px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .context-row input {
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 4px 8px;
+      font-size: 12px;
+      width: 140px;
+      outline: none;
+    }
+
+    .context-row input:focus { border-color: var(--accent); }
+
+    /* ─── Interruption indicator ── */
+    #interruption-flash {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--warn);
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+    #interruption-flash.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div id="interruption-flash"></div>
+
+<header>
+  <div>
+    <h1>🎙️ D2C Voice Support</h1>
+    <div class="subtitle">Phase 2 — Realtime AI via Pipecat + SupportRuntime</div>
+  </div>
+  <span id="status-badge">IDLE</span>
+</header>
+
+<!-- Context injection (dev mode) -->
+<div class="context-row">
+  <label>Tenant: <input id="inp-tenant" value="zepto" placeholder="tenant_id" /></label>
+  <label>Customer: <input id="inp-customer" value="voice_demo_user" placeholder="customer_id" /></label>
+  <label>Session: <input id="inp-session" value="" placeholder="session_id (optional)" /></label>
+  <label>Language: <input id="inp-lang" value="en" placeholder="en" style="width:60px" /></label>
+</div>
+
+<div id="transcript"></div>
+<div id="partial">— ready —</div>
+
+<div id="controls">
+  <button id="btn-start">🎙️ Start Voice</button>
+  <button id="btn-stop">⏹ Stop</button>
+  <div id="metrics">—</div>
+</div>
+
+<script>
+// ─── Configuration ────────────────────────────────────────────────────────────
+const SERVER = `${location.protocol}//${location.hostname}:${location.port || 7860}`;
+const OFFER_URL   = `${SERVER}/voice/offer`;
+const ICE_URL     = `${SERVER}/voice/ice`;
+const METRICS_URL = `${SERVER}/voice/metrics`;
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let pc = null;          // RTCPeerConnection
+let pcId = null;        // Pipecat peer connection ID
+let localStream = null; // Microphone stream
+let metricsTimer = null;
+
+// ─── DOM refs ─────────────────────────────────────────────────────────────────
+const statusBadge    = document.getElementById('status-badge');
+const transcript     = document.getElementById('transcript');
+const partial        = document.getElementById('partial');
+const btnStart       = document.getElementById('btn-start');
+const btnStop        = document.getElementById('btn-stop');
+const metricsDiv     = document.getElementById('metrics');
+const flashBar       = document.getElementById('interruption-flash');
+
+// ─── Status management ────────────────────────────────────────────────────────
+function setStatus(state, label) {
+  statusBadge.className = state;
+  statusBadge.textContent = label || state.toUpperCase().replace('_', ' ');
+}
+
+// ─── Transcript rendering ─────────────────────────────────────────────────────
+function addMessage(role, text) {
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  div.innerHTML = `<div class="role">${role === 'user' ? '🎤 You' : '🤖 Assistant'}</div><div>${text}</div>`;
+  transcript.appendChild(div);
+  transcript.scrollTop = transcript.scrollHeight;
+}
+
+function setPartial(text) {
+  partial.textContent = text || '— listening —';
+}
+
+// ─── Interruption flash ───────────────────────────────────────────────────────
+function showInterruption() {
+  flashBar.classList.add('show');
+  setTimeout(() => flashBar.classList.remove('show'), 300);
+}
+
+// ─── WebRTC setup ─────────────────────────────────────────────────────────────
+async function startVoice() {
+  btnStart.disabled = true;
+  setStatus('connecting', 'CONNECTING...');
+
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  } catch (err) {
+    alert(`Microphone access denied: ${err.message}`);
+    btnStart.disabled = false;
+    setStatus('error', 'MIC ERROR');
+    return;
+  }
+
+  pc = new RTCPeerConnection({
+    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+  });
+
+  // Add microphone track
+  localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+  // Receive bot audio
+  const audioEl = document.createElement('audio');
+  audioEl.autoplay = true;
+  audioEl.controls = false;
+  document.body.appendChild(audioEl);
+
+  pc.ontrack = (evt) => {
+    if (evt.streams[0]) {
+      audioEl.srcObject = evt.streams[0];
+      setStatus('connected', 'CONNECTED');
+    }
+  };
+
+  // ICE candidate trickle
+  const pendingCandidates = [];
+  let iceSentAfterOffer = false;
+
+  pc.onicecandidate = async ({ candidate }) => {
+    if (!candidate) return;
+    const c = {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex,
+    };
+    if (!iceSentAfterOffer || !pcId) {
+      pendingCandidates.push(c);
+    } else {
+      await sendIce([c]);
+    }
+  };
+
+  pc.onconnectionstatechange = () => {
+    const s = pc.connectionState;
+    if (s === 'connected') {
+      setStatus('listening', 'LISTENING');
+      btnStart.style.display = 'none';
+      btnStop.style.display = '';
+      startMetricsPolling();
+    } else if (s === 'disconnected' || s === 'failed') {
+      setStatus('ended', 'DISCONNECTED');
+      cleanup();
+    } else if (s === 'closed') {
+      setStatus('ended', 'ENDED');
+    }
+  };
+
+  // Create data channel for bot communication and keepalive
+  let dcPingInterval = null;
+  const dc = pc.createDataChannel("pipecat", { ordered: true });
+  dc.onopen = () => {
+    console.log("Data channel opened");
+    dcPingInterval = setInterval(() => {
+      if (dc.readyState === "open") {
+        dc.send("ping");
+      }
+    }, 2000);
+  };
+  dc.onmessage = ({ data }) => {
+    try {
+      const msg = JSON.parse(data);
+      handleBotMessage(msg);
+    } catch {
+      console.debug('datachannel msg:', data);
+    }
+  };
+
+  // Also listen for incoming data channel
+  pc.ondatachannel = ({ channel }) => {
+    channel.onmessage = ({ data }) => {
+      try {
+        const msg = JSON.parse(data);
+        handleBotMessage(msg);
+      } catch {
+        console.debug('non-json datachannel msg:', data);
+      }
+    };
+  };
+
+  // SDP negotiation
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  const ctx = getContext();
+  const res = await fetch(
+    `${OFFER_URL}?tenant_id=${ctx.tenant_id}&customer_id=${ctx.customer_id}&session_id=${ctx.session_id}&language=${ctx.language}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sdp: offer.sdp,
+        type: offer.type,
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    alert(`Server error: ${err}`);
+    cleanup();
+    return;
+  }
+
+  const answer = await res.json();
+  pcId = answer.pc_id;
+
+  await pc.setRemoteDescription({ sdp: answer.sdp, type: answer.type });
+
+  // Send buffered ICE candidates
+  iceSentAfterOffer = true;
+  if (pendingCandidates.length > 0) {
+    await sendIce(pendingCandidates);
+    pendingCandidates.length = 0;
+  }
+
+  setPartial('— connected, listening —');
+}
+
+async function sendIce(candidates) {
+  if (!pcId || !candidates.length) return;
+  await fetch(ICE_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pc_id: pcId, candidates }),
+  });
+}
+
+// ─── Bot messages (datachannel / RTVI) ───────────────────────────────────────
+function handleBotMessage(msg) {
+  const label = msg.label || msg.type || '';
+  const data  = msg.data || msg;
+
+  if (label === 'transcript' || msg.transcript) {
+    const text = msg.transcript || data.text || '';
+    const role = msg.role || 'user';
+    if (text) addMessage(role, text);
+
+  } else if (label === 'user-started-speaking') {
+    setStatus('user_speaking', 'YOU SPEAKING');
+    setPartial('🎤 ...');
+
+  } else if (label === 'user-stopped-speaking') {
+    setStatus('processing', 'PROCESSING');
+    setPartial('— thinking —');
+
+  } else if (label === 'bot-started-speaking') {
+    setStatus('assistant_speaking', 'BOT SPEAKING');
+
+  } else if (label === 'bot-stopped-speaking') {
+    setStatus('listening', 'LISTENING');
+    setPartial('— listening —');
+
+  } else if (label === 'interruption') {
+    showInterruption();
+    setStatus('user_speaking', 'INTERRUPTED');
+    setPartial('🎤 ...');
+  }
+}
+
+// ─── Context helpers ──────────────────────────────────────────────────────────
+function getContext() {
+  return {
+    tenant_id:   document.getElementById('inp-tenant').value.trim()   || 'zepto',
+    customer_id: document.getElementById('inp-customer').value.trim() || 'voice_demo_user',
+    session_id:  document.getElementById('inp-session').value.trim()  || '',
+    language:    document.getElementById('inp-lang').value.trim()     || 'en',
+  };
+}
+
+// ─── Metrics polling ──────────────────────────────────────────────────────────
+function startMetricsPolling() {
+  metricsTimer = setInterval(async () => {
+    try {
+      const res = await fetch(METRICS_URL);
+      const data = await res.json();
+      const sessions = data.sessions || [];
+      if (sessions.length > 0) {
+        const s = sessions[sessions.length - 1];
+        const ttfa = s.avg_ttfa_ms ? `${Math.round(s.avg_ttfa_ms)}ms` : '—';
+        metricsDiv.innerHTML =
+          `Turns: ${s.turn_count} | Interruptions: ${s.interruption_count}<br>` +
+          `Avg TTFA: ${ttfa} | Status: ${s.status}`;
+      }
+    } catch { /* ignore */ }
+  }, 3000);
+}
+
+// ─── Cleanup ──────────────────────────────────────────────────────────────────
+function cleanup() {
+  if (dcPingInterval) { clearInterval(dcPingInterval); dcPingInterval = null; }
+  if (metricsTimer) { clearInterval(metricsTimer); metricsTimer = null; }
+  if (localStream)  { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+  if (pc)           { pc.close(); pc = null; }
+  pcId = null;
+  btnStart.style.display = '';
+  btnStop.style.display  = 'none';
+  btnStart.disabled = false;
+}
+
+// ─── Button handlers ──────────────────────────────────────────────────────────
+btnStart.addEventListener('click', startVoice);
+
+btnStop.addEventListener('click', () => {
+  setStatus('ending', 'ENDING...');
+  cleanup();
+  setStatus('ended', 'ENDED');
+  setPartial('— session ended —');
+});
+
+// ─── Initial state ────────────────────────────────────────────────────────────
+setStatus('idle', 'IDLE');
+setPartial('Click "Start Voice" to begin');
+</script>
+</body>
+</html>

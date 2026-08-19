@@ -1,3 +1,4 @@
+# runtime/response.py
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -9,7 +10,7 @@ class RuntimeResponse:
     """
     Stable response contract for all channels.
     Chat maps this to existing JSON.
-    Voice will later map text → TTS.
+    Voice maps text → TTS.
     """
     response: str
     confidence: float = 0.0
@@ -24,6 +25,8 @@ class RuntimeResponse:
     missing_inputs: List[str] = field(default_factory=list)
     auth_level: Optional[str] = None
     identity_blocked: bool = False
+    needs_identity: bool = False
+    identity_challenge: Optional[Dict[str, Any]] = None
     intent: Optional[str] = None
     risk_level: Optional[str] = None
     status: Optional[str] = None
@@ -53,4 +56,5 @@ class RuntimeResponse:
             "missing_inputs": self.missing_inputs,
             "auth_level": self.auth_level,
             "identity_blocked": self.identity_blocked,
+            "needs_identity": self.needs_identity,
         }
