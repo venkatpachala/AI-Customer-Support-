@@ -1,0 +1,9 @@
+# Tool availability for Zepto. Flags only — connectors stay in tools/.
+# P0-B policy and workflow code reads this; nothing executes from this file yet.
+
+shopify:
+  enabled: true
+stripe:
+  enabled: true
+gmail:
+  enabled: true

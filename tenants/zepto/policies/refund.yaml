@@ -1,0 +1,14 @@
+# Stub. P0-B executes this pack. Numbers match tenants/zepto/tenant.yaml limits.
+id: refund
+version: "2026.09.0"
+requires_auth: verified
+thresholds:
+  auto_refund_max: 2000
+  manager_refund_max: 10000
+  currency: INR
+photo_required_for:
+  - damaged
+  - missing_item
+# Sealed / unopened goods are not auto-refunded. QA can still explain the policy.
+out_of_policy_reasons:
+  - preference

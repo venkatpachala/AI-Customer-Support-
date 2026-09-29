@@ -11,6 +11,7 @@ from sqlalchemy import (
     Integer,
     JSON,
     Index,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -152,3 +153,208 @@ class ToolCallRow(Base):
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+
+# Cases in these statuses are still the customer's journey. A resolved case
+# is not in this set and must not be reused for a new order problem.
+# waiting_approval and running_workflow are accepted now so a later workflow
+# engine can park a case without splitting it. Nothing writes them yet.
+OPEN_CASE_STATUSES = (
+    "open",
+    "waiting_customer",
+    "waiting_approval",
+    "running_workflow",
+    "escalated",
+)
+
+# workflow_runs.status
+WORKFLOW_RUN_STATUSES = (
+    "pending",
+    "running",
+    "waiting_approval",
+    "retrying",
+    "succeeded",
+    "failed",
+    "cancelled",
+)
+
+# human_tasks.type
+HUMAN_TASK_TYPES = (
+    "refund_approval",
+    "identity_review",
+    "fraud_review",
+    "policy_exception",
+)
+
+HUMAN_TASK_STATUSES = ("pending", "approved", "rejected")
+
+
+class PlatformTenantRow(Base):
+    """Cached copy of a platform tenant contract. YAML on disk is the source."""
+
+    __tablename__ = "platform_tenants"
+
+    tenant_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    name: Mapped[str] = mapped_column(String(128), default="")
+    config_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+
+class PlatformCustomerRow(Base):
+    """Customer directory inside one tenant. external_id is the support customer id."""
+
+    __tablename__ = "platform_customers"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "external_id", name="uq_platform_customer_external"),
+    )
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    external_id: Mapped[str] = mapped_column(String(128), index=True)
+    contact: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    tier: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    auth_level: Mapped[str] = mapped_column(String(32), default="anonymous")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+
+class PlatformConversationRow(Base):
+    """Binds a channel session to the case it is working, including across sessions.
+
+    The case row keeps the session that opened it. This table is how a later
+    chat or voice session points at that same case without a new column on
+    ``sessions`` (SQLite create_all would not add one).
+    """
+
+    __tablename__ = "platform_conversations"
+    __table_args__ = (
+        UniqueConstraint("session_id", "case_id", name="uq_platform_conversation_session_case"),
+        Index("ix_platform_conversations_session_created", "session_id", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    customer_id: Mapped[str] = mapped_column(String(128), index=True)
+    session_id: Mapped[str] = mapped_column(ForeignKey("sessions.session_id"), index=True)
+    case_id: Mapped[str] = mapped_column(ForeignKey("cases.case_id"), index=True)
+    channel: Mapped[str] = mapped_column(String(32), default="chat")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+
+class WorkflowRunRow(Base):
+    """One execution of a named workflow for a case.
+
+    status: pending | running | waiting_approval | retrying | succeeded | failed | cancelled
+    """
+
+    __tablename__ = "workflow_runs"
+    __table_args__ = (
+        Index("ix_workflow_runs_tenant_case", "tenant_id", "case_id"),
+        Index("ix_workflow_runs_status", "status"),
+    )
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    case_id: Mapped[str] = mapped_column(ForeignKey("cases.case_id"), index=True)
+    workflow_name: Mapped[str] = mapped_column(String(128), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="pending")
+    input_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    output_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    idempotency_key: Mapped[Optional[str]] = mapped_column(String(128), nullable=True, unique=True)
+    current_step: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    steps = relationship("WorkflowStepRow", back_populates="run", cascade="all, delete-orphan")
+
+
+class WorkflowStepRow(Base):
+    """One step attempt inside a workflow run."""
+
+    __tablename__ = "workflow_steps"
+    __table_args__ = (
+        Index("ix_workflow_steps_run_index", "run_id", "step_index"),
+    )
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    run_id: Mapped[str] = mapped_column(ForeignKey("workflow_runs.id"), index=True)
+    step_name: Mapped[str] = mapped_column(String(128))
+    step_index: Mapped[int] = mapped_column(Integer, default=0)
+    status: Mapped[str] = mapped_column(String(32), default="pending")
+    attempt: Mapped[int] = mapped_column(Integer, default=1)
+    input_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    output_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    run = relationship("WorkflowRunRow", back_populates="steps")
+
+
+class HumanTaskRow(Base):
+    """Approval queue. type: refund_approval | identity_review | fraud_review | policy_exception.
+
+    status: pending | approved | rejected
+    """
+
+    __tablename__ = "human_tasks"
+    __table_args__ = (
+        Index("ix_human_tasks_tenant_status", "tenant_id", "status"),
+    )
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    case_id: Mapped[Optional[str]] = mapped_column(ForeignKey("cases.case_id"), nullable=True, index=True)
+    workflow_run_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("workflow_runs.id"), nullable=True, index=True
+    )
+    task_type: Mapped[str] = mapped_column("type", String(64), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="pending")
+    payload_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    resolution_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    decided_by: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+    decided_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+
+class EvidenceRow(Base):
+    """Citation or QA span attached to a case. Unused until the knowledge phase."""
+
+    __tablename__ = "evidence"
+    __table_args__ = (
+        Index("ix_evidence_case", "case_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    case_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
+    interaction_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    source: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    citation: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    span_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
+
+
+class PlatformEventRow(Base):
+    """Append-only typed event log for a tenant. payload_json holds the body."""
+
+    __tablename__ = "platform_events"
+    __table_args__ = (
+        Index("ix_platform_events_tenant_created", "tenant_id", "created_at"),
+        Index("ix_platform_events_case", "case_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    case_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    session_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    event_type: Mapped[str] = mapped_column(String(128), index=True)
+    payload_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
