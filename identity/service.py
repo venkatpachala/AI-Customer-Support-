@@ -70,22 +70,35 @@ def is_policy_or_info_query(text: str, intent: str = "") -> bool:
     if intent in ("policy_query", "faq", "policy"):
         return True
 
-    # Check for policy/info queries
-    policy_phrases = [
-        "what is", "what's", "how long do i have", "can i return a",
-        "what are the", "what are your", "tell me the policy",
-        "return policy", "refund policy", "damage policy", "delivery policy",
-        "cancellation policy", "damaged products", "defective product"
+    # Action commands take priority
+    action_triggers = [
+        "i want to return",
+        "i want a refund",
+        "cancel my order",
+        "cancel this order",
+        "where is my order",
+        "track my order",
+        "return my order",
+        "refund my money",
+        "please cancel",
+        "please return my",
+        "please refund my",
     ]
-    if any(p in t for p in policy_phrases) and "policy" in t:
+    if any(a in t for a in action_triggers):
+        return False
+
+    # Policy and informational question patterns
+    policy_phrases = [
+        "what is", "what's", "how long", "can i return", "can i replace",
+        "can i get a refund", "can i cancel", "what are", "tell me the policy",
+        "policy", "policies", "rules", "guidelines", "terms", "eligibility",
+        "damaged product", "damaged item", "damaged", "defective product", "defective",
+        "broken seal", "expired"
+    ]
+    if any(p in t for p in policy_phrases):
         return True
 
-    if any(p in t for p in ["how long do i have to return", "can i return a defective", "what are your delivery policies"]):
-        return True
-
-    if (t.startswith("what") or t.startswith("how") or t.startswith("can i")) and not any(
-        a in t for a in ["my order", "cancel my", "track my", "i want to", "where is my"]
-    ):
+    if (t.startswith("what") or t.startswith("how") or t.startswith("can i") or t.startswith("do you") or t.startswith("is it")):
         return True
 
     return False

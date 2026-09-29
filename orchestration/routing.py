@@ -1,94 +1,73 @@
+"""
+orchestration/routing.py — Phase 3 three-way routing.
+
+Routes after supervisor decision:
+  knowledge    → hitl_check → qa      (RAG + QA)
+  transactional → identity_gate       (Shopify direct lookup)
+  action        → identity_gate       (full planner/executor flow)
+  conversational → hitl_check → qa   (direct conversational reply)
+"""
 from typing import Dict, Any
 
 
-POLICY_INTENTS = {
-    "policy",
-    "general",
-    "faq",
-    "policy_question",
-    "general_query",
-}
+# ── Intent sets for reference ────────────────────────────────────────────────
 
-ACTION_INTENTS = {
-    "return",
-    "refund",
-    "cancel",
-    "replacement",
-    "track",
-    "order_status",
-}
+KNOWLEDGE_INTENTS = {"policy_query", "policy", "faq", "general_query", "policy_question"}
+TRANSACTIONAL_INTENTS = {"track", "order_status"}
+ACTION_INTENTS = {"return", "refund", "cancel", "replace", "replacement", "damaged_return", "damage"}
+CONVERSATIONAL_INTENTS = {"general", "greeting", "smalltalk", "thanks", "unknown"}
 
 
-def _last_user_text(state: Dict[str, Any]) -> str:
-    messages = state.get("messages") or []
-    if not messages:
-        return ""
-    last = messages[-1]
-    return (last.content if hasattr(last, "content") else str(last)).lower()
+def _intent_type_from_state(state: Dict[str, Any]) -> str:
+    """Resolve intent_type — prefer explicit field, fallback to intent mapping."""
+    it = (state.get("intent_type") or "").lower().strip()
+    if it in ("knowledge", "transactional", "action", "conversational"):
+        return it
 
+    intent = (
+        state.get("intent")
+        or (state.get("current_plan") or {}).get("intent")
+        or ""
+    ).lower().strip()
 
-def is_policy_fast_path(state: Dict[str, Any]) -> bool:
-    if state.get("blocked"):
-        return False
-    if state.get("needs_escalation"):
-        return False
-
-    risk = (state.get("risk_level") or "low").lower().strip()
-    if risk in ["high", "critical"]:
-        return False
-
-    intent = (state.get("intent") or "").lower().strip()
-    if not intent:
-        plan = state.get("current_plan") or {}
-        intent = (plan.get("intent") or "").lower().strip()
-
-    text = _last_user_text(state)
-
-    # 1) Hard action signals (true operational requests)
-    hard_action_signals = [
-        "order #",
-        "order id",
-        "my order",
-        "refund of",
-        "i want a refund",
-        "cancel my order",
-        "initiate refund",
-        "replace my",
-        "arrived damaged",
-        "is damaged",
-        "received damaged",
-        "wrong item received",
-    ]
-    if any(k in text for k in hard_action_signals):
-        return False
-
-    # 2) Clear policy/FAQ signals (override supervisor intent)
-    policy_signals = [
-        "policy",
-        "return policy",
-        "refund policy",
-        "cancellation policy",
-        "what is the",
-        "how long does",
-        "how many days",
-        "do you accept returns",
-        "terms of use",
-        "according to policy",
-    ]
-    if any(k in text for k in policy_signals):
-        return True
-
-    # 3) Intent-based fallback
-    if intent in POLICY_INTENTS:
-        return True
+    if intent in KNOWLEDGE_INTENTS:
+        return "knowledge"
+    if intent in TRANSACTIONAL_INTENTS:
+        return "transactional"
     if intent in ACTION_INTENTS:
-        return False
+        return "action"
+    return "conversational"
 
-    return False
 
 def after_supervisor_route(state: Dict[str, Any]) -> str:
+    """
+    Primary routing decision after supervisor:
+    - blocked / escalated → end
+    - knowledge           → hitl_check (→ qa with RAG context)
+    - transactional       → identity_gate (→ direct Shopify lookup via planner)
+    - action              → identity_gate (→ full planner/executor/verifier)
+    - conversational      → hitl_check (→ qa for direct reply)
+    """
     if state.get("blocked"):
         return "end"
-    if is_policy_fast_path(state):
-        return "hitl_check"
-    return "planner"
+    if state.get("needs_escalation"):
+        return "end"
+
+    risk = (state.get("risk_level") or "low").lower()
+    if risk in ("high", "critical"):
+        return "end"
+
+    intent_type = _intent_type_from_state(state)
+
+    if intent_type in ("transactional", "action"):
+        return "identity_gate"
+
+    # knowledge or conversational → policy fast-path through hitl → qa
+    return "hitl_check"
+
+
+# Legacy compatibility alias
+def is_policy_fast_path(state: Dict[str, Any]) -> bool:
+    """True when the request should bypass the planner and go directly to QA via HITL."""
+    it = _intent_type_from_state(state)
+    return it in ("knowledge", "conversational")

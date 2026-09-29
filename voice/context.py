@@ -98,7 +98,26 @@ class VoiceSession:
     # Sticky action for email-only turns
     issue_type: Optional[str] = None
 
+    # ── Phase 3: Conversation Memory ─────────────────────────────────────────
+    # Sticky intent for multi-turn continuity
+    active_intent: Optional[str] = None          # "damaged_return" | "order_status" | "refund"
+    active_case_type: Optional[str] = None       # broader case category
+    pending_action: Optional[str] = None         # next expected step in multi-turn flow
+
+    # Tool result memory (last successful tool call)
+    last_tool_name: Optional[str] = None
+    last_tool_result: Optional[dict] = None
+
+    # Conversation history (last 10 turns for context-aware supervisor)
+    conversation_turns: list = field(default_factory=list)
+    # Each entry: {"role": "user"|"assistant", "text": str, "intent": str}
+
+    # Damage case state
+    photos_requested: bool = False
+    photos_received: bool = False
+
     language: str = "en"
+    detected_language: Optional[str] = None
 
     # Latency tracking — current turn
     current_latency: LatencyRecord = field(default_factory=LatencyRecord)

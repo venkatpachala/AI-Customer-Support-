@@ -25,20 +25,21 @@ def after_identity_route(state):
     intent = (
         state.get("intent")
         or (state.get("current_plan") or {}).get("intent")
+        or state.get("active_intent")
+        or memory.get("active_intent")
         or memory.get("issue_type")
-        or memory.get("intent")
         or ""
     )
     intent = str(intent).lower().strip()
 
     auth = str(state.get("auth_level") or memory.get("auth_level") or "").lower()
 
-    # Just identified on a contact-only turn — continue the return/refund case
-    action_intents = ("return", "refund", "cancel", "replace", "replacement", "track")
+    action_intents = ("return", "refund", "cancel", "replace", "replacement", "track",
+                      "order_status", "damaged_return", "damage")
     if auth in ("identified", "verified") and any(a in intent for a in action_intents):
         return "planner"
 
-    # Fallback: if we have a resolved order and were in identity flow, still act
+    # Order context present → proceed to planner
     if auth in ("identified", "verified") and (
         state.get("resolved_order_id") or memory.get("pending_order_id") or memory.get("active_order_id")
     ):
@@ -74,8 +75,16 @@ def build_graph():
         },
     )
 
-    # Supervisor → Identity Gate
-    graph.add_edge("supervisor", "identity_gate")
+    # Supervisor → three-way routing (knowledge→hitl_check, transactional/action→identity_gate)
+    graph.add_conditional_edges(
+        "supervisor",
+        after_supervisor_route,
+        {
+            "identity_gate": "identity_gate",
+            "hitl_check": "hitl_check",
+            "end": END,
+        },
+    )
 
     # Identity Gate → challenge QA / planner / policy HITL / end
     graph.add_conditional_edges(
@@ -116,4 +125,4 @@ def build_graph():
     return graph.compile()
 
 
-compiled_graph = build_graph()
+compiled_graph = build_graph()
