@@ -1,0 +1,39 @@
+# Copy this folder to tenants/<id>/ and replace every placeholder.
+# Also add config/tenants/<id>/config.yaml for the legacy brand/tone file,
+# plus policies/*.yaml and tools.yaml beside this file.
+
+id: your_brand
+brand: Your Brand
+locale: en
+currency: USD
+
+auth:
+  intents:
+    policy: anonymous
+    order_status: identified
+    refund: verified
+    return: identified
+    cancel: identified
+
+limits:
+  auto_refund_max: 2000
+  manager_refund_max: 10000
+  photo_required_for:
+    - damaged
+    - missing_item
+
+channels:
+  - chat
+  - voice
+
+tools:
+  shopify: false
+  stripe: false
+  gmail: false
+
+versions:
+  agent: "0.0.0"
+  policy_pack: "unversioned"
+  knowledge_snapshot: "none"
+
+# legacy_config: config/tenants/your_brand/config.yaml

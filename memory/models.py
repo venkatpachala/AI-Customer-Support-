@@ -21,7 +21,9 @@ class CaseMemory(BaseModel):
     tenant_id: str
     order_id: Optional[str] = None
     issue_type: Optional[str] = None  # return | refund | cancel | track | general
-    status: str = "open"  # open | waiting_customer | escalated | resolved
+    # open | waiting_customer | waiting_approval | running_workflow | escalated | resolved
+    # waiting_approval and running_workflow are reserved for the workflow engine.
+    status: str = "open"
     missing_inputs: List[str] = Field(default_factory=list)
     photos_requested: bool = False
     photos_received: bool = False

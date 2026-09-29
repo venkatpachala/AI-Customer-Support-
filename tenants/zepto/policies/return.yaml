@@ -1,0 +1,11 @@
+# Stub. P0-B executes this pack.
+id: return
+version: "2026.09.0"
+requires_auth: identified
+thresholds:
+  require_photos_for_return: true
+photo_required_for:
+  - damaged
+  - missing_item
+out_of_policy_reasons:
+  - preference

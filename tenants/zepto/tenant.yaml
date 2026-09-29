@@ -1,0 +1,42 @@
+# Platform contract for the Zepto tenant.
+# Brand tone and the legacy approval block stay in config/tenants/zepto/config.yaml.
+# This file is what the platform reads for auth, money caps, channels, and versions.
+
+id: zepto
+brand: Zepto
+locale: en-IN
+currency: INR
+
+auth:
+  # Minimum auth level required before the agent may act on an intent.
+  # policy is public. Order lookup, return, and cancel need an identified
+  # customer. Refunds move money and require a verified customer.
+  intents:
+    policy: anonymous
+    order_status: identified
+    refund: verified
+    return: identified
+    cancel: identified
+
+limits:
+  auto_refund_max: 2000
+  manager_refund_max: 10000
+  photo_required_for:
+    - damaged
+    - missing_item
+
+channels:
+  - chat
+  - voice
+
+tools:
+  shopify: true
+  stripe: true
+  gmail: true
+
+versions:
+  agent: "1.0.0"
+  policy_pack: "2026.09.0"
+  knowledge_snapshot: "zepto-terms-2026-08"
+
+legacy_config: config/tenants/zepto/config.yaml

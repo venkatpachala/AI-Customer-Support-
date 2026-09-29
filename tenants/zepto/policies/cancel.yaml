@@ -1,0 +1,8 @@
+# Cancel is refused once the order has left the cancellable window.
+# A missing status is not treated as delivered; the caller must fetch it.
+id: cancel
+version: "2026.09.0"
+requires_auth: identified
+blocked_order_statuses:
+  - delivered
+  - fulfilled

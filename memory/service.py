@@ -8,11 +8,39 @@ from sqlalchemy import select, desc
 
 from memory.models import SessionMemory, CaseMemory
 from db.session import SessionLocal
-from db.models import SessionRow, CaseRow, MessageRow
+from db.models import (
+    OPEN_CASE_STATUSES,
+    CaseRow,
+    MessageRow,
+    PlatformConversationRow,
+    SessionRow,
+)
 
 
 def _new_id() -> str:
     return str(uuid.uuid4())
+
+
+def _norm_order_id(order_id: Optional[str]) -> Optional[str]:
+    if order_id is None:
+        return None
+    text = str(order_id).strip()
+    return text or None
+
+
+def find_open_case(
+    tenant_id: str,
+    customer_id: str,
+    order_id: Optional[str] = None,
+) -> Optional[CaseMemory]:
+    """Latest open case for this tenant and customer.
+
+    When ``order_id`` is set, the order must match. Cases are not shared
+    across orders, and a resolved case is never returned. ``order_id`` of
+    None returns the latest open case for the customer on any order; the
+    reuse path does not call it that way.
+    """
+    return MemoryService().find_open_case(tenant_id, customer_id, order_id)
 
 
 class MemoryService:
@@ -111,12 +139,22 @@ class MemoryService:
                 return None
             messages = self._load_messages(db, session_id, limit=20)
 
-            # attach active case if available
+            # attach active case if available.
+            # A cross-session bind lives on platform_conversations because
+            # sessions has no active_case_id column. Fall back to the case
+            # that was opened on this session.
             session = self._session_from_row(row, messages=messages)
+            linked = self._open_case_linked_to_session(db, row)
+            if linked is not None:
+                session.active_case_id = linked.case_id
+                return session
+
             case_stmt = (
                 select(CaseRow)
                 .where(CaseRow.session_id == session_id)
-                .where(CaseRow.status.in_(["open", "waiting_customer", "escalated"]))
+                .where(CaseRow.tenant_id == row.tenant_id)
+                .where(CaseRow.customer_id == row.customer_id)
+                .where(CaseRow.status.in_(OPEN_CASE_STATUSES))
                 .order_by(desc(CaseRow.updated_at))
                 .limit(1)
             )
@@ -229,35 +267,199 @@ class MemoryService:
             row.updated_at = datetime.utcnow()
             db.commit()
 
-    def get_or_create_active_case(self, session: SessionMemory) -> CaseMemory:
-        if getattr(session, "active_case_id", None):
-            case = self.get_case(session.active_case_id)
-            if case and case.status in ["open", "waiting_customer", "escalated"]:
-                return case
+    def find_open_case(
+        self,
+        tenant_id: str,
+        customer_id: str,
+        order_id: Optional[str] = None,
+    ) -> Optional[CaseMemory]:
+        """Latest still-open case for this tenant + customer.
 
+        Pass ``order_id`` to require that order. Without it, this is a
+        customer-wide lookup and must not be used to merge two orders.
+        """
+        order_id = _norm_order_id(order_id)
         with SessionLocal() as db:
             stmt = (
                 select(CaseRow)
-                .where(CaseRow.session_id == session.session_id)
-                .where(CaseRow.status.in_(["open", "waiting_customer", "escalated"]))
+                .where(CaseRow.tenant_id == tenant_id)
+                .where(CaseRow.customer_id == customer_id)
+                .where(CaseRow.status.in_(OPEN_CASE_STATUSES))
+            )
+            if order_id is not None:
+                stmt = stmt.where(CaseRow.order_id == order_id)
+            stmt = stmt.order_by(desc(CaseRow.updated_at)).limit(1)
+            row = db.execute(stmt).scalars().first()
+            return self._case_from_row(row) if row else None
+
+    def get_or_create_case(
+        self,
+        session: SessionMemory,
+        order_id: Optional[str] = None,
+        issue_type: Optional[str] = None,
+        channel: str = "chat",
+    ) -> CaseMemory:
+        """Reuse one open journey for tenant + customer + order.
+
+        Order of lookup:
+
+        1. ``session.active_case_id`` when that case is still open, and the
+           caller passed no order, the case has no order yet, or the order
+           matches. A different order is not reused.
+        2. Any session's open case with the same tenant, customer, and order.
+        3. The latest open case opened on this session, same order rule.
+        4. A new case.
+
+        An empty case order is filled in when the caller supplies one.
+        ``issue_type`` is written only alongside that fill, and only when
+        the case does not already have one. The case row keeps the session
+        that opened it; this session is linked through platform_conversations.
+        """
+        order_id = _norm_order_id(order_id)
+        issue_type = (issue_type or "").strip() or None
+
+        active_id = getattr(session, "active_case_id", None)
+        if active_id:
+            active = self.get_case(active_id)
+            if self._case_reusable_for_order(active, session, order_id):
+                self._attach_order_if_empty(active, order_id, issue_type)
+                self._bind_session_to_case(session, active, channel=channel)
+                return active
+
+        if order_id:
+            shared = self.find_open_case(session.tenant_id, session.customer_id, order_id)
+            if shared is not None:
+                self._attach_order_if_empty(shared, order_id, issue_type)
+                self._bind_session_to_case(session, shared, channel=channel)
+                return shared
+
+        on_session = self._latest_open_case_on_session(session.session_id)
+        if on_session is not None and self._case_reusable_for_order(on_session, session, order_id):
+            self._attach_order_if_empty(on_session, order_id, issue_type)
+            self._bind_session_to_case(session, on_session, channel=channel)
+            return on_session
+
+        created = self.create_case(
+            session_id=session.session_id,
+            customer_id=session.customer_id,
+            tenant_id=session.tenant_id,
+            order_id=order_id,
+            issue_type=issue_type,
+        )
+        self._bind_session_to_case(session, created, channel=channel)
+        return created
+
+    def get_or_create_active_case(
+        self,
+        session: SessionMemory,
+        order_id: Optional[str] = None,
+        issue_type: Optional[str] = None,
+        customer_id: Optional[str] = None,
+        tenant_id: Optional[str] = None,
+        channel: str = "chat",
+    ) -> CaseMemory:
+        """Session entry used by chat and voice. Same reuse rules as ``get_or_create_case``.
+
+        ``customer_id`` and ``tenant_id`` are accepted so older callers can
+        pass them. The session row remains the source of those identities.
+        """
+        del customer_id, tenant_id
+        return self.get_or_create_case(
+            session,
+            order_id=order_id,
+            issue_type=issue_type,
+            channel=channel,
+        )
+
+    def _case_reusable_for_order(
+        self,
+        case: Optional[CaseMemory],
+        session: SessionMemory,
+        order_id: Optional[str],
+    ) -> bool:
+        if case is None:
+            return False
+        if case.status not in OPEN_CASE_STATUSES:
+            return False
+        if case.tenant_id != session.tenant_id or case.customer_id != session.customer_id:
+            return False
+        case_order = _norm_order_id(case.order_id)
+        if order_id is None or case_order is None or case_order == order_id:
+            return True
+        return False
+
+    def _latest_open_case_on_session(self, session_id: str) -> Optional[CaseMemory]:
+        with SessionLocal() as db:
+            stmt = (
+                select(CaseRow)
+                .where(CaseRow.session_id == session_id)
+                .where(CaseRow.status.in_(OPEN_CASE_STATUSES))
                 .order_by(desc(CaseRow.updated_at))
                 .limit(1)
             )
             row = db.execute(stmt).scalars().first()
-            if row:
-                case = self._case_from_row(row)
-                session.active_case_id = case.case_id
-                self.save_session(session)
-                return case
+            return self._case_from_row(row) if row else None
 
-        case = self.create_case(
-            session_id=session.session_id,
-            customer_id=session.customer_id,
-            tenant_id=session.tenant_id,
-        )
+    def _attach_order_if_empty(
+        self,
+        case: CaseMemory,
+        order_id: Optional[str],
+        issue_type: Optional[str],
+    ) -> None:
+        if not order_id or _norm_order_id(case.order_id):
+            return
+        case.order_id = order_id
+        if issue_type and not (case.issue_type or "").strip():
+            case.issue_type = issue_type
+        self.save_case(case)
+
+    def _bind_session_to_case(
+        self,
+        session: SessionMemory,
+        case: CaseMemory,
+        channel: str = "chat",
+    ) -> None:
         session.active_case_id = case.case_id
         self.save_session(session)
-        return case
+        channel_name = (channel or "chat").strip() or "chat"
+        with SessionLocal() as db:
+            existing = db.execute(
+                select(PlatformConversationRow)
+                .where(PlatformConversationRow.session_id == session.session_id)
+                .where(PlatformConversationRow.case_id == case.case_id)
+            ).scalars().first()
+            if existing is not None:
+                return
+            db.add(
+                PlatformConversationRow(
+                    id=_new_id(),
+                    tenant_id=session.tenant_id,
+                    customer_id=session.customer_id,
+                    session_id=session.session_id,
+                    case_id=case.case_id,
+                    channel=channel_name,
+                )
+            )
+            db.commit()
+
+    def _open_case_linked_to_session(self, db, session_row: SessionRow) -> Optional[CaseRow]:
+        links = db.execute(
+            select(PlatformConversationRow)
+            .where(PlatformConversationRow.session_id == session_row.session_id)
+            .order_by(desc(PlatformConversationRow.created_at))
+        ).scalars().all()
+        for link in links:
+            if link.tenant_id != session_row.tenant_id or link.customer_id != session_row.customer_id:
+                continue
+            case_row = db.get(CaseRow, link.case_id)
+            if case_row is None:
+                continue
+            if case_row.status not in OPEN_CASE_STATUSES:
+                continue
+            if case_row.tenant_id != session_row.tenant_id or case_row.customer_id != session_row.customer_id:
+                continue
+            return case_row
+        return None
 
     # ---------------- Helpers ----------------
     def append_message(self, session: SessionMemory, role: str, content: str):

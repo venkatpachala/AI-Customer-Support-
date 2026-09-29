@@ -1,0 +1,9 @@
+# Same evidence and auth bar as a return. No money movement.
+id: replacement
+version: "2026.09.0"
+requires_auth: identified
+photo_required_for:
+  - damaged
+  - missing_item
+out_of_policy_reasons:
+  - preference
