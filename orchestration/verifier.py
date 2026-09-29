@@ -1,6 +1,10 @@
+from orchestration.planner import BANNED_EXECUTOR_TOOLS
 from orchestration.state import AgentState
 from observability.logging import log_event
 from typing import Dict, List
+
+_POLICY_DENIALS = {"OUT_OF_POLICY", "AUTH", "AMOUNT", "MISSING_INPUT", "FRAUD"}
+_WAITING_STATUSES = {"waiting_input", "waiting_auth", "waiting_approval"}
 
 
 def verifier_node(state: AgentState) -> Dict:
@@ -16,12 +20,60 @@ def verifier_node(state: AgentState) -> Dict:
 
     hard_issues: List[str] = []
     soft_issues: List[str] = []
+    workflow_status = str(state.get("workflow_status") or "")
+    policy = state.get("policy_decision") if isinstance(state.get("policy_decision"), dict) else {}
+    workflow_ran = bool(state.get("workflow_run_id"))
+    requires_inputs = list(policy.get("requires_inputs") or [])
+    if workflow_status == "waiting_input":
+        for name in requires_inputs:
+            missing_inputs.add(name)
+
+    if workflow_status in _WAITING_STATUSES:
+        missing_photos = workflow_status == "waiting_input" and (
+            "photos" in missing_inputs or "photos" in requires_inputs
+        )
+        log_event("verifier_passed", request_id, node="verifier", data={
+            "workflow_status": workflow_status,
+            "missing_photos": missing_photos,
+        })
+        return {
+            "verification_passed": True,
+            "verification_issues": [],
+            "needs_escalation": False,
+            "missing_photos": missing_photos,
+            "missing_inputs": sorted(missing_inputs),
+        }
+
+    if workflow_status == "failed":
+        deny = str(policy.get("deny_code") or "")
+        if deny in _POLICY_DENIALS or policy.get("allowed") is False:
+            log_event("verifier_passed", request_id, node="verifier", data={
+                "workflow_status": workflow_status,
+                "deny_code": deny,
+            })
+            return {
+                "verification_passed": True,
+                "verification_issues": [],
+                "needs_escalation": False,
+                "missing_photos": False,
+            }
+        error = state.get("workflow_error") or deny or "workflow failed"
+        log_event("verifier_failed", request_id, node="verifier", data={"issues": [error]}, level="warning")
+        return {
+            "verification_passed": False,
+            "verification_issues": [str(error)],
+            "needs_escalation": True,
+            "escalation_reason": f"Execution verification failed: {error}",
+            "missing_photos": False,
+        }
 
     required_tools = []
     for step in steps:
         if isinstance(step, dict) and step.get("required", True):
             tool = step.get("tool")
             if tool:
+                if workflow_ran and tool in BANNED_EXECUTOR_TOOLS:
+                    continue
                 required_tools.append(tool)
 
     for tool in required_tools:
@@ -66,6 +118,7 @@ def verifier_node(state: AgentState) -> Dict:
                 or "missing required input" in reason_l
                 or "payment_intent" in reason_l
                 or "charge_id" in reason_l
+                or "redirected_to_workflow" in reason_l
             ):
                 soft_issues.append(f"{tool}: {reason}")
             else:

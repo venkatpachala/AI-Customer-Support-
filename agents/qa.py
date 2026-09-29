@@ -215,11 +215,43 @@ def qa_node(state: AgentState) -> Dict:
     needs_escalation = bool(
         state.get("needs_escalation", False) or case_status == "escalated"
     )
+    workflow_status = state.get("workflow_status") or ""
+    workflow_run_id = state.get("workflow_run_id") or ""
+    policy_decision = state.get("policy_decision") if isinstance(state.get("policy_decision"), dict) else {}
+    policy_allowed = policy_decision.get("allowed")
+    policy_deny = policy_decision.get("deny_code")
+    policy_reasons = policy_decision.get("reasons") or []
 
     # ---------------- Instructions ----------------
     extra_instruction = ""
 
-    if needs_escalation or case_status == "escalated":
+    if workflow_status == "waiting_input" and missing_photos and not photos_received:
+        order_ref = active_order_id or "your order"
+        extra_instruction = f"""
+IMPORTANT:
+Photos are required before we can proceed with return/refund for {order_ref}.
+Ask for photos only.
+Do NOT say a refund was issued.
+Do NOT escalate.
+Do NOT invent a Stripe refund id, return labels, or timelines.
+"""
+    elif workflow_status == "waiting_approval":
+        extra_instruction = f"""
+IMPORTANT:
+A human will review this refund. The refund is not done.
+workflow_run_id={workflow_run_id}
+Do NOT say the refund has been issued.
+Never invent a Stripe refund id.
+"""
+    elif policy_deny == "OUT_OF_POLICY":
+        extra_instruction = """
+IMPORTANT:
+This request is outside policy.
+Explain that we cannot refund or return this order for the reason given.
+Do NOT promise a refund.
+Never invent a Stripe refund id.
+"""
+    elif needs_escalation or case_status == "escalated":
         extra_instruction = """
 IMPORTANT:
 This case requires human assistance.
@@ -296,6 +328,14 @@ MEMORY:
 - missing_photos: {missing_photos}
 - case_status: {case_status}
 - needs_escalation: {needs_escalation}
+
+WORKFLOW: status={workflow_status} run_id={workflow_run_id}
+POLICY: allowed={policy_allowed} deny_code={policy_deny} reasons={policy_reasons}
+
+If WORKFLOW status is waiting_input and photos are missing, ask for photos only.
+If WORKFLOW status is waiting_approval, say a human will review and do not say the refund is done.
+If POLICY deny_code is OUT_OF_POLICY, explain and do not promise a refund.
+Never invent a Stripe refund id.
 
 RECENT CONVERSATION:
 {history_text}

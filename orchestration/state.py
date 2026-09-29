@@ -61,3 +61,12 @@ class AgentState(Dict):
 
     # ── Per-turn trace (Phase 3) ──────────────────────────────────────────────
     turn_trace: Optional[Dict[str, Any]]  # structured per-turn observability record
+
+    # ── Durable workflow (P0-D) ──────────────────────────────────────────────
+    # The planner may name a workflow. The executor starts it. Stripe stays
+    # inside the engine, and these fields carry the snapshot to HITL and QA.
+    policy_decision: Optional[Dict]
+    workflow_run_id: Optional[str]
+    workflow_name: Optional[str]
+    workflow_status: Optional[str]
+    workflow_waiting: Optional[str]  # input | approval | auth | None

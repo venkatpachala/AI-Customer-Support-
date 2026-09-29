@@ -10,6 +10,33 @@ from runtime.events import RuntimeEvent, RuntimeEventType
 from runtime.response import RuntimeResponse
 
 
+def _workflow_summary(tool_results: Dict[str, Any], result: Dict[str, Any]) -> Dict[str, Any]:
+    summary = {
+        key: {"status": (value or {}).get("status")}
+        for key, value in (tool_results or {}).items()
+        if isinstance(value, dict)
+    }
+    if result.get("workflow_run_id"):
+        summary["workflow_run_id"] = result.get("workflow_run_id")
+        summary["workflow_status"] = result.get("workflow_status")
+        summary["workflow_name"] = result.get("workflow_name")
+    if isinstance(result.get("policy_decision"), dict):
+        summary["policy_decision"] = result.get("policy_decision")
+    return summary
+
+
+def _workflow_metadata(result: Dict[str, Any], channel: str, via: str) -> Dict[str, Any]:
+    policy = result.get("policy_decision") if isinstance(result.get("policy_decision"), dict) else {}
+    return {
+        "channel": channel,
+        "via": via,
+        "workflow_run_id": result.get("workflow_run_id"),
+        "workflow_status": result.get("workflow_status"),
+        "deny_code": policy.get("deny_code"),
+        "reasons": list(policy.get("reasons") or []),
+    }
+
+
 class SupportRuntime:
     """
     Single entrypoint for all channels.
@@ -139,6 +166,9 @@ class SupportRuntime:
             risk_level=result.get("risk_level"),
             status=status,
             order_id=order_id,
+            workflow_run_id=result.get("workflow_run_id"),
+            workflow_status=result.get("workflow_status"),
+            policy_decision=result.get("policy_decision") if isinstance(result.get("policy_decision"), dict) else None,
             raw=result if isinstance(result, dict) else {},
         )
 
@@ -390,11 +420,7 @@ class SupportRuntime:
                         issue_type=intent,
                         missing_inputs=missing_inputs,
                         tools_executed=list(tool_results.keys()),
-                        tool_results_summary={
-                            k: {"status": (v or {}).get("status")}
-                            for k, v in tool_results.items()
-                            if isinstance(v, dict)
-                        },
+                        tool_results_summary=_workflow_summary(tool_results, result),
                         policy_citations=citations,
                         escalated=escalated,
                         escalation_reason=result.get("escalation_reason"),
@@ -445,7 +471,7 @@ class SupportRuntime:
                         latency_ms=latency_ms,
                         status=status,
                         request_id=request_id,
-                        metadata={"channel": ctx.channel, "via": "handle"},
+                        metadata=_workflow_metadata(result, ctx.channel, "handle"),
                     )
                 except Exception:
                     pass
@@ -489,6 +515,9 @@ class SupportRuntime:
                 risk_level=result.get("risk_level"),
                 status=status,
                 order_id=order_id,
+                workflow_run_id=result.get("workflow_run_id"),
+                workflow_status=result.get("workflow_status"),
+                policy_decision=result.get("policy_decision") if isinstance(result.get("policy_decision"), dict) else None,
                 raw=result,
             )
 
