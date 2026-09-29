@@ -25,3 +25,8 @@ class ExecutionPlan(BaseModel):
     replan_triggers: List[str] = Field(default_factory=list)
     confidence: float = 0.7
     estimated_steps: int = 0
+    # Action intents name a durable workflow. read_tools are the only tools
+    # the executor may call. Side effects stay inside WorkflowEngine.
+    workflow: Optional[str] = None
+    read_tools: List[str] = Field(default_factory=list)
+    slots: Dict[str, Any] = Field(default_factory=dict)

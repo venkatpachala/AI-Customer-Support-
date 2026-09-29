@@ -38,6 +38,18 @@ from observability.metrics import (
 from memory.service import MemoryService
 from interactions.service import InteractionService
 from security.output_guard import apply_output_guard
+
+
+def _case_tool_summary(tool_results: Dict[str, Any], result: Dict[str, Any]) -> Dict[str, Any]:
+    """Persist the workflow id on the case so the next turn can resume it."""
+    summary = dict(tool_results) if isinstance(tool_results, dict) else {}
+    if result.get("workflow_run_id"):
+        summary["workflow_run_id"] = result.get("workflow_run_id")
+        summary["workflow_status"] = result.get("workflow_status")
+        summary["workflow_name"] = result.get("workflow_name")
+    if isinstance(result.get("policy_decision"), dict):
+        summary["policy_decision"] = result.get("policy_decision")
+    return summary
 from rag.policy_cache import policy_cache
 from db.session import init_db
 
@@ -669,6 +681,11 @@ async def chat(request: ChatRequest):
                 "A support agent will review this case shortly."
             )
             escalated = True
+        elif escalated and result.get("workflow_status") == "waiting_approval":
+            response_text = (
+                "This refund is pending review by a support agent. "
+                "No refund has been issued yet."
+            )
         elif escalated:
             response_text = (
                 "This request requires human assistance. "
@@ -708,6 +725,9 @@ async def chat(request: ChatRequest):
 
         plan_missing = list(plan.get("missing_inputs") or [])
         missing_inputs = plan_missing or list(case.missing_inputs or [])
+        for item in result.get("missing_inputs") or []:
+            if item not in missing_inputs:
+                missing_inputs.append(item)
 
         if result.get("missing_photos") and "photos" not in missing_inputs and not photos_received:
             missing_inputs.append("photos")
@@ -769,7 +789,7 @@ async def chat(request: ChatRequest):
             photos_requested=photos_requested,
             photos_received=photos_received,
             tools_executed=list(tool_results.keys()),
-            tool_results_summary=tool_results,
+            tool_results_summary=_case_tool_summary(tool_results, result),
             policy_citations=citations,
             escalated=escalated,
             escalation_reason=result.get("escalation_reason") if escalated else case.escalation_reason,
@@ -791,6 +811,9 @@ async def chat(request: ChatRequest):
             "missing_inputs": missing_inputs,
             "auth_level": result_auth_level,
             "identity_blocked": identity_blocked,
+            "workflow_run_id": result.get("workflow_run_id"),
+            "workflow_status": result.get("workflow_status"),
+            "policy_decision": result.get("policy_decision"),
         }
 
         if not escalated and not blocked and looks_like_policy_query(request.message):
@@ -828,6 +851,12 @@ async def chat(request: ChatRequest):
                     "channel": "chat",
                     "via": "support_runtime",
                     "missing_photos_seed": missing_photos_seed,
+                    "workflow_run_id": result.get("workflow_run_id"),
+                    "workflow_status": result.get("workflow_status"),
+                    "deny_code": (result.get("policy_decision") or {}).get("deny_code")
+                    if isinstance(result.get("policy_decision"), dict) else None,
+                    "reasons": list((result.get("policy_decision") or {}).get("reasons") or [])
+                    if isinstance(result.get("policy_decision"), dict) else [],
                 },
             )
         except Exception as e:

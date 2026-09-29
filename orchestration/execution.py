@@ -3,6 +3,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, Any, Set, Optional
 
+from orchestration.planner import BANNED_EXECUTOR_TOOLS, READ_TOOL_ALLOWLIST, workflow_for_intent
 from orchestration.state import AgentState
 from tools.registry import TOOL_REGISTRY
 from tools.base.context import ToolContext
@@ -151,10 +152,15 @@ def build_tool_params(
     return params
 
 
+def _registry_from(state: AgentState):
+    return state.get("tool_registry") or TOOL_REGISTRY
+
+
 def invoke_registry_tool(
     tool_name: str,
     params: Dict[str, Any],
     context: ToolContext,
+    registry=None,
 ) -> Dict[str, Any]:
     """
     Invoke enterprise BaseTool from registry with:
@@ -162,7 +168,7 @@ def invoke_registry_tool(
     - idempotent replay for side-effecting tools (refunds etc.)
     Retries/timeouts/auth remain inside BaseTool.
     """
-    tool = TOOL_REGISTRY.get(tool_name)
+    tool = (registry or TOOL_REGISTRY).get(tool_name)
     if tool is None:
         return {
             "status": "error",
@@ -211,6 +217,20 @@ def invoke_registry_tool(
             raw = tool.execute(params, context)
             result = normalize_tool_result(raw)
         # Backward compatibility for old-style specs
+        elif callable(tool):
+            try:
+                data = tool(params)
+                result = data if isinstance(data, dict) and "status" in data else {
+                    "status": "success",
+                    "data": data if isinstance(data, dict) else {"result": data},
+                    "attempts": 1,
+                }
+            except Exception as e:
+                result = {
+                    "status": "error",
+                    "error": str(e),
+                    "error_code": "legacy_tool_error",
+                }
         elif hasattr(tool, "function"):
             try:
                 data = tool.function(**params)
@@ -275,6 +295,179 @@ def invoke_registry_tool(
         return err
 
 
+def _workflow_name_from_plan(state: AgentState, plan: Dict[str, Any]) -> Optional[str]:
+    named = (plan.get("workflow") or "").strip()
+    if named:
+        return named
+    return workflow_for_intent(plan.get("intent") or state.get("intent"))
+
+
+def _workflow_slots(
+    state: AgentState,
+    plan: Dict[str, Any],
+    *,
+    order_id: Optional[str],
+    amount_major: int,
+    tool_results: Dict[str, Any],
+) -> Dict[str, Any]:
+    memory = state.get("memory_context") or {}
+    slots = dict(plan.get("slots") or {})
+    if order_id:
+        slots["order_id"] = str(order_id)
+    if amount_major and amount_major > 0:
+        slots["amount"] = int(amount_major)
+    elif slots.get("amount") in (0, "0", None, ""):
+        slots.pop("amount", None)
+    if memory.get("photos_received") or state.get("photos_received"):
+        slots["photos_received"] = True
+    else:
+        slots["photos_received"] = bool(slots.get("photos_received"))
+    order_result = tool_results.get("shopify_get_order")
+    data = order_result.get("data") if isinstance(order_result, dict) else None
+    if isinstance(data, dict):
+        if data.get("status") or data.get("fulfillment_status"):
+            slots["order_status"] = data.get("status") or data.get("fulfillment_status")
+        total = data.get("total") or data.get("current_total_price")
+        if total and not slots.get("amount"):
+            try:
+                slots["amount"] = int(float(total))
+            except (TypeError, ValueError):
+                pass
+    return slots
+
+
+def _stored_workflow(state: AgentState) -> tuple[Optional[str], Optional[str]]:
+    memory = state.get("memory_context") or {}
+    summary = memory.get("tool_results_summary") or {}
+    nested = summary.get("workflow") if isinstance(summary.get("workflow"), dict) else {}
+    run_id = (
+        state.get("workflow_run_id")
+        or summary.get("workflow_run_id")
+        or nested.get("workflow_run_id")
+    )
+    status = (
+        state.get("workflow_status")
+        or summary.get("workflow_status")
+        or nested.get("workflow_status")
+    )
+    return (str(run_id) if run_id else None, str(status) if status else None)
+
+
+def _waiting_kind(status: Optional[str]) -> Optional[str]:
+    return {
+        "waiting_input": "input",
+        "waiting_approval": "approval",
+        "waiting_auth": "auth",
+    }.get(status or "")
+
+
+def _run_durable_workflow(
+    state: AgentState,
+    plan: Dict[str, Any],
+    tool_results: Dict[str, Any],
+    *,
+    order_id: Optional[str],
+    amount_major: int,
+) -> Dict[str, Any]:
+    """Start or resume the plan's workflow. Never calls Stripe from this node."""
+    from workflows import WorkflowEngine
+    from workflows.context import WorkflowContext
+
+    workflow_name = _workflow_name_from_plan(state, plan)
+    if not workflow_name:
+        return {}
+
+    request_id = state.get("request_id", "unknown")
+    case_id = state.get("case_id") or (state.get("memory_context") or {}).get("case_id")
+    if not case_id:
+        log_event(
+            "workflow_skipped",
+            request_id,
+            node="executor",
+            data={"reason": "missing_case_id", "workflow": workflow_name},
+            level="warning",
+        )
+        return {
+            "workflow_name": workflow_name,
+            "workflow_status": "failed",
+            "workflow_error": "case_id is required",
+        }
+
+    slots = _workflow_slots(
+        state,
+        plan,
+        order_id=order_id,
+        amount_major=amount_major,
+        tool_results=tool_results,
+    )
+    memory = state.get("memory_context") or {}
+    auth_level = state.get("auth_level") or memory.get("auth_level") or "anonymous"
+    engine = state.get("workflow_engine") or WorkflowEngine()
+    ctx = WorkflowContext(
+        tenant_id=state.get("tenant_id") or "zepto",
+        case_id=str(case_id),
+        customer_id=str(state.get("customer_id") or memory.get("customer_id") or "customer"),
+        auth_level=str(auth_level),
+        conversation_id=state.get("session_id") or memory.get("session_id"),
+        slots=slots,
+        tool_registry=state.get("tool_registry"),
+    )
+    stored_run_id, stored_status = _stored_workflow(state)
+    try:
+        if stored_run_id and str(stored_status or "").startswith("waiting"):
+            view = engine.resume(stored_run_id, slots=slots)
+        else:
+            view = engine.start(workflow_name, ctx)
+            if str(view.status or "").startswith("waiting"):
+                # start() returns an existing paused run without applying new slots.
+                view = engine.resume(view.run_id, slots=slots)
+    except Exception as exc:
+        log_event(
+            "workflow_failed",
+            request_id,
+            node="executor",
+            data={"error": str(exc), "workflow": workflow_name},
+            level="error",
+        )
+        return {
+            "workflow_name": workflow_name,
+            "workflow_status": "failed",
+            "workflow_error": str(exc),
+        }
+
+    output = dict(view.output or {})
+    policy = output.get("policy") if isinstance(output.get("policy"), dict) else None
+    requires = list(output.get("requires_inputs") or [])
+    if not requires and policy:
+        requires = list(policy.get("requires_inputs") or [])
+    waiting = _waiting_kind(view.status)
+    missing_photos = waiting == "input" and "photos" in requires
+    log_event("workflow_finished", request_id, node="executor", data={
+        "workflow": view.workflow_name,
+        "run_id": view.run_id,
+        "status": view.status,
+        "deny_code": None if policy is None else policy.get("deny_code"),
+    })
+    tool_results["workflow"] = {
+        "status": view.status,
+        "workflow_run_id": view.run_id,
+        "workflow_status": view.status,
+        "workflow_name": view.workflow_name,
+        "redirected_to_workflow": True,
+    }
+    payload = {
+        "workflow_run_id": view.run_id,
+        "workflow_name": view.workflow_name,
+        "workflow_status": view.status,
+        "workflow_waiting": waiting,
+        "policy_decision": policy,
+        "missing_photos": missing_photos,
+    }
+    if requires and view.status == "waiting_input":
+        payload["missing_inputs"] = requires
+    return payload
+
+
 def execution_engine_node(state: AgentState) -> Dict:
     request_id = state.get("request_id", "unknown")
     start_time = time.time()
@@ -297,6 +490,8 @@ def execution_engine_node(state: AgentState) -> Dict:
     already_executed = set(memory_context.get("tools_executed") or [])
 
     context = build_tool_context(state)
+    registry = _registry_from(state)
+    workflow_name = _workflow_name_from_plan(state, plan)
 
     log_event("executor_started", request_id, node="executor", data={
         "order_id": order_id,
@@ -349,6 +544,29 @@ def execution_engine_node(state: AgentState) -> Dict:
                 step_num = step.get("step")
 
                 if not tool_name:
+                    continue
+
+                # Money movement and other writes belong to the workflow engine.
+                if tool_name in BANNED_EXECUTOR_TOOLS or (
+                    workflow_name and tool_name not in READ_TOOL_ALLOWLIST
+                ):
+                    tool_results[tool_name] = {
+                        "status": "skipped",
+                        "reason": "redirected_to_workflow",
+                    }
+                    log_event(
+                        "tool_redirected_to_workflow",
+                        request_id,
+                        node="executor",
+                        data={"tool": tool_name, "workflow": workflow_name},
+                    )
+                    try:
+                        TOOL_COUNT.labels(tool_name=tool_name, status="skipped").inc()
+                    except Exception:
+                        pass
+                    if isinstance(step_num, int):
+                        completed_steps.add(step_num)
+                    print(f"Redirected {tool_name} to workflow {workflow_name}")
                     continue
 
                 # Skip idempotent read tools already executed in this case
@@ -408,7 +626,7 @@ def execution_engine_node(state: AgentState) -> Dict:
                     print(f"Skipped {tool_name} - missing order_id")
                     continue
 
-                if TOOL_REGISTRY.get(tool_name) is None:
+                if registry.get(tool_name) is None:
                     tool_results[tool_name] = {
                         "status": "error",
                         "error": f"Tool '{tool_name}' not registered",
@@ -460,7 +678,9 @@ def execution_engine_node(state: AgentState) -> Dict:
                         continue
 
                 print(f"Invoking {tool_name} with params={params}")
-                future = executor.submit(invoke_registry_tool, tool_name, params, context)
+                future = executor.submit(
+                    invoke_registry_tool, tool_name, params, context, registry
+                )
                 future_to_step[future] = step
 
             for future in as_completed(future_to_step):
@@ -518,8 +738,18 @@ def execution_engine_node(state: AgentState) -> Dict:
         "duration": round(duration, 3),
     })
 
+    workflow_state = _run_durable_workflow(
+        state,
+        plan,
+        tool_results,
+        order_id=order_id,
+        amount_major=amount_major,
+    )
+
     print("=== Execution Finished ===\n")
-    return {
+    result = {
         "tool_results": tool_results,
         "resolved_order_id": order_id,
     }
+    result.update(workflow_state)
+    return result

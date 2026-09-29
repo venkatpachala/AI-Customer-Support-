@@ -31,6 +31,9 @@ class RuntimeResponse:
     risk_level: Optional[str] = None
     status: Optional[str] = None
     order_id: Optional[str] = None
+    workflow_run_id: Optional[str] = None
+    workflow_status: Optional[str] = None
+    policy_decision: Optional[Dict[str, Any]] = None
     raw: Dict[str, Any] = field(default_factory=dict)
     error: Optional[str] = None
 
@@ -42,7 +45,7 @@ class RuntimeResponse:
                 "request_id": self.request_id,
                 "session_id": self.session_id,
             }
-        return {
+        payload = {
             "response": self.response,
             "confidence": self.confidence,
             "citations": self.citations,
@@ -58,3 +61,10 @@ class RuntimeResponse:
             "identity_blocked": self.identity_blocked,
             "needs_identity": self.needs_identity,
         }
+        if self.workflow_run_id:
+            payload["workflow_run_id"] = self.workflow_run_id
+        if self.workflow_status:
+            payload["workflow_status"] = self.workflow_status
+        if self.policy_decision:
+            payload["policy_decision"] = self.policy_decision
+        return payload

@@ -30,106 +30,83 @@ def extract_amount_from_messages(messages) -> int:
 
 from orchestration.escalation_policy import evaluate_escalation
 
+def _refund_amount(state: AgentState) -> int:
+    plan = state.get("current_plan") or {}
+    slots = plan.get("slots") or {}
+    raw = slots.get("amount")
+    if raw:
+        try:
+            return int(float(raw))
+        except (TypeError, ValueError):
+            pass
+    return extract_amount_from_messages(state.get("messages") or [])
+
+
 def check_escalation(state: AgentState) -> Dict:
-    needs, reason, codes = evaluate_escalation(state)
-    """
-    Escalate only for strong reasons:
-    - already escalated case
-    - high-value refund
-    - stripe requires approval
-    - true high risk
-    - planner approval only when reason is serious
+    """Escalate from the workflow snapshot when one exists.
+
+    Amount caps live in the policy YAML. A missing-photo wait stays on the
+    QA ask path. Identity waits stay off the supervisor queue.
     """
     request_id = state.get("request_id", "unknown")
     log_event("hitl_started", request_id, node="hitl")
 
-    plan = state.get("current_plan") or {}
-    tool_results = state.get("tool_results") or {}
-    tenant_config = state.get("tenant_config") or {}
-    risk_level = state.get("risk_level", "low")
-    missing_photos = state.get("missing_photos", False)
     memory_context = state.get("memory_context") or {}
-    messages = state.get("messages", [])
+    workflow_status = str(state.get("workflow_status") or "")
+    policy = state.get("policy_decision") if isinstance(state.get("policy_decision"), dict) else {}
+    missing_photos = bool(state.get("missing_photos"))
+    run_id = state.get("workflow_run_id")
+    amount = _refund_amount(state)
 
-    approval = tenant_config.get("approval", {})
-    high_value_limit = approval.get("high_value_refund_limit", 2000)
-
-    needs_escalation = False
-    reason = ""
-    amount = 0
-
-    # 1) Already escalated in memory
-    if memory_context.get("case_status") == "escalated":
+    def finish(needs: bool, reason: str, codes: list) -> Dict:
         log_event("hitl_completed", request_id, node="hitl", data={
-            "needs_escalation": True,
-            "reason": "Case already escalated",
-            "amount": 0
+            "needs_escalation": needs,
+            "reason": reason,
+            "amount": amount,
+            "workflow_status": workflow_status,
+            "codes": codes,
         })
         return {
-            "needs_escalation": True,
-            "escalation_reason": memory_context.get("escalation_reason") or "Case already escalated"
+            "needs_escalation": bool(needs),
+            "escalation_reason": reason,
+            "escalation_codes": codes,
         }
 
-    # 2) Stripe explicit requires_approval
-    stripe_result = tool_results.get("stripe_refund", {})
-    if isinstance(stripe_result, dict):
-        data = stripe_result.get("data", {})
-        if isinstance(data, dict):
-            amount = data.get("amount", 0) or 0
-            if data.get("status") == "requires_approval":
-                needs_escalation = True
-                reason = f"High value refund of ₹{amount} requires manual approval"
-
-    # 3) Safe amount extraction from user text
-    if not amount:
-        amount = extract_amount_from_messages(messages)
-
-    if not needs_escalation and amount >= high_value_limit:
-        needs_escalation = True
-        reason = (
-            f"High value refund of ₹{amount} requires manual approval "
-            f"(limit: ₹{high_value_limit})"
+    if memory_context.get("case_status") == "escalated":
+        return finish(
+            True,
+            memory_context.get("escalation_reason") or "Case already escalated",
+            ["preexisting"],
         )
 
-    # 4) True high risk only
-    if not needs_escalation and risk_level in ["high", "critical"]:
-        needs_escalation = True
-        reason = f"High risk level detected ({risk_level})"
+    if workflow_status == "waiting_auth":
+        return finish(False, "", [])
 
-    # 5) Planner approval only for serious reasons
-    if not needs_escalation:
-        approval_rules = plan.get("approval_rules", {})
-        planner_wants_approval = approval_rules.get("requires_human_approval", False)
-        planner_reason = (approval_rules.get("reason") or "").lower()
+    photos_blocking = workflow_status == "waiting_input" or (
+        missing_photos and workflow_status != "waiting_approval"
+    )
+    pending_approval = (
+        workflow_status == "waiting_approval" or policy.get("requires_approval") is True
+    )
+    if pending_approval and not photos_blocking:
+        reason = (
+            f"High value refund of ₹{amount} requires manual approval; "
+            f"pending refund approval; workflow_run_id={run_id}"
+        )
+        return finish(True, reason, ["high_value_refund"])
 
-        serious_markers = [
-            "fraud",
-            "abuse",
-            "chargeback",
-            "high value",
-            "manual review required",
-            "suspicious",
-            "unsafe"
-        ]
-
-        if planner_wants_approval and any(marker in planner_reason for marker in serious_markers):
-            needs_escalation = True
-            reason = approval_rules.get("reason") or "Planner flagged serious case for human review"
-
-    # 6) Missing photos / preference / FAQ should never escalate alone
-    if missing_photos and not needs_escalation:
-        needs_escalation = False
-        reason = ""
-
-    log_event("hitl_completed", request_id, node="hitl", data={
-        "needs_escalation": needs_escalation,
-        "reason": reason,
-        "amount": amount,
-        "risk_level": risk_level
-    })
-
-    return {
-        "needs_escalation": bool(needs),
-        "escalation_reason": reason,
-        "escalation_codes": codes,
-    }
+    needs, reason, codes = evaluate_escalation(state)
+    codes = list(codes or [])
+    policy_present = bool(policy) or bool(workflow_status)
+    if photos_blocking or (policy_present and policy.get("requires_approval") is not True):
+        if "high_value_refund" in codes:
+            codes = [code for code in codes if code != "high_value_refund"]
+            if reason and str(reason).startswith("High value"):
+                reason = ""
+    if not codes:
+        return finish(False, "", [])
+    if not reason:
+        reason = f"Human review required ({codes[0]})"
+    if missing_photos and codes == ["high_value_refund"]:
+        return finish(False, "", [])
+    return finish(bool(needs and codes), reason or "", codes)
