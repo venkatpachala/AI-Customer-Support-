@@ -1,4 +1,5 @@
 import os
+import re
 
 from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field
@@ -8,11 +9,23 @@ from tools.base.context import ToolContext
 from tools.base.rate_limit import TokenBucketRateLimiter
 from tools.base.retry import RetryPolicy
 from tools.base.exceptions import ResourceNotFoundError, ValidationError
+from observability.logging import log_event
 from tools.shopify.client import ShopifyClient
 
 
 class GetOrderRequest(BaseModel):
     order_id: str = Field(..., min_length=1)
+
+
+def _mask_contact(value: Optional[str]) -> str:
+    text = str(value or "")
+    if "@" in text:
+        name, _, domain = text.partition("@")
+        return f"{name[:1]}***@{domain}" if name else f"***@{domain}"
+    digits = re.sub(r"\D", "", text)
+    if len(digits) >= 2:
+        return ("*" * (len(digits) - 2)) + digits[-2:]
+    return ""
 
 
 def _normalize_order(order: Dict[str, Any]) -> Dict[str, Any]:
@@ -70,8 +83,8 @@ def _normalize_order(order: Dict[str, Any]) -> Dict[str, Any]:
 class ShopifyGetOrder(BaseTool):
     name = "shopify_get_order"
     provider = "shopify"
-    timeout_seconds = 10.0
-    max_retries = 3
+    timeout_seconds = 8.0
+    max_retries = 2
     idempotent = True
     request_model = GetOrderRequest
 
@@ -135,7 +148,20 @@ class ShopifyGetOrder(BaseTool):
                 if not order:
                     raise ResourceNotFoundError(f"Order not found for id={order_id}")
 
-            return _normalize_order(order)
+            normalized = _normalize_order(order)
+            customer = order.get("customer") or {}
+            shipping = order.get("shipping_address") or {}
+            log_event(
+                "shopify_order_loaded",
+                context.request_id,
+                node="tool",
+                data={
+                    "order_id": str(order.get("id") or order_id),
+                    "email": _mask_contact(customer.get("email")),
+                    "phone": _mask_contact(customer.get("phone") or shipping.get("phone")),
+                },
+            )
+            return normalized
 
         except Exception as e:
             msg = str(e).lower()

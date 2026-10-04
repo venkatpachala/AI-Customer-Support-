@@ -4,6 +4,7 @@
 
 id: zepto
 brand: Zepto
+tone: "calm, short, and plain"
 locale: en-IN
 currency: INR
 
@@ -21,6 +22,7 @@ auth:
 limits:
   auto_refund_max: 2000
   manager_refund_max: 10000
+  live_refund_cap_inr: 20000
   photo_required_for:
     - damaged
     - missing_item

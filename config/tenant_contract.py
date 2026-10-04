@@ -45,6 +45,7 @@ class TenantLimits(BaseModel):
 
     auto_refund_max: float = 2000
     manager_refund_max: float = 10000
+    live_refund_cap_inr: float = 20000
     photo_required_for: List[str] = Field(
         default_factory=lambda: ["damaged", "missing_item"]
     )
@@ -73,6 +74,7 @@ class PlatformTenant(BaseModel):
 
     id: str
     brand: str = ""
+    tone: str = ""
     locale: str = "en"
     currency: str = "USD"
     auth: AuthPolicy = Field(default_factory=AuthPolicy)

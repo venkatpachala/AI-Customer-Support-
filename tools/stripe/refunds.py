@@ -1,4 +1,5 @@
 import hashlib
+import os
 from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field, validator
 
@@ -74,8 +75,8 @@ class StripeCreateRefund(BaseTool):
 
     name = "stripe_refund"
     provider = "stripe"
-    timeout_seconds = 15.0
-    max_retries = 3
+    timeout_seconds = 8.0
+    max_retries = 2
     idempotent = True
     request_model = CreateRefundRequest
 
@@ -95,6 +96,23 @@ class StripeCreateRefund(BaseTool):
         charge_id = request.get("charge_id")
         high_value_limit = int(request.get("high_value_limit", 200000))
         require_approval_above_limit = bool(request.get("require_approval_above_limit", True))
+
+        tools_mode = os.getenv("TOOLS_MODE", "mock").strip().lower()
+        stripe_mode = os.getenv("STRIPE_MODE", "test").strip().lower()
+        if stripe_mode not in {"test", "live"}:
+            stripe_mode = "test"
+        secret = os.getenv("STRIPE_SECRET_KEY", "").strip()
+        if tools_mode == "live" and stripe_mode != "live" and secret.startswith("sk_live"):
+            raise BusinessRuleError("STRIPE_MODE=live is required before a live secret can refund")
+        if tools_mode != "live":
+            return {
+                "refund_id": "re_mock",
+                "status": "succeeded",
+                "amount": amount,
+                "currency": currency,
+                "order_id": order_id,
+                "idempotency_key": request.get("idempotency_key"),
+            }
 
         if not payment_intent_id and not charge_id:
             # In a full system, resolve from order mapping DB.
@@ -119,8 +137,10 @@ class StripeCreateRefund(BaseTool):
                 latency_ms=0.0,
             )
 
+        amount_paise = int(amount) * 100
         form_data: Dict[str, Any] = {
-            "amount": str(amount),
+            "amount": str(amount_paise),
+            "currency": currency,
             "reason": reason,
         }
         if payment_intent_id:
@@ -136,11 +156,11 @@ class StripeCreateRefund(BaseTool):
         if context.customer_id:
             form_data["metadata[customer_id]"] = context.customer_id
 
-        idem_key = build_idempotency_key(
+        idem_key = str(request.get("idempotency_key") or "").strip() or build_idempotency_key(
             tenant_id=context.tenant_id,
             case_id=context.case_id,
             order_id=order_id,
-            amount=amount,
+            amount=amount_paise,
             currency=currency,
         )
 
