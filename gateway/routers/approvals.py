@@ -3,9 +3,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel
 
+from identity.ops_session import COOKIE_NAME, ops_role
 from workflows.approvals import ApprovalError, approve_task, list_tasks, reject_task
 from workflows.engine import WorkflowEngine
 
@@ -32,11 +33,14 @@ def _tenant(x_tenant_id: Optional[str]) -> str:
     return tenant
 
 
-def _supervisor(x_actor_role: Optional[str]) -> str:
+def _supervisor(x_actor_role: Optional[str], request: Request) -> str:
     role = (x_actor_role or "").strip().lower()
-    if role not in {"supervisor", "admin"}:
-        raise HTTPException(status_code=403, detail="supervisor role required")
-    return role
+    if role in {"supervisor", "admin"}:
+        return role
+    cookie_role = ops_role(request.cookies.get(COOKIE_NAME))
+    if cookie_role == "supervisor":
+        return cookie_role
+    raise HTTPException(status_code=403, detail="supervisor role required")
 
 
 def _call(fn):
@@ -48,6 +52,7 @@ def _call(fn):
 
 @router.get("")
 def list_approvals(
+    request: Request,
     status: str = "pending",
     tenant_id: Optional[str] = None,
     limit: int = 50,
@@ -55,8 +60,7 @@ def list_approvals(
     x_actor_role: Optional[str] = Header(default=None),
 ):
     tenant = _tenant(x_tenant_id)
-    if x_actor_role is not None:
-        _supervisor(x_actor_role)
+    _supervisor(x_actor_role, request)
     if tenant_id and tenant_id != tenant:
         raise HTTPException(status_code=403, detail="tenant header does not match tenant_id")
     return {"approvals": list_tasks(tenant_id=tenant, status=status, limit=limit)}
@@ -65,13 +69,14 @@ def list_approvals(
 @router.post("/{task_id}/approve")
 def approve(
     task_id: str,
+    request: Request,
     body: Optional[DecisionBody] = None,
     x_tenant_id: Optional[str] = Header(default=None),
     x_actor_role: Optional[str] = Header(default=None),
     x_actor_id: Optional[str] = Header(default=None),
 ):
     tenant = _tenant(x_tenant_id)
-    _supervisor(x_actor_role)
+    _supervisor(x_actor_role, request)
     actor = (x_actor_id or "").strip() or "supervisor"
     note = None if body is None else body.note
     return _call(
@@ -88,13 +93,16 @@ def approve(
 @router.post("/{task_id}/reject")
 def reject(
     task_id: str,
+    request: Request,
     body: Optional[DecisionBody] = None,
     x_tenant_id: Optional[str] = Header(default=None),
     x_actor_role: Optional[str] = Header(default=None),
     x_actor_id: Optional[str] = Header(default=None),
 ):
     tenant = _tenant(x_tenant_id)
-    _supervisor(x_actor_role)
+    _supervisor(x_actor_role, request)
     actor = (x_actor_id or "").strip() or "supervisor"
-    note = None if body is None else body.note
+    note = None if body is None else (body.note or "").strip()
+    if not note:
+        raise HTTPException(status_code=400, detail="reject note is required")
     return _call(lambda: reject_task(task_id, tenant_id=tenant, actor_id=actor, note=note))

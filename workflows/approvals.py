@@ -245,6 +245,9 @@ def _task_queue_item(row: HumanTaskRow) -> Dict[str, Any]:
         "run_id": row.workflow_run_id,
         "amount": payload.get("amount"),
         "order_id": payload.get("order_id"),
+        "reason": payload.get("reason"),
+        "policy_version": payload.get("policy_version"),
+        "photos_received": bool(payload.get("photos_received")),
         "reasons": list(payload.get("reasons") or []),
         "created_at": _iso(row.created_at),
     }

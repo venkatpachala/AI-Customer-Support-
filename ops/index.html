@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Refund approvals</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; color: #1b1b1b; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border-bottom: 1px solid #ddd; text-align: left; padding: 0.5rem; }
+    button { margin-right: 0.4rem; }
+    #note { width: 100%; max-width: 32rem; }
+  </style>
+</head>
+<body>
+  <h1>Pending refunds</h1>
+  <form id="login">
+    <input id="user" placeholder="user" autocomplete="username" />
+    <input id="password" placeholder="password" type="password" autocomplete="current-password" />
+    <button type="submit">Sign in</button>
+  </form>
+  <p id="status"></p>
+  <label>Reject note <input id="note" /></label>
+  <table>
+    <thead>
+      <tr><th>Amount</th><th>Order</th><th>Reason</th><th>Policy</th><th>Photos</th><th></th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <script>
+    const status = document.getElementById("status");
+    async function load() {
+      const response = await fetch("/v1/approvals?status=pending", { credentials: "include", headers: { "X-Tenant-Id": "zepto" } });
+      if (!response.ok) { status.textContent = "Sign in required"; return; }
+      const body = await response.json();
+      const rows = document.getElementById("rows");
+      rows.innerHTML = "";
+      for (const item of body.approvals || []) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${item.amount ?? ""}</td><td>${item.order_id ?? ""}</td><td>${item.reason ?? ""}</td><td>${item.policy_version ?? ""}</td><td>${item.photos_received ? "yes" : "no"}</td>`;
+        const approve = document.createElement("button");
+        approve.textContent = "Approve";
+        approve.onclick = () => decide(item.id, "approve");
+        const reject = document.createElement("button");
+        reject.textContent = "Reject";
+        reject.onclick = () => decide(item.id, "reject");
+        const cell = document.createElement("td");
+        cell.append(approve, reject);
+        tr.append(cell);
+        rows.append(tr);
+      }
+    }
+    async function decide(id, action) {
+      const note = document.getElementById("note").value;
+      const response = await fetch(`/v1/approvals/${id}/${action}`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "X-Tenant-Id": "zepto" },
+        body: JSON.stringify({ note })
+      });
+      const body = await response.json();
+      status.textContent = response.ok ? (body.workflow_status || "updated") : (body.detail || "already decided");
+      load();
+    }
+    document.getElementById("login").onsubmit = async (event) => {
+      event.preventDefault();
+      const response = await fetch("/v1/ops/login", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: document.getElementById("user").value, password: document.getElementById("password").value })
+      });
+      status.textContent = response.ok ? "signed in" : "login failed";
+      if (response.ok) load();
+    };
+  </script>
+</body>
+</html>
