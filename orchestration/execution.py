@@ -401,7 +401,13 @@ def _run_durable_workflow(
         tool_results=tool_results,
     )
     memory = state.get("memory_context") or {}
-    auth_level = state.get("auth_level") or memory.get("auth_level") or "anonymous"
+    from identity.ownership import case_auth
+
+    stored_level, _orders, checked = case_auth(str(case_id))
+    if checked:
+        auth_level = stored_level
+    else:
+        auth_level = state.get("auth_level") or memory.get("auth_level") or "anonymous"
     engine = state.get("workflow_engine") or WorkflowEngine()
     ctx = WorkflowContext(
         tenant_id=state.get("tenant_id") or "zepto",
@@ -647,35 +653,23 @@ def execution_engine_node(state: AgentState) -> Dict:
                     state=state,
                 )
 
-                # Stripe special case: without payment reference, skip with clear reason
-                if tool_name == "stripe_refund":
-                    if not params.get("payment_intent_id") and not params.get("charge_id"):
-                        tool_results[tool_name] = {
-                            "status": "skipped",
-                            "reason": "Missing payment_intent_id/charge_id mapping for Stripe refund",
-                        }
-                        try:
-                            TOOL_COUNT.labels(tool_name=tool_name, status="skipped").inc()
-                        except Exception:
-                            pass
-                        if isinstance(step_num, int):
-                            completed_steps.add(step_num)
-                        print(f"Skipped {tool_name} - missing Stripe payment reference")
-                        continue
-
-                    if params.get("amount", 0) <= 0:
-                        tool_results[tool_name] = {
-                            "status": "skipped",
-                            "reason": "Missing/invalid refund amount",
-                        }
-                        try:
-                            TOOL_COUNT.labels(tool_name=tool_name, status="skipped").inc()
-                        except Exception:
-                            pass
-                        if isinstance(step_num, int):
-                            completed_steps.add(step_num)
-                        print(f"Skipped {tool_name} - invalid amount")
-                        continue
+                # The executor never calls Stripe or any other write, even if a plan names one.
+                if tool_name not in {"shopify_get_order", "shopify_identify_customer", "health"}:
+                    reason = (
+                        "redirected_to_workflow"
+                        if tool_name in BANNED_EXECUTOR_TOOLS
+                        else "not_in_executor_allowlist"
+                    )
+                    tool_results[tool_name] = {"status": "skipped", "reason": reason}
+                    log_event(
+                        "tool_redirected_to_workflow",
+                        request_id,
+                        node="executor",
+                        data={"tool": tool_name, "workflow": workflow_name, "reason": reason},
+                    )
+                    if isinstance(step_num, int):
+                        completed_steps.add(step_num)
+                    continue
 
                 print(f"Invoking {tool_name} with params={params}")
                 future = executor.submit(

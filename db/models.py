@@ -22,6 +22,18 @@ def _utcnow() -> datetime:
     return datetime.utcnow()
 
 
+class CustomerSessionRow(Base):
+    """Public widget session. The client cannot choose its auth level."""
+
+    __tablename__ = "customer_sessions"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    customer_ref: Mapped[str] = mapped_column(String(128), index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
 class SessionRow(Base):
     __tablename__ = "sessions"
 
@@ -95,8 +107,8 @@ class InteractionRow(Base):
     customer_id: Mapped[str] = mapped_column(String(128), index=True)
     channel: Mapped[str] = mapped_column(String(32), default="chat")
 
-    message: Mapped[str] = mapped_column(Text)
-    response: Mapped[str] = mapped_column(Text)
+    message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    response: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     intent: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     risk_level: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)

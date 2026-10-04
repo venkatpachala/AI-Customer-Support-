@@ -32,5 +32,6 @@ class CaseMemory(BaseModel):
     policy_citations: List[str] = Field(default_factory=list)
     escalation_reason: Optional[str] = None
     last_agent_action: Optional[str] = None
+    auth_level: str = "anonymous"
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

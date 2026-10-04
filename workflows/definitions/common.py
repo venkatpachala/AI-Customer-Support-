@@ -27,12 +27,26 @@ def decision_payload(decision: Any) -> Dict[str, Any]:
     return decision.dict()
 
 
+def _auth_for_step(rt: StepRuntime, action: str) -> str:
+    """Public ownership on the case wins. Engine callers keep ctx until then."""
+    from identity.ownership import case_auth
+
+    level, orders, checked = case_auth(rt.ctx.case_id, rt.session_factory)
+    order_id = str(rt.ctx.slots.get("order_id") or "")
+    if checked:
+        if action == "refund" and (level != "verified" or not order_id or order_id not in orders):
+            return "anonymous"
+        return level
+    return rt.ctx.auth_level
+
+
 def assert_auth(action: str):
     def step(rt: StepRuntime) -> StepResult:
+        level = _auth_for_step(rt, action)
         decision = evaluate(
             rt.ctx.tenant_id,
             action,
-            auth_level=rt.ctx.auth_level,
+            auth_level=level,
             slots=dict(rt.ctx.slots),
         )
         payload = decision_payload(decision)
@@ -42,7 +56,7 @@ def assert_auth(action: str):
                 output={"policy": payload},
                 error="AUTH",
             )
-        return StepResult(status=STEP_SUCCESS, output={"auth_level": rt.ctx.auth_level})
+        return StepResult(status=STEP_SUCCESS, output={"auth_level": level})
 
     return step
 
@@ -84,7 +98,7 @@ def evaluate_action(action: str, *, order_status_wins: bool = False):
         decision = evaluate(
             rt.ctx.tenant_id,
             action,
-            auth_level=rt.ctx.auth_level,
+            auth_level=_auth_for_step(rt, action),
             slots=slots,
         )
         payload = decision_payload(decision)
@@ -155,6 +169,7 @@ def require_refund_approval(rt: StepRuntime) -> StepResult:
                 "reasons": list(policy.get("reasons") or []),
                 "policy_id": policy.get("policy_id"),
                 "policy_version": policy.get("policy_version"),
+                "photos_received": bool(slots.get("photos_received")),
                 "deny_code": policy.get("deny_code"),
                 "max_amount": policy.get("max_amount"),
             },
@@ -198,6 +213,44 @@ def _approval_override(rt: StepRuntime, policy: Dict[str, Any]) -> bool:
     return amount > 0 and amount <= cap
 
 
+def _over_daily_cap(rt: StepRuntime) -> bool:
+    """Sum today's succeeded refund amounts. Over the tenant cap stays in approval."""
+    from datetime import datetime
+
+    from sqlalchemy import select
+
+    from config.tenant_contract import load_platform_tenant
+    from db.models import WorkflowRunRow
+
+    try:
+        cap = float(load_platform_tenant(rt.ctx.tenant_id).limits.live_refund_cap_inr)
+    except Exception:
+        cap = 20000.0
+    start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    total = 0.0
+    with rt.session_factory() as db:
+        rows = db.execute(
+            select(WorkflowRunRow)
+            .where(WorkflowRunRow.tenant_id == rt.ctx.tenant_id)
+            .where(WorkflowRunRow.workflow_name == "refund")
+            .where(WorkflowRunRow.status == "succeeded")
+        ).scalars().all()
+        for row in rows:
+            finished = row.finished_at or row.updated_at or row.created_at
+            if finished is None or finished < start:
+                continue
+            slots = dict((row.input_json or {}).get("slots") or {})
+            try:
+                total += float(slots.get("amount") or 0)
+            except (TypeError, ValueError):
+                continue
+    try:
+        incoming = float(rt.ctx.slots.get("amount") or 0)
+    except (TypeError, ValueError):
+        incoming = 0.0
+    return total + incoming > cap
+
+
 def execute_refund(rt: StepRuntime) -> StepResult:
     """Stripe runs when the snapshot allows it, or when a supervisor approved a manager-band refund."""
     policy = dict(rt.policy or {})
@@ -207,11 +260,31 @@ def execute_refund(rt: StepRuntime) -> StepResult:
             output={"denied": True, "stripe_called": False, "policy": policy},
             error=str(policy.get("deny_code") or "policy_not_allowed"),
         )
-    if os.getenv("WORKFLOW_STRIPE_FAIL", "").strip() == "1" and rt.attempt < 3:
+    tools_live = os.getenv("TOOLS_MODE", "mock").strip().lower() == "live"
+    stripe_mode = os.getenv("STRIPE_MODE", "test").strip().lower()
+    force_fail = os.getenv("WORKFLOW_STRIPE_FAIL", "").strip() == "1"
+    if force_fail and not (tools_live and stripe_mode in {"test", "live"}) and rt.attempt < 3:
         return StepResult(
             status=STEP_RETRY,
             output={"stripe_called": False, "attempt": rt.attempt},
             error="stripe_forced_failure",
+        )
+    if tools_live and _over_daily_cap(rt):
+        slots = dict(rt.ctx.slots)
+        return StepResult(
+            status=STEP_WAIT_APPROVAL,
+            output={"policy": policy, "daily_cap": True, "stripe_called": False},
+            human_task={
+                "type": "refund_approval",
+                "payload": {
+                    "amount": slots.get("amount"),
+                    "order_id": slots.get("order_id"),
+                    "reason": slots.get("reason"),
+                    "policy_version": policy.get("policy_version"),
+                    "daily_cap": True,
+                },
+            },
+            error="daily_cap",
         )
     slots = dict(rt.ctx.slots)
     params = {
@@ -220,6 +293,8 @@ def execute_refund(rt: StepRuntime) -> StepResult:
         "currency": "inr",
         "reason": "requested_by_customer",
         "idempotency_key": stripe_step_key(rt.run_id),
+        "require_approval_above_limit": False,
+        "payment_intent_id": slots.get("payment_intent_id"),
     }
     result = rt.call_tool("stripe_refund", params)
     status = str(result.get("status") or "")

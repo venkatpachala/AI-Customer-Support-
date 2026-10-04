@@ -1,0 +1,6 @@
+# Mock ownership. Live mode uses Shopify and ignores this file.
+orders:
+  "12345":
+    phone: "9999900000"
+    email: "pilot@zepto.test"
+    customer_id: "cust_zepto_12345"

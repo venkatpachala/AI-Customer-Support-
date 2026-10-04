@@ -89,6 +89,7 @@ class MemoryService:
             "policy_citations": list(row.policy_citations or []),
             "escalation_reason": row.escalation_reason,
             "last_agent_action": row.last_agent_action,
+            "auth_level": row.auth_level or "anonymous",
             "created_at": row.created_at,
             "updated_at": row.updated_at,
         }
@@ -112,6 +113,7 @@ class MemoryService:
             case.policy_citations = list(row.policy_citations or [])
             case.escalation_reason = row.escalation_reason
             case.last_agent_action = row.last_agent_action
+            case.auth_level = row.auth_level or "anonymous"
             return case
 
     def _load_messages(self, db, session_id: str, limit: int = 20) -> List[dict]:
@@ -263,6 +265,7 @@ class MemoryService:
             row.policy_citations = list(getattr(case, "policy_citations", []) or [])
             row.escalation_reason = case.escalation_reason
             row.last_agent_action = getattr(case, "last_agent_action", None)
+            row.auth_level = getattr(case, "auth_level", None) or row.auth_level or "anonymous"
             row.escalated = (case.status == "escalated") or bool(getattr(case, "escalated", False))
             row.updated_at = datetime.utcnow()
             db.commit()

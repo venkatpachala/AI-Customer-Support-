@@ -16,8 +16,8 @@ print("DEBUG: PINECONE_API_KEY loaded =", "YES" if os.getenv("PINECONE_API_KEY")
 print("DEBUG: LANGSMITH tracing =", os.getenv("LANGCHAIN_TRACING_V2"))
 print("DEBUG: TOOLS_MODE =", os.getenv("TOOLS_MODE", "mock"))
 
-from fastapi import FastAPI, Query
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, Query, Request
+from fastapi.responses import JSONResponse, StreamingResponse
 from tools.bootstrap import register_default_tools
 register_default_tools()
 
@@ -81,6 +81,12 @@ from runtime import SupportRuntime, RequestContext, AuthContext
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    try:
+        from interactions.retention import sweep_interaction_text
+
+        sweep_interaction_text()
+    except Exception:
+        pass
     yield
 
 
@@ -88,11 +94,21 @@ app = FastAPI(title="D2C AI Support Agent", lifespan=lifespan)
 
 from gateway.routers.approvals import router as approvals_router
 from gateway.routers.cases import router as cases_router
+from gateway.routers.copilot import router as copilot_router
+from gateway.routers.intelligence import router as intelligence_router
+from gateway.routers.ops import router as ops_router
+from gateway.routers.sessions import router as sessions_router
+from gateway.routers.widget import router as widget_router
 from gateway.routers.workflows import router as workflows_router
 
 app.include_router(approvals_router)
 app.include_router(workflows_router)
 app.include_router(cases_router)
+app.include_router(intelligence_router)
+app.include_router(copilot_router)
+app.include_router(sessions_router)
+app.include_router(ops_router)
+app.include_router(widget_router)
 memory_service = MemoryService()
 interaction_service = InteractionService()
 
@@ -254,10 +270,21 @@ def metrics():
 
 @app.get("/health")
 def health():
+    db_status = "ok"
+    try:
+        from sqlalchemy import text
+
+        from db.session import SessionLocal
+
+        with SessionLocal() as session:
+            session.execute(text("SELECT 1"))
+    except Exception:
+        db_status = "error"
     return {
-        "status": "ok",
+        "status": "ok" if db_status == "ok" else "degraded",
         "service": "d2c-support-agent",
         "tools_mode": os.getenv("TOOLS_MODE", "mock"),
+        "db": db_status,
     }
 
 
@@ -298,12 +325,14 @@ def get_conversation_interactions(conversation_id: str):
     }
 
 
+_FORGED_AUTH_FIELDS = ("auth_level", "verified", "verified_order_ids", "verified_customer")
+
+
 @app.post("/chat")
-async def chat(request: ChatRequest):
+async def chat(raw_request: Request):
     """
-    Phase 0:
-    - Gateway keeps HTTP, metrics, and R1 short-circuits (cache / sticky escalation / verify).
-    - Core agent path is invoked through SupportRuntime (channel-agnostic entry).
+    Public chat. Auth comes from the session cookie and order ownership.
+    Client auth fields are logged and dropped.
     """
     request_id = new_request_id()
     ACTIVE_REQUESTS.inc()
@@ -311,22 +340,50 @@ async def chat(request: ChatRequest):
     session = None
     case = None
 
-    auth_level = normalize_auth_level(
-        request.auth_level,
-        verified=request.verified,
-        verified_customer=request.verified_customer,
-    )
-    is_verified = auth_level == "verified"
-    verified_order_ids = list(request.verified_order_ids or [])
+    try:
+        body = await raw_request.json()
+    except Exception:
+        ACTIVE_REQUESTS.dec()
+        return JSONResponse(status_code=400, content={"detail": "json body required"})
+    if not isinstance(body, dict):
+        ACTIVE_REQUESTS.dec()
+        return JSONResponse(status_code=400, content={"detail": "json body required"})
+
+    forged = [key for key in _FORGED_AUTH_FIELDS if key in body]
+    if forged:
+        log_event("ignored_client_auth", request_id, data={"fields": forged})
+        for key in forged:
+            body.pop(key, None)
+    request = ChatRequest(**body)
+
+    from identity.session import COOKIE_NAME, load_customer_session
+
+    customer_session = load_customer_session(raw_request.cookies.get(COOKIE_NAME))
+    if customer_session is None:
+        ACTIVE_REQUESTS.dec()
+        return JSONResponse(status_code=401, content={"detail": "session required"})
+    if request.tenant_id != customer_session.tenant_id:
+        ACTIVE_REQUESTS.dec()
+        return JSONResponse(status_code=403, content={"detail": "tenant mismatch"})
+    request.customer_id = customer_session.customer_ref
+    from gateway.limits import allow_chat
+
+    client_host = raw_request.client.host if raw_request.client else "unknown"
+    if not allow_chat(customer_session.id, client_host):
+        ACTIVE_REQUESTS.dec()
+        return JSONResponse(status_code=429, content={"detail": "rate limit"})
+
+    auth_level = "anonymous"
+    is_verified = False
+    verified_order_ids: List[str] = []
 
     log_event("request_received", request_id, data={
         "tenant_id": request.tenant_id,
         "customer_id": request.customer_id,
-        "session_id": request.session_id,
+        "session_id": customer_session.id,
         "message": request.message,
         "auth_level": auth_level,
-        "verified": is_verified,
-        "verified_order_ids": verified_order_ids,
+        "verified": False,
         "channel": "chat",
     })
 
@@ -427,84 +484,6 @@ async def chat(request: ChatRequest):
                 "identity_blocked": False,
             }
 
-        # -------- high-value requires verified --------
-        if requires_verified_customer(request.message, tenant_config_dict) and not is_verified:
-            response_text = (
-                "For security, high-value refund or account-sensitive requests require account verification. "
-                "Please continue from your logged-in/verified account or contact support."
-            )
-            memory_service.append_message(session, role="user", content=request.message)
-            memory_service.append_message(session, role="assistant", content=response_text)
-
-            latency = time.time() - start_time
-            try:
-                REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(latency)
-                ESCALATION_COUNT.labels(
-                    tenant_id=request.tenant_id,
-                    reason="unverified_sensitive_action"[:50],
-                ).inc()
-                REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="escalated").inc()
-            except Exception:
-                pass
-
-            order_id = case.order_id or extract_order_id(request.message)
-            try:
-                memory_service.update_case_from_result(
-                    case,
-                    order_id=order_id,
-                    issue_type="refund",
-                    escalated=True,
-                    escalation_reason="Unverified customer attempted sensitive/high-value action",
-                    status="escalated",
-                    last_agent_action="verification_required",
-                )
-            except Exception:
-                pass
-
-            try:
-                interaction_service.log_chat_turn(
-                    conversation_id=session.session_id,
-                    case_id=case.case_id,
-                    tenant_id=request.tenant_id,
-                    customer_id=request.customer_id,
-                    message=request.message,
-                    response=response_text,
-                    intent="refund",
-                    risk_level="high",
-                    order_id=order_id,
-                    missing_inputs=case.missing_inputs or [],
-                    photos_requested=bool(getattr(case, "photos_requested", False)),
-                    photos_received=bool(getattr(case, "photos_received", False)),
-                    tool_results={},
-                    escalated=True,
-                    blocked=False,
-                    escalation_reason="Unverified customer attempted sensitive/high-value action",
-                    citations=[],
-                    confidence=1.0,
-                    latency_ms=round(latency * 1000.0, 2),
-                    status="escalated",
-                    request_id=request_id,
-                    metadata={"reason": "unverified_sensitive_action", "auth_level": auth_level, "channel": "chat"},
-                )
-            except Exception as e:
-                log_event("interaction_log_failed", request_id, data={"error": str(e)}, level="warning")
-
-            return {
-                "response": response_text,
-                "confidence": 1.0,
-                "citations": [],
-                "escalated": True,
-                "blocked": False,
-                "reason": "Unverified customer attempted sensitive/high-value action",
-                "tool_results": {},
-                "request_id": request_id,
-                "session_id": session.session_id,
-                "case_id": case.case_id,
-                "missing_inputs": case.missing_inputs or [],
-                "auth_level": auth_level,
-                "identity_blocked": True,
-            }
-
         # -------- user message + photo follow-up --------
         memory_service.append_message(session, role="user", content=request.message)
 
@@ -519,6 +498,18 @@ async def chat(request: ChatRequest):
                 missing_inputs=missing_inputs,
                 status="open" if case.status == "waiting_customer" else case.status,
             )
+
+        owned_order = case.order_id or extract_order_id(request.message)
+        owned_contact = None
+        from identity.ownership import apply_ownership, extract_contact
+
+        owned_contact = extract_contact(request.message, request.contact)
+        if owned_order and owned_contact:
+            apply_ownership(case.case_id, request.tenant_id, owned_order, owned_contact)
+            case = memory_service.get_case(case.case_id) or case
+        auth_level = getattr(case, "auth_level", None) or "anonymous"
+        is_verified = auth_level == "verified"
+        verified_order_ids = list((case.tool_results_summary or {}).get("verified_order_ids") or [])
 
         memory_context = memory_service.to_state_context(session, case) or {}
         memory_context["auth_level"] = auth_level
@@ -839,7 +830,9 @@ async def chat(request: ChatRequest):
             "auth_level": result_auth_level,
             "identity_blocked": identity_blocked,
             "workflow_run_id": result.get("workflow_run_id"),
+            "workflow_name": result.get("workflow_name"),
             "workflow_status": result.get("workflow_status"),
+            "workflow_waiting": result.get("workflow_waiting"),
             "policy_decision": result.get("policy_decision"),
             "approval_task_id": _pending_approval_task_id(
                 result.get("workflow_run_id"),
