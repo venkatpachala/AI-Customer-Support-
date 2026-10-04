@@ -1,0 +1,46 @@
+name: gate
+
+on:
+  pull_request:
+  schedule:
+    - cron: "0 2 * * *"
+
+jobs:
+  gate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python -m pytest tests/policy tests/platform tests/workflows tests/api tests/identity tests/evaluation tests/rag/test_tenant_isolation.py -q -rs
+      - name: tenant filter must not be skipped
+        run: python -m pytest tests/rag/test_tenant_isolation.py -q -rs | tee tenant-filter.txt && ! grep -q skipped tenant-filter.txt
+      - run: python -m evaluation.release_gate
+        env:
+          TOOLS_MODE: mock
+
+  goldens:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: boot and goldens
+        env:
+          TOOLS_MODE: mock
+          EVAL_HTTP: "1"
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DATABASE_URL: sqlite:///./data/d2c_agent.db
+        run: |
+          python -m uvicorn gateway.main:app --host 127.0.0.1 --port 8000 &
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            curl -sf http://127.0.0.1:8000/health && break
+            sleep 2
+          done
+          python -m evaluation.release_gate
