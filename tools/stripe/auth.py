@@ -4,6 +4,9 @@ from tools.base.auth import BearerTokenAuth
 
 def get_stripe_auth() -> BearerTokenAuth:
     secret = os.getenv("STRIPE_SECRET_KEY", "").strip()
+    mode = os.getenv("TOOLS_MODE", "mock").strip().lower()
+    if mode != "live":
+        return BearerTokenAuth(token=secret or "mock")
     if not secret:
         raise RuntimeError("STRIPE_SECRET_KEY is not set")
     return BearerTokenAuth(token=secret)

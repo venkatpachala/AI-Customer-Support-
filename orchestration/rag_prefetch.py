@@ -24,7 +24,13 @@ def rag_prefetch_node(state: Dict[str, Any]) -> Dict[str, Any]:
         rag = get_rag()
 
         # smaller retrieve for speed; QA can still work with this
-        docs = rag.retrieve(query, k=6, final_k=3, use_hybrid=True)
+        docs = rag.retrieve(
+            query,
+            k=6,
+            final_k=3,
+            use_hybrid=True,
+            metadata_filter={"tenant_id": state.get("tenant_id") or ""},
+        )
 
         citations = []
         serializable_docs = []

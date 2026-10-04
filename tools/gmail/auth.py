@@ -21,12 +21,15 @@ class GmailOAuth2Auth:
         self.refresh_token = os.getenv("GMAIL_REFRESH_TOKEN", "").strip()
         self.token_uri = os.getenv("GMAIL_TOKEN_URI", "https://oauth2.googleapis.com/token").strip()
 
-        if not all([self.client_id, self.client_secret, self.refresh_token]):
-            raise RuntimeError("Gmail OAuth env vars are missing")
-
+        mode = os.getenv("TOOLS_MODE", "mock").strip().lower()
+        self.mock = mode != "live"
         self._access_token: Optional[str] = None
         self._expires_at: float = 0
         self._lock = threading.Lock()
+        if self.mock:
+            return
+        if not all([self.client_id, self.client_secret, self.refresh_token]):
+            raise RuntimeError("Gmail OAuth env vars are missing")
 
     def _refresh(self) -> str:
         data = {

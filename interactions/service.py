@@ -127,6 +127,21 @@ class InteractionService:
                     "latency_ms": v.get("latency_ms"),
                 }
 
+        from interactions.intelligence import stamp_turn_metadata
+
+        metadata = stamp_turn_metadata(
+            tenant_id=tenant_id,
+            message=message or "",
+            status=status,
+            blocked=bool(blocked),
+            escalated=bool(escalated),
+            missing_inputs=list(missing_inputs or []),
+            photos_received=bool(photos_received),
+            metadata=metadata,
+            channel=str((metadata or {}).get("channel") or "chat"),
+        )
+        channel = str(metadata.get("channel") or "chat")
+
         interaction_id = str(uuid.uuid4())
         row = InteractionRow(
             interaction_id=interaction_id,
@@ -134,7 +149,7 @@ class InteractionService:
             case_id=case_id,
             tenant_id=tenant_id,
             customer_id=customer_id,
-            channel="chat",
+            channel=channel,
             message=message or "",
             response=response or "",
             intent=intent,

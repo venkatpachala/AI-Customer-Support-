@@ -92,8 +92,10 @@ class GmailSendEmail(BaseTool):
         )
         self.client = GmailClient(timeout_seconds=self.timeout_seconds)
         self.sender = os.getenv("GMAIL_SENDER", "").strip()
-        if not self.sender:
+        if not self.sender and os.getenv("TOOLS_MODE", "mock").strip().lower() == "live":
             raise RuntimeError("GMAIL_SENDER is not set")
+        if not self.sender:
+            self.sender = "mock-sender@local"
         self.allowlist = set(x.lower() for x in (allowlist or _default_allowlist()))
 
     def _assert_allowlisted(self, emails: List[str]):

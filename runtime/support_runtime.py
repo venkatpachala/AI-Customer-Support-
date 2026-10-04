@@ -27,12 +27,20 @@ def _workflow_summary(tool_results: Dict[str, Any], result: Dict[str, Any]) -> D
 
 def _workflow_metadata(result: Dict[str, Any], channel: str, via: str) -> Dict[str, Any]:
     policy = result.get("policy_decision") if isinstance(result.get("policy_decision"), dict) else {}
+    slots = result.get("slots") if isinstance(result.get("slots"), dict) else {}
+    plan = result.get("current_plan") if isinstance(result.get("current_plan"), dict) else {}
+    if not slots and isinstance(plan.get("slots"), dict):
+        slots = plan["slots"]
     return {
         "channel": channel,
         "via": via,
         "workflow_run_id": result.get("workflow_run_id"),
         "workflow_status": result.get("workflow_status"),
         "deny_code": policy.get("deny_code"),
+        "policy_version": policy.get("policy_version"),
+        "policy_decision": policy or None,
+        "reason": slots.get("reason"),
+        "slots": slots or None,
         "reasons": list(policy.get("reasons") or []),
     }
 
@@ -449,7 +457,10 @@ class SupportRuntime:
             latency_ms = (time.time() - started) * 1000.0
             if self.interaction_service is not None and ctx.session_id:
                 try:
-                    self.interaction_service.log_chat_turn(
+                    from interactions.intelligence import record_turn
+
+                    record_turn(
+                        self.interaction_service,
                         conversation_id=ctx.session_id,
                         case_id=ctx.case_id,
                         tenant_id=ctx.tenant_id,

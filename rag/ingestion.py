@@ -39,7 +39,30 @@ def sanitize_metadata(metadata: dict) -> dict:
     return clean
 
 
-def normalize_chunks(chunks: List[Document]) -> List[Document]:
+def tenant_knowledge_dir(tenant_id: str) -> Path:
+    return Path("tenants") / tenant_id / "knowledge"
+
+
+def tenant_pdf(tenant_id: str) -> Path:
+    folder = tenant_knowledge_dir(tenant_id)
+    pdfs = sorted(folder.glob("*.pdf")) if folder.is_dir() else []
+    if not pdfs:
+        raise FileNotFoundError(f"No canonical PDF in {folder}")
+    return pdfs[0]
+
+
+def bm25_corpus_path(tenant_id: str) -> Path:
+    return Path(f"rag/bm25_corpus_{tenant_id}.pkl")
+
+
+def normalize_chunks(
+    chunks: List[Document],
+    *,
+    tenant_id: str = "zepto",
+    source_id: str = SOURCE_ID,
+    source_name: str = SOURCE_NAME,
+    knowledge_snapshot: str = "unversioned",
+) -> List[Document]:
     """
     Enforce canonical source identity + stable chunk_id + Pinecone-safe metadata.
     """
@@ -51,17 +74,17 @@ def normalize_chunks(chunks: List[Document]) -> List[Document]:
         page = md.get("page", md.get("page_number", ""))
         clause = md.get("clause", "") or ""
         section = md.get("section", "") or ""
-
-        # Prefer existing clause-aware id if present; otherwise build stable id
-        chunk_id = md.get("chunk_id") or f"{SOURCE_ID}:p{page}:{clause or 'noclause'}:c{i}"
+        chunk_id = f"{source_id}:c{i}"
 
         new_md = {
-            "source_id": SOURCE_ID,
-            "source": SOURCE_NAME,
+            "tenant_id": tenant_id,
+            "source_id": source_id,
+            "source": source_name,
             "page": page if page is not None else "",
             "clause": clause,
             "section": section,
             "chunk_id": chunk_id,
+            "knowledge_snapshot": knowledge_snapshot,
             "chunk_index": i,
         }
 
@@ -82,19 +105,21 @@ def normalize_chunks(chunks: List[Document]) -> List[Document]:
     return normalized
 
 
-def save_bm25_corpus(chunks: List[Document]) -> None:
-    BM25_CORPUS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(BM25_CORPUS_PATH, "wb") as f:
+def save_bm25_corpus(chunks: List[Document], tenant_id: str = "zepto") -> None:
+    path = bm25_corpus_path(tenant_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "wb") as f:
         pickle.dump(chunks, f)
-    print(f"Saved BM25 corpus: {BM25_CORPUS_PATH} ({len(chunks)} chunks)")
+    print(f"Saved BM25 corpus: {path} ({len(chunks)} chunks)")
 
 
 def ingest_zepto_policy() -> None:
-    if not PDF_PATH.exists():
-        raise FileNotFoundError(f"Policy PDF not found: {PDF_PATH.resolve()}")
+    from config.tenant_contract import load_platform_tenant
 
-    print(f"Loading single canonical PDF: {PDF_PATH}")
-    loader = PyPDFLoader(str(PDF_PATH))
+    pdf_path = tenant_pdf("zepto")
+    snapshot = load_platform_tenant("zepto").versions.knowledge_snapshot or "unversioned"
+    print(f"Loading single canonical PDF: {pdf_path}")
+    loader = PyPDFLoader(str(pdf_path))
     pages = loader.load()
     print(f"Loaded {len(pages)} pages")
 
@@ -102,7 +127,7 @@ def ingest_zepto_policy() -> None:
     raw_chunks = create_policy_chunks(pages)
     print(f"Created {len(raw_chunks)} policy chunks")
 
-    chunks = normalize_chunks(raw_chunks)
+    chunks = normalize_chunks(raw_chunks, tenant_id="zepto", knowledge_snapshot=snapshot)
     print(f"Normalized {len(chunks)} chunks with canonical metadata")
 
     # Diagnostics
@@ -119,7 +144,7 @@ def ingest_zepto_policy() -> None:
     print(f"Pinecone upsert complete: {len(chunks)} chunks")
 
     # Save exact same chunks for BM25/hybrid
-    save_bm25_corpus(chunks)
+    save_bm25_corpus(chunks, "zepto")
 
     print("Ingestion complete")
     print(f"  source_id = {SOURCE_ID}")

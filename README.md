@@ -164,6 +164,10 @@ Set `EVAL_HTTP=1` to also run the 12 golden chats against `http://127.0.0.1:8000
 
 A failed scenario or any unauthorized Stripe create prints `GATE FAIL` and exits 1. The JSON report is written to `evaluation/reports/release_gate_<timestamp>.json`.
 
+`TOOLS_MODE=mock` is the local and container default. Mock boot does not need Shopify, Stripe, or Gmail secrets. `GET /health` returns `status`, `tools_mode`, and `db`, and it does not open a Shopify client. Live mode (`TOOLS_MODE=live`) requires `SHOPIFY_SHOP_DOMAIN`, `SHOPIFY_ACCESS_TOKEN`, and `STRIPE_SECRET_KEY` at the moment a live tool call is constructed.
+
+`SKIP http goldens` means `/health` did not answer, so the 12 `/chat` goldens were not run. `SKIP retrieval` means Pinecone was not required for this gate. Neither skip hides an in-process Stripe failure.
+
 ## Getting Started
 
 ### Prerequisites

@@ -1,3 +1,4 @@
+import os
 from typing import Any, Dict, Optional
 from tools.base.http import HttpClient
 from tools.base.context import ToolContext
@@ -8,7 +9,12 @@ class ShopifyClient:
     def __init__(self, timeout_seconds: float = 10.0):
         self.http = HttpClient(default_timeout=timeout_seconds)
         self.auth = get_shopify_auth()
-        self.base_url = get_shopify_base_url()
+        mode = os.getenv("TOOLS_MODE", "mock").strip().lower()
+        # Live domain is required only when a real Shopify call is constructed.
+        if mode == "live":
+            self.base_url = get_shopify_base_url()
+        else:
+            self.base_url = "https://mock.myshopify.com/admin/api/2024-10"
 
     def _headers(self, context: ToolContext) -> Dict[str, str]:
         headers = {

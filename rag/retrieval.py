@@ -11,6 +11,7 @@ from langchain_core.documents import Document
 
 from rag.hybrid import BM25Index, reciprocal_rank_fusion
 from rag.reranker import SimpleReranker
+from rag.tenant_filter import is_duplicate_source, select_tenant_docs
 
 load_dotenv()
 
@@ -37,6 +38,17 @@ def build_citation(doc: Document) -> str:
 def _norm_text(text: str, n: int = 300) -> str:
     t = re.sub(r"\s+", " ", (text or "").lower()).strip()
     return t[:n]
+
+
+def _scope_pairs(pairs: List[Tuple[Document, float]], tenant_id: str) -> List[Tuple[Document, float]]:
+    scoped: List[Tuple[Document, float]] = []
+    for doc, score in pairs:
+        if is_duplicate_source((doc.metadata or {}).get("source")):
+            continue
+        if tenant_id and str((doc.metadata or {}).get("tenant_id") or "") != tenant_id:
+            continue
+        scoped.append((doc, score))
+    return scoped
 
 
 def dedup_docs(docs: List[Document]) -> List[Document]:
@@ -128,11 +140,13 @@ class AdvancedRAGRetriever:
                 dense_results.append((doc, float(score)))
 
             print(f"Dense results: {len(dense_results)}")
+            tenant_id = str((metadata_filter or {}).get("tenant_id") or "").strip()
+            dense_results = _scope_pairs(dense_results, tenant_id)
 
             # -------- Sparse retrieval --------
             sparse_results: List[Tuple[Document, float]] = []
             if use_hybrid and self.bm25_index is not None:
-                sparse_results = self.bm25_index.search(query, k=candidate_k)
+                sparse_results = _scope_pairs(self.bm25_index.search(query, k=candidate_k), tenant_id)
                 print(f"Sparse results: {len(sparse_results)}")
             elif use_hybrid and self.bm25_index is None:
                 print("Hybrid requested but BM25 index is not loaded")
@@ -153,6 +167,10 @@ class AdvancedRAGRetriever:
                 )
                 ranked_docs = [doc for doc, _ in dense_sorted]
                 print("Used dense-only retrieval")
+
+            if tenant_id and not ranked_docs:
+                print(f"No chunks for tenant {tenant_id}")
+                return []
 
             # -------- Deduplicate while preserving rank --------
             before = len(ranked_docs)
@@ -177,6 +195,8 @@ class AdvancedRAGRetriever:
             for doc in final_docs:
                 doc.metadata["citation"] = build_citation(doc)
 
+            if tenant_id:
+                final_docs = select_tenant_docs(final_docs, tenant_id)
             print(f"Final documents: {len(final_docs)}")
             for i, doc in enumerate(final_docs):
                 print(
