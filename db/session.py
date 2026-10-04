@@ -41,9 +41,12 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, futu
 
 
 def init_db() -> None:
-    """Create tables if they do not exist."""
+    """Create tables if they do not exist, then apply the pilot SQL once."""
     from db import models  # noqa: F401
+    from db.migrate import apply_migrations
+
     Base.metadata.create_all(bind=engine)
+    apply_migrations()
     print(f"[DB] Initialized database: {get_database_url()}")
 
 

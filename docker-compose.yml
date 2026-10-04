@@ -1,19 +1,26 @@
 services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: d2c
+      POSTGRES_PASSWORD: d2c
+      POSTGRES_DB: d2c
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U d2c -d d2c"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
   api:
     build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg2://d2c:d2c@postgres:5432/d2c
+      TOOLS_MODE: mock
+      PORT: "8000"
     ports:
       - "8000:8000"
-    env_file:
-      - .env
-    environment:
-      DATABASE_URL: sqlite:///./data/d2c_agent.db
-      TOOLS_MODE: mock
-    volumes:
-      - ./data:/app/data
-      - ./attachments:/app/attachments
-      - ./rag/bm25_corpus.pkl:/app/rag/bm25_corpus.pkl
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
-      interval: 20s
-      timeout: 5s
-      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
