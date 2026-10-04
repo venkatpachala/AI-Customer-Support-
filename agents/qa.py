@@ -148,7 +148,13 @@ def qa_node(state: AgentState) -> Dict:
         )
     else:
         rag = get_rag()
-        retrieved = rag.retrieve(query, k=8, final_k=4, use_hybrid=True)
+        retrieved = rag.retrieve(
+            query,
+            k=8,
+            final_k=4,
+            use_hybrid=True,
+            metadata_filter={"tenant_id": tenant_id},
+        )
         docs = retrieved or []
 
         if docs:
@@ -187,9 +193,19 @@ def qa_node(state: AgentState) -> Dict:
 
     # ---------------- Brand ----------------
     tenant_config = state.get("tenant_config") or {}
-    brand = tenant_config.get("brand", {})
+    brand = tenant_config.get("brand", {}) if isinstance(tenant_config.get("brand"), dict) else {}
     brand_name = brand.get("brand_name", "our company")
     tone = brand.get("tone", "professional, polite, and helpful")
+    try:
+        from config.tenant_contract import load_platform_tenant
+
+        platform = load_platform_tenant(tenant_id)
+        if platform.brand:
+            brand_name = platform.brand
+        if platform.tone:
+            tone = platform.tone
+    except Exception:
+        pass
 
     # ---------------- Memory / flags ----------------
     active_order_id = (

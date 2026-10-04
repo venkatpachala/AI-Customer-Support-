@@ -1,0 +1,13 @@
+id: otherbrand
+brand: Other
+tone: "brief and direct"
+locale: en-IN
+currency: INR
+limits:
+  auto_refund_max: 2000
+  manager_refund_max: 10000
+  live_refund_cap_inr: 20000
+versions:
+  agent: "1.0.0"
+  policy_pack: "2026.09.0"
+  knowledge_snapshot: "other-terms-2026-10"
