@@ -3,7 +3,10 @@
 start() inserts a workflow_runs row and walks steps until a wait, a failure,
 or the last step. resume() reloads those rows and continues at the first
 step that is not success. Stripe is never called from here unless the
-policy snapshot already stored allowed=True.
+policy snapshot already stored allowed=True, or a supervisor approved a
+refund_approval task for an amount inside manager_max. That override lives
+in execute_refund. It does not cover OUT_OF_POLICY or an amount above the
+manager cap. A cancelled run is not resumed.
 """
 from __future__ import annotations
 
@@ -26,6 +29,7 @@ from workflows.state import (
     RUN_PENDING,
     RUN_RUNNING,
     RUN_RETRYING,
+    RUN_CANCELLED,
     RUN_SUCCEEDED,
     RUN_WAITING_APPROVAL,
     RUN_WAITING_AUTH,
@@ -130,7 +134,7 @@ class WorkflowEngine:
             row = db.get(WorkflowRunRow, run_id)
             if row is None:
                 raise KeyError(f"workflow run not found: {run_id}")
-            if row.status == RUN_SUCCEEDED:
+            if row.status in (RUN_SUCCEEDED, RUN_CANCELLED):
                 return _view(row)
             if row.status == RUN_FAILED and not slots:
                 return _view(row)

@@ -152,6 +152,18 @@ graph TD
 
 ---
 
+## Release gate
+
+`python -m evaluation.release_gate` is the P0 check that unauthorized Stripe creates stay at zero.
+
+It runs the policy, platform, workflow, and approval tests, then the ten in-process scenarios in `evaluation/scenarios/p0_platform.yaml`. Those scenarios do not need `/chat`.
+
+Set `EVAL_HTTP=1` to also run the 12 golden chats against `http://127.0.0.1:8000/chat`. That step runs only when `/health` answers. If the API is down, the gate prints `SKIP http goldens` and the in-process scenarios still decide pass or fail.
+
+`EVAL_HTTP_MULTI=1` does the same for multi-turn goldens. `SKIP retrieval` means Pinecone is not configured, and that skip does not fail the gate.
+
+A failed scenario or any unauthorized Stripe create prints `GATE FAIL` and exits 1. The JSON report is written to `evaluation/reports/release_gate_<timestamp>.json`.
+
 ## Getting Started
 
 ### Prerequisites

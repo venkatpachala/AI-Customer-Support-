@@ -40,6 +40,25 @@ from interactions.service import InteractionService
 from security.output_guard import apply_output_guard
 
 
+def _pending_approval_task_id(run_id: Optional[str], status: Optional[str]) -> Optional[str]:
+    """Read the pending refund task so a demo can approve without SQL."""
+    if not run_id or status != "waiting_approval":
+        return None
+    from sqlalchemy import select
+
+    from db.models import HumanTaskRow
+    from db.session import SessionLocal
+
+    with SessionLocal() as db:
+        row = db.execute(
+            select(HumanTaskRow)
+            .where(HumanTaskRow.workflow_run_id == run_id)
+            .where(HumanTaskRow.task_type == "refund_approval")
+            .where(HumanTaskRow.status == "pending")
+        ).scalars().first()
+        return None if row is None else row.id
+
+
 def _case_tool_summary(tool_results: Dict[str, Any], result: Dict[str, Any]) -> Dict[str, Any]:
     """Persist the workflow id on the case so the next turn can resume it."""
     summary = dict(tool_results) if isinstance(tool_results, dict) else {}
@@ -66,6 +85,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="D2C AI Support Agent", lifespan=lifespan)
+
+from gateway.routers.approvals import router as approvals_router
+from gateway.routers.cases import router as cases_router
+from gateway.routers.workflows import router as workflows_router
+
+app.include_router(approvals_router)
+app.include_router(workflows_router)
+app.include_router(cases_router)
 memory_service = MemoryService()
 interaction_service = InteractionService()
 
@@ -814,6 +841,10 @@ async def chat(request: ChatRequest):
             "workflow_run_id": result.get("workflow_run_id"),
             "workflow_status": result.get("workflow_status"),
             "policy_decision": result.get("policy_decision"),
+            "approval_task_id": _pending_approval_task_id(
+                result.get("workflow_run_id"),
+                result.get("workflow_status"),
+            ),
         }
 
         if not escalated and not blocked and looks_like_policy_query(request.message):

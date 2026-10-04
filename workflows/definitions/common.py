@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from policy import evaluate
 from workflows.idempotency import stripe_step_key
@@ -110,37 +110,98 @@ def collect_inputs(fields: tuple[str, ...] = ("photos", "amount")):
     return step
 
 
+def _refund_task_status(rt: StepRuntime) -> Optional[str]:
+    """Latest refund_approval row for this run. pending, approved, or rejected."""
+    from sqlalchemy import select
+
+    from db.models import HumanTaskRow
+
+    with rt.session_factory() as db:
+        row = db.execute(
+            select(HumanTaskRow)
+            .where(HumanTaskRow.workflow_run_id == rt.run_id)
+            .where(HumanTaskRow.task_type == "refund_approval")
+            .order_by(HumanTaskRow.created_at.desc())
+        ).scalars().first()
+        return None if row is None else row.status
+
+
 def require_refund_approval(rt: StepRuntime) -> StepResult:
+    """Stop while a supervisor decision is pending.
+
+    An approved refund_approval task continues the same run. A rejected task
+    stops it. evaluate() is not asked again here; the stored snapshot stays
+    the eligibility record, and execute_refund applies the approval override.
+    """
     policy = dict(rt.policy or {})
-    if policy.get("requires_approval") is not True:
-        return StepResult(status=STEP_SUCCESS, output={"approval": "not_required"})
-    slots = dict(rt.ctx.slots)
-    task = {
-        "type": "refund_approval",
-        "payload": {
-            "amount": slots.get("amount"),
-            "order_id": slots.get("order_id"),
-            "reason": slots.get("reason"),
-            "customer_id": rt.ctx.customer_id,
-            "reasons": list(policy.get("reasons") or []),
-            "policy_id": policy.get("policy_id"),
-            "policy_version": policy.get("policy_version"),
-            "deny_code": policy.get("deny_code"),
-            "max_amount": policy.get("max_amount"),
-        },
-    }
-    return StepResult(
-        status=STEP_WAIT_APPROVAL,
-        output={"policy": policy},
-        human_task=task,
-        error="AMOUNT",
-    )
+    decision = _refund_task_status(rt)
+    if decision == "approved":
+        return StepResult(status=STEP_SUCCESS, output={"approval": "approved", "policy": policy})
+    if decision == "rejected":
+        return StepResult(
+            status=STEP_FAILED,
+            output={"denied": True, "approval": "rejected", "policy": policy},
+            error="approval_rejected",
+        )
+    if decision == "pending" or policy.get("requires_approval") is True:
+        slots = dict(rt.ctx.slots)
+        task = {
+            "type": "refund_approval",
+            "payload": {
+                "amount": slots.get("amount"),
+                "order_id": slots.get("order_id"),
+                "reason": slots.get("reason"),
+                "customer_id": rt.ctx.customer_id,
+                "reasons": list(policy.get("reasons") or []),
+                "policy_id": policy.get("policy_id"),
+                "policy_version": policy.get("policy_version"),
+                "deny_code": policy.get("deny_code"),
+                "max_amount": policy.get("max_amount"),
+            },
+        }
+        return StepResult(
+            status=STEP_WAIT_APPROVAL,
+            output={"policy": policy},
+            human_task=task,
+            error="AMOUNT",
+        )
+    return StepResult(status=STEP_SUCCESS, output={"approval": "not_required", "policy": policy})
+
+
+def _approval_override(rt: StepRuntime, policy: Dict[str, Any]) -> bool:
+    """Supervisor approval may move a manager-band refund.
+
+    evaluate() still returns allowed False and requires_approval True for
+    amounts between the auto cap and the manager cap. After the
+    refund_approval task is approved, Stripe may run when photos and auth
+    are already satisfied and the amount is still within manager_max.
+
+    manager_max is the decision's max_amount. An amount above that cap, an
+    OUT_OF_POLICY denial, a fraud denial, missing photos, or missing auth
+    are not overridden.
+    """
+    if policy.get("deny_code") == "OUT_OF_POLICY":
+        return False
+    if policy.get("requires_strong_auth") is True:
+        return False
+    if list(policy.get("requires_inputs") or []):
+        return False
+    if policy.get("deny_code") not in (None, "AMOUNT"):
+        return False
+    if _refund_task_status(rt) != "approved":
+        return False
+    try:
+        amount = float(rt.ctx.slots.get("amount"))
+        cap = float(policy.get("max_amount"))
+    except (TypeError, ValueError):
+        return False
+    return amount > 0 and amount <= cap
 
 
 def execute_refund(rt: StepRuntime) -> StepResult:
-    """Stripe runs only when the stored policy snapshot says allowed is True."""
+    """Stripe runs when the snapshot allows it, or when a supervisor approved a manager-band refund."""
     policy = dict(rt.policy or {})
-    if policy.get("allowed") is not True:
+    if policy.get("allowed") is not True and not _approval_override(rt, policy):
         return StepResult(
             status=STEP_FAILED,
             output={"denied": True, "stripe_called": False, "policy": policy},
