@@ -2,6 +2,14 @@
 
 Hosted control plane around the existing agent kernel. A brand uploads rules, connects a shop in sandbox, runs one refund, approves it, and pastes a widget. Mock tools only. Card charges are not enabled.
 
+## Host
+
+Public pilot, mock tools, free Render web service: https://d2c-support-agent-0360.onrender.com
+
+`TOOLS_MODE=mock`. Shopify is unset. `/health` returns ok. The free instance sleeps after 15 idle minutes and wakes on the next request. Do not upgrade the service or add a paid database. Card charges are not enabled.
+
+Owner sign-up is `POST /signup` (email and password). Sign-in is `POST /login` and sets `d2c_owner`. The seeded Zepto door remains `ops@zepto.local` with `OPS_PASSWORD` for the pilot script.
+
 ## URLs
 
 | Path | What it is |
@@ -10,6 +18,7 @@ Hosted control plane around the existing agent kernel. A brand uploads rules, co
 | `/docs` | Bearer auth, the four calls, the sandbox script, refund statuses |
 | `/openapi.json` | OpenAPI. Swagger is `/swagger` |
 | `/login` | Owner sign-in. Lands on `/app/inbox` |
+| `/signup` | Creates a tenant, a widget test key, and a supervisor test key |
 | `/app/inbox` | Interactions |
 | `/app/cases/{case_id}` | Timeline |
 | `/app/approvals` | Same queue as `/ops` |

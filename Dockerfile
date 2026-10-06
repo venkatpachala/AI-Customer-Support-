@@ -23,4 +23,4 @@ RUN mkdir -p /app/data
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "uvicorn gateway.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "python -m controlplane.seed; uvicorn gateway.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

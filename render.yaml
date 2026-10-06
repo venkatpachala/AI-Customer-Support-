@@ -2,6 +2,7 @@ services:
   - type: web
     name: d2c-support
     runtime: docker
+    plan: free
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     envVars:
@@ -20,6 +21,6 @@ services:
 
 databases:
   - name: d2c-db
-    plan: basic-256mb
+    plan: free
     databaseName: d2c
     user: d2c

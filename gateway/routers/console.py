@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from controlplane.connections import list_cards, mock_health, save_connection
@@ -16,7 +16,8 @@ from controlplane.turns import run_product_chat
 from controlplane.webhooks import get_endpoint, save_endpoint
 from db.models import CaseRow, HumanTaskRow
 from db.session import SessionLocal
-from identity.owner_session import COOKIE_NAME, TTL_SECONDS, credentials_match, issue_owner_token, read_owner
+from identity.accounts import signup, tenant_for_credentials
+from identity.owner_session import COOKIE_NAME, TTL_SECONDS, issue_owner_token, read_owner
 from identity.session import create_customer_session
 from interactions.intelligence import IntelligenceError, case_timeline, list_interactions
 from sqlalchemy import select
@@ -38,10 +39,41 @@ def _require(request: Request) -> str:
     return tenant
 
 
-def _render(request: Request, template: str, **context) -> HTMLResponse:
+def _render(request: Request, template: str, status_code: int = 200, **context) -> HTMLResponse:
     context.setdefault("error", request.query_params.get("error"))
     context.setdefault("section", "")
-    return _TEMPLATES.TemplateResponse(request, template, {"request": request, **context})
+    return _TEMPLATES.TemplateResponse(
+        request,
+        template,
+        {"request": request, **context},
+        status_code=status_code,
+    )
+
+
+def _wants_json(request: Request) -> bool:
+    content_type = (request.headers.get("content-type") or "").lower()
+    accept = (request.headers.get("accept") or "").lower()
+    return "application/json" in content_type or "application/json" in accept
+
+
+async def _email_password(request: Request) -> tuple[str, str]:
+    if _wants_json(request) and "application/json" in (request.headers.get("content-type") or "").lower():
+        body = await request.json()
+        return str(body.get("email") or ""), str(body.get("password") or "")
+    form = await request.form()
+    return str(form.get("email") or ""), str(form.get("password") or "")
+
+
+def _owner_cookie(response, tenant_id: str):
+    response.set_cookie(
+        key=COOKIE_NAME,
+        value=issue_owner_token(tenant_id),
+        httponly=True,
+        samesite="lax",
+        max_age=TTL_SECONDS,
+        path="/",
+    )
+    return response
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -62,19 +94,50 @@ def login_form(request: Request):
 
 
 @router.post("/login")
-def login_submit(email: str = Form(...), password: str = Form(...)):
-    if not credentials_match(email, password):
-        return RedirectResponse("/login?error=Invalid+email+or+password", status_code=303)
-    response = RedirectResponse("/app/inbox", status_code=303)
-    response.set_cookie(
-        key=COOKIE_NAME,
-        value=issue_owner_token("zepto"),
-        httponly=True,
-        samesite="lax",
-        max_age=TTL_SECONDS,
-        path="/",
-    )
-    return response
+async def login_submit(request: Request):
+    email, password = await _email_password(request)
+    tenant = tenant_for_credentials(email, password)
+    if not tenant:
+        if _wants_json(request):
+            return JSONResponse({"detail": "invalid credentials"}, status_code=401)
+        return _render(request, "login.html", status_code=401, error="Invalid email or password")
+    if _wants_json(request):
+        response = JSONResponse({"ok": True, "tenant_id": tenant})
+    else:
+        response = RedirectResponse("/app/inbox", status_code=303)
+    return _owner_cookie(response, tenant)
+
+
+@router.get("/signup", response_class=HTMLResponse)
+def signup_form(request: Request):
+    if _owner(request):
+        return RedirectResponse("/app/inbox", status_code=303)
+    return _render(request, "signup.html")
+
+
+@router.post("/signup")
+async def signup_submit(request: Request):
+    email, password = await _email_password(request)
+    try:
+        account = signup(email, password)
+    except ValueError as exc:
+        if _wants_json(request):
+            return JSONResponse({"detail": str(exc)}, status_code=400)
+        return _render(request, "signup.html", status_code=400, error=str(exc))
+    if _wants_json(request):
+        take_unrevealed(account["tenant_id"], role="widget", mode="test")
+        take_unrevealed(account["tenant_id"], role="supervisor", mode="test")
+        response = JSONResponse(
+            {
+                "tenant_id": account["tenant_id"],
+                "widget_key": account["widget_key"],
+                "supervisor_key": account["supervisor_key"],
+            },
+            status_code=201,
+        )
+    else:
+        response = RedirectResponse("/app/install", status_code=303)
+    return _owner_cookie(response, account["tenant_id"])
 
 
 @router.post("/logout")
@@ -213,6 +276,7 @@ def sandbox_page(request: Request):
         citations="",
         workflow_status="",
         missing="",
+        tools=[],
     )
 
 
@@ -243,6 +307,7 @@ async def sandbox_send(request: Request, message: str = Form(...)):
         citations=", ".join(str(item) for item in (turn.get("citations") or [])),
         workflow_status=turn.get("workflow_status") or "",
         missing=", ".join(str(item) for item in (turn.get("missing_inputs") or [])),
+        tools=_tool_names(turn),
     )
 
 
@@ -269,7 +334,47 @@ async def sandbox_script(request: Request):
         citations=", ".join(str(item) for item in (last.get("citations") or [])),
         workflow_status=last.get("workflow_status") or "",
         missing=", ".join(str(item) for item in (last.get("missing_inputs") or [])),
+        tools=_tool_names(last),
         error=None if report["passed"] else "Sandbox did not pass",
+    )
+
+
+def _tool_names(turn: dict) -> list[str]:
+    names: list[str] = []
+    raw = turn.get("tools_used") or turn.get("tool_calls") or []
+    if isinstance(raw, list):
+        for item in raw:
+            if isinstance(item, str) and item:
+                names.append(item)
+            elif isinstance(item, dict):
+                label = item.get("name") or item.get("tool") or ""
+                if label:
+                    names.append(str(label))
+    status = turn.get("workflow_status") or ""
+    if status:
+        names.append(f"workflow refund → {status}")
+    return names
+
+
+@router.post("/app/sandbox/voice")
+async def sandbox_voice(request: Request):
+    """Voice is another client of the same chat turn. The browser sends the transcript."""
+    tenant = _require(request)
+    body = await request.json()
+    message = str(body.get("message") or "").strip()
+    if not message:
+        return JSONResponse({"detail": "message is required"}, status_code=400)
+    turn = await _owner_turn(request, tenant, message)
+    return JSONResponse(
+        {
+            "message": message,
+            "response": turn.get("response") or turn.get("error") or "",
+            "workflow_status": turn.get("workflow_status") or "",
+            "citations": turn.get("citations") or [],
+            "missing_inputs": turn.get("missing_inputs") or [],
+            "case_id": turn.get("case_id") or "",
+            "tools": _tool_names(turn),
+        }
     )
 
 
@@ -368,6 +473,7 @@ def _key_context(request: Request, tenant: str) -> dict:
         "live_prefix": None if live is None else live["prefix"],
         "supervisor_prefix": None if supervisor is None else supervisor["prefix"],
         "test_secret": take_unrevealed(tenant, role="widget", mode="test"),
+        "supervisor_secret": take_unrevealed(tenant, role="supervisor", mode="test"),
         "live_secret": take_unrevealed(tenant, role="widget", mode="live"),
         "webhook_url": hook.get("url") or "",
         "last_status": hook.get("last_status"),

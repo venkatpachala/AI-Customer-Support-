@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% block theme %}app{% endblock %}
 {% block nav %}
 <a href="/app/inbox" {% if section == "inbox" %}aria-current="page"{% endif %}>Inbox</a>
 <a href="/app/approvals" {% if section == "approvals" %}aria-current="page"{% endif %}>Approvals</a>

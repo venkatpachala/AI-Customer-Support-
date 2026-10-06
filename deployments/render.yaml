@@ -1,8 +1,10 @@
-# Render. Mock tools. Secrets are set in the dashboard, not in this file.
+# Render. Mock tools. Free plans only. Secrets are set in the dashboard, not in this file.
+# Free Postgres expires 30 days after creation. Do not upgrade it. An upgrade is a paid plan.
 services:
   - type: web
     name: d2c-support
     runtime: docker
+    plan: free
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     envVars:
@@ -21,6 +23,6 @@ services:
 
 databases:
   - name: d2c-db
-    plan: basic-256mb
+    plan: free
     databaseName: d2c
     user: d2c

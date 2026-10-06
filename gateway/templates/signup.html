@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Create account · D2C Support{% endblock %}
+{% block main %}
+<section class="auth">
+  <p class="kicker">Workspace</p>
+  <h1>Create an account</h1>
+  <p class="lede">This creates your tenant and two test keys. The raw keys are shown once on the install screen.</p>
+  <form method="post" action="/signup" class="panel">
+    <label>Work email <input name="email" type="email" autocomplete="username" required /></label>
+    <label>Password <input name="password" type="password" minlength="8" autocomplete="new-password" required /></label>
+    <button type="submit">Create account</button>
+  </form>
+  <p>Already registered? <a href="/login">Sign in</a></p>
+</section>
+{% endblock %}

@@ -49,5 +49,13 @@
     <button type="submit">{{ "Enable chat" if killed else "Disable chat" }}</button>
   </form>
 </section>
-<p>Supervisor key prefix: <span class="mono">{{ supervisor_prefix or "run the seed command" }}</span></p>
+<section class="panel">
+  <h2>Supervisor test key</h2>
+  {% if supervisor_secret %}
+  <p>Shown once. This key is not the widget key.</p>
+  <pre id="supervisor-key">{{ supervisor_secret }}</pre>
+  {% else %}
+  <p class="mono">{{ supervisor_prefix or "No supervisor key yet" }}</p>
+  {% endif %}
+</section>
 {% endblock %}

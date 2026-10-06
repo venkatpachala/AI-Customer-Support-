@@ -38,7 +38,91 @@
       <dt>citations</dt><dd>{{ citations or "—" }}</dd>
       <dt>workflow_status</dt><dd class="mono">{{ workflow_status or "—" }}</dd>
       <dt>missing_inputs</dt><dd>{{ missing or "—" }}</dd>
+      <dt>tools</dt><dd class="mono">{{ tools|join(", ") if tools else "—" }}</dd>
     </dl>
   </aside>
 </div>
+<section class="panel" id="voice">
+  <h2>Voice</h2>
+  <p>The browser turns speech into a transcript and sends it through the same sandbox chat. There is no second assistant.</p>
+  <div class="row-actions">
+    <button type="button" id="voice-btn">Talk</button>
+    <button type="button" class="ghost" id="voice-stop">Stop</button>
+  </div>
+  <label>Transcript <textarea id="voice-text" rows="3" placeholder="Or type the same transcript"></textarea></label>
+  <button type="button" id="voice-send">Send transcript</button>
+  <p id="voice-status" class="state-empty">Idle</p>
+  <div id="voice-reply" class="chat-log"></div>
+</section>
+<script>
+(function () {
+  var status = document.getElementById("voice-status");
+  var text = document.getElementById("voice-text");
+  var reply = document.getElementById("voice-reply");
+  var Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var rec = null;
+  function show(payload) {
+    var tools = (payload.tools || []).join(", ") || "none";
+    reply.innerHTML = "";
+    var user = document.createElement("div");
+    user.className = "bubble user";
+    user.textContent = payload.message || "";
+    var agent = document.createElement("div");
+    agent.className = "bubble";
+    agent.textContent = payload.response || "";
+    var meta = document.createElement("p");
+    meta.className = "mono";
+    meta.textContent = "case " + (payload.case_id || "—") + " · " + (payload.workflow_status || "no workflow") + " · tools " + tools;
+    reply.appendChild(user);
+    reply.appendChild(agent);
+    reply.appendChild(meta);
+  }
+  async function send(message) {
+    status.textContent = "Sending…";
+    status.className = "state-loading";
+    var response = await fetch("/app/sandbox/voice", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({message: message})
+    });
+    var payload = await response.json();
+    if (!response.ok) {
+      status.textContent = payload.detail || "Voice turn failed";
+      status.className = "state-error";
+      return;
+    }
+    status.textContent = "Reply received";
+    status.className = "state-empty";
+    show(payload);
+  }
+  document.getElementById("voice-send").addEventListener("click", function () {
+    if (text.value.trim()) send(text.value.trim());
+  });
+  document.getElementById("voice-btn").addEventListener("click", function () {
+    if (!Rec) {
+      status.textContent = "This browser has no speech recognition. Type the transcript.";
+      status.className = "state-error";
+      return;
+    }
+    rec = new Rec();
+    rec.lang = "en-IN";
+    rec.onresult = function (event) {
+      text.value = event.results[0][0].transcript;
+      send(text.value);
+    };
+    rec.onerror = function () {
+      status.textContent = "Speech recognition failed. Type the transcript.";
+      status.className = "state-error";
+    };
+    status.textContent = "Listening…";
+    status.className = "state-loading";
+    rec.start();
+  });
+  document.getElementById("voice-stop").addEventListener("click", function () {
+    if (rec) rec.stop();
+    status.textContent = "Stopped";
+    status.className = "state-empty";
+  });
+})();
+</script>
 {% endblock %}

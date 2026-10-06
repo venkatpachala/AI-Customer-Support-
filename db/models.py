@@ -384,6 +384,18 @@ class TenantAccountRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
+class OwnerAccountRow(Base):
+    """Person who signed up. The password is a hash. The row points at one tenant."""
+
+    __tablename__ = "owner_accounts"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    email: Mapped[str] = mapped_column(String(256), unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String(256))
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
 class ApiKeyRow(Base):
     """Bearer credential. The raw secret is stored only until the install page shows it once."""
 
