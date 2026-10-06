@@ -262,26 +262,26 @@ def planner_node(state: AgentState) -> Dict:
 - tools_executed: {memory_context.get('tools_executed')}
 """
 
-    response = llm.invoke(
-        planner_prompt.format(
-            query=query,
-            config_context=config_context,
-            memory_context=memory_text
-        )
-    )
-    content = response.content.strip()
-
     try:
+        response = llm.invoke(
+            planner_prompt.format(
+                query=query,
+                config_context=config_context,
+                memory_context=memory_text
+            )
+        )
+        content = response.content.strip()
         json_match = re.search(r'\{.*\}', content, re.DOTALL)
         if json_match:
             content = json_match.group(0)
         plan_dict = json.loads(content)
         plan = ExecutionPlan(**plan_dict)
     except Exception as e:
+        # The supervisor intent still starts the workflow when the planner model is down.
         log_event("planner_parse_failed", request_id, node="planner", data={"error": str(e)}, level="error")
         plan = ExecutionPlan(
             plan_id=str(uuid.uuid4()),
-            intent="general",
+            intent=str(state.get("intent") or "general"),
             steps=[],
             confidence=0.4,
             estimated_steps=0,

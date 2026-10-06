@@ -26,8 +26,25 @@
     </thead>
     <tbody id="rows"></tbody>
   </table>
+  <h2>Timeline</h2>
+  <pre id="timeline"></pre>
   <script>
     const status = document.getElementById("status");
+    function taskId(item) { return item.task_id || item.id; }
+    async function openTimeline(caseId) {
+      const response = await fetch("/v1/cases/" + caseId + "/timeline", {
+        credentials: "include",
+        headers: { "X-Tenant-Id": "zepto" }
+      });
+      const body = await response.json();
+      const lines = (body.items || []).map(function (item) {
+        const data = item.data || {};
+        if (item.kind === "message") return item.kind + " " + (data.role || "") + " " + (data.text || "");
+        if (item.kind === "step") return item.kind + " " + (data.step_name || item.title) + " " + (data.status || "") + " attempt " + (data.attempt ?? "");
+        return item.kind + " " + (item.title || "");
+      });
+      document.getElementById("timeline").textContent = response.ok ? lines.join("\n") : (body.detail || "timeline unavailable");
+    }
     async function load() {
       const response = await fetch("/v1/approvals?status=pending", { credentials: "include", headers: { "X-Tenant-Id": "zepto" } });
       if (!response.ok) { status.textContent = "Sign in required"; return; }
@@ -37,12 +54,13 @@
       for (const item of body.approvals || []) {
         const tr = document.createElement("tr");
         tr.innerHTML = `<td>${item.amount ?? ""}</td><td>${item.order_id ?? ""}</td><td>${item.reason ?? ""}</td><td>${item.policy_version ?? ""}</td><td>${item.photos_received ? "yes" : "no"}</td>`;
+        tr.onclick = () => openTimeline(item.case_id);
         const approve = document.createElement("button");
         approve.textContent = "Approve";
-        approve.onclick = () => decide(item.id, "approve");
+        approve.onclick = (event) => { event.stopPropagation(); decide(taskId(item), "approve"); };
         const reject = document.createElement("button");
         reject.textContent = "Reject";
-        reject.onclick = () => decide(item.id, "reject");
+        reject.onclick = (event) => { event.stopPropagation(); decide(taskId(item), "reject"); };
         const cell = document.createElement("td");
         cell.append(approve, reject);
         tr.append(cell);
@@ -50,7 +68,11 @@
       }
     }
     async function decide(id, action) {
-      const note = document.getElementById("note").value;
+      const note = document.getElementById("note").value.trim();
+      if (action === "reject" && !note) {
+        status.textContent = "Reject requires a note";
+        return;
+      }
       const response = await fetch(`/v1/approvals/${id}/${action}`, {
         method: "POST",
         credentials: "include",

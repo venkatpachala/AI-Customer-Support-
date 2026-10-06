@@ -13,6 +13,16 @@ class AgentState(Dict):
     tenant_id: str
     tenant_config: dict
     request_id: str
+    # Kept on the graph so /chat can start and resume a workflow.
+    session_id: Optional[str]
+    case_id: Optional[str]
+    memory_context: Optional[Dict]
+    verified: Optional[bool]
+    verified_order_ids: Optional[List[str]]
+    photos_received: Optional[bool]
+    missing_photos: Optional[bool]
+    tool_registry: Optional[Any]
+    workflow_engine: Optional[Any]
 
     # ── Workflow / plan ──────────────────────────────────────────────────────
     current_plan: Optional[Dict]

@@ -189,7 +189,22 @@ class MemoryService:
             if existing:
                 return existing
             return self.create_session(customer_id=customer_id, tenant_id=tenant_id, session_id=session_id)
+        # The widget cookie is not a memory session id. Continue the customer's open journey.
+        latest = self._latest_session_for_customer(customer_id, tenant_id)
+        if latest is not None:
+            return latest
         return self.create_session(customer_id=customer_id, tenant_id=tenant_id)
+
+    def _latest_session_for_customer(self, customer_id: str, tenant_id: str) -> Optional[SessionMemory]:
+        with SessionLocal() as db:
+            row = db.execute(
+                select(SessionRow)
+                .where(SessionRow.customer_id == customer_id)
+                .where(SessionRow.tenant_id == tenant_id)
+                .order_by(desc(SessionRow.updated_at))
+                .limit(1)
+            ).scalars().first()
+            return self._session_from_row(row) if row else None
 
     def save_session(self, session: SessionMemory):
         with SessionLocal() as db:
