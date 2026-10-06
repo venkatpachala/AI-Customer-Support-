@@ -63,11 +63,13 @@ def approve_task(
             "note": note,
         },
     )
-    return {
+    result = {
         "task": _task_view(_reload(session_factory, task.id)),
         "workflow_run_id": view.run_id,
         "workflow_status": view.status,
     }
+    _notify(tenant_id, task.case_id, view.status, view.run_id)
+    return result
 
 
 def reject_task(
@@ -104,11 +106,13 @@ def reject_task(
             "note": note,
         },
     )
-    return {
+    result = {
         "task": _task_view(_reload(session_factory, task.id)),
         "workflow_run_id": run.id,
         "workflow_status": RUN_CANCELLED,
     }
+    _notify(tenant_id, task.case_id, RUN_CANCELLED, run.id)
+    return result
 
 
 def list_tasks(
@@ -158,7 +162,7 @@ def _load_run(session_factory, run_id: Optional[str]) -> WorkflowRunRow:
 
 def _ensure_pending(task: HumanTaskRow) -> None:
     if task.status != "pending":
-        raise ApprovalError(409, f"approval task is {task.status}")
+        raise ApprovalError(409, "already decided")
 
 
 def _decide(session_factory, task_id: str, *, status: str, actor_id: str, note: Optional[str]) -> None:
@@ -167,7 +171,7 @@ def _decide(session_factory, task_id: str, *, status: str, actor_id: str, note: 
         if row is None:
             raise ApprovalError(404, "approval task not found")
         if row.status != "pending":
-            raise ApprovalError(409, f"approval task is {row.status}")
+            raise ApprovalError(409, "already decided")
         row.status = status
         row.decided_by = actor_id
         row.decided_at = datetime.utcnow()
@@ -192,6 +196,20 @@ def _cancel_run(session_factory, run_id: str, case_id: Optional[str]) -> None:
                 case.escalation_reason = "approval_rejected"
                 case.updated_at = datetime.utcnow()
         db.commit()
+
+
+def _notify(tenant_id: str, case_id: Optional[str], workflow_status: str, run_id: Optional[str]) -> None:
+    try:
+        from controlplane.webhooks import deliver_decision
+
+        deliver_decision(
+            tenant_id=tenant_id,
+            case_id=case_id,
+            workflow_status=workflow_status,
+            run_id=run_id,
+        )
+    except Exception:
+        return
 
 
 def _record_event(session_factory, *, tenant_id: str, case_id: Optional[str], event_type: str, payload: Dict[str, Any]) -> None:
@@ -239,6 +257,7 @@ def _task_view(row: HumanTaskRow) -> Dict[str, Any]:
 def _task_queue_item(row: HumanTaskRow) -> Dict[str, Any]:
     payload = dict(row.payload_json or {})
     return {
+        "task_id": row.id,
         "id": row.id,
         "type": row.task_type,
         "case_id": row.case_id,

@@ -1,4 +1,6 @@
 fastapi
+jinja2
+python-multipart
 uvicorn[standard]
 langgraph
 langchain

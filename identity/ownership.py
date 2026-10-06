@@ -134,7 +134,9 @@ def prove(tenant_id: str, order_id: str, contact: str) -> Dict[str, Any]:
     order = str(order_id or "").strip()
     if not order or not (contact or "").strip():
         return {"ok": False, "matched_on": None, "customer_id": None}
-    mode = os.getenv("TOOLS_MODE", "mock").strip().lower()
+    from controlplane.mode import current_tools_mode
+
+    mode = current_tools_mode()
     if mode == "live":
         proof = _prove_live(tenant_id, order, contact)
     else:

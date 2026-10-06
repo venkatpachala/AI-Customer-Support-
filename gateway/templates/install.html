@@ -1,0 +1,53 @@
+{% extends "app_base.html" %}
+{% block title %}Install · D2C Support{% endblock %}
+{% block main %}
+<h1>Install</h1>
+<p class="warning">The widget key cannot approve.</p>
+<section class="panel">
+  <h2>Test key</h2>
+  {% if test_secret %}
+  <p>Shown once.</p>
+  <pre id="test-key">{{ test_secret }}</pre>
+  <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('test-key').innerText)">Copy</button>
+  {% else %}
+  <p class="mono">{{ test_prefix or "No test key yet" }}</p>
+  {% endif %}
+  <form method="post" action="/app/install/test-key"><button type="submit">Create test widget key</button></form>
+</section>
+<section class="panel">
+  <h2>Live key</h2>
+  {% if not sandbox_passed %}
+  <p>Available after sandbox pass</p>
+  <button type="button" disabled>Create live key</button>
+  {% else %}
+  {% if live_secret %}
+  <pre id="live-key">{{ live_secret }}</pre>
+  {% else %}
+  <p class="mono">{{ live_prefix or "Not created" }}</p>
+  {% endif %}
+  <form method="post" action="/app/install/live-key"><button type="submit">Create live key</button></form>
+  <p>Card charges stay off in this release.</p>
+  {% endif %}
+</section>
+<section class="panel">
+  <h2>Widget</h2>
+  <pre id="snippet">&lt;script src="{{ origin }}/widget.js?tenant={{ tenant }}"&gt;&lt;/script&gt;</pre>
+  <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('snippet').innerText)">Copy snippet</button>
+</section>
+<section class="panel">
+  <h2>Webhook</h2>
+  <form method="post" action="/app/install/webhook">
+    <label>URL <input name="url" value="{{ webhook_url }}" placeholder="https://example.com/d2c" required /></label>
+    <button type="submit">Save</button>
+  </form>
+  <p>Last delivery: {{ last_status or "none" }}{% if last_error %} — {{ last_error }}{% endif %}</p>
+</section>
+<section class="panel">
+  <h2>Kill switch</h2>
+  <p>Chat for this tenant is {{ "disabled" if killed else "enabled" }}.</p>
+  <form method="post" action="/app/install/kill">
+    <button type="submit">{{ "Enable chat" if killed else "Disable chat" }}</button>
+  </form>
+</section>
+<p>Supervisor key prefix: <span class="mono">{{ supervisor_prefix or "run the seed command" }}</span></p>
+{% endblock %}

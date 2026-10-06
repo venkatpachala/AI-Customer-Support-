@@ -13,6 +13,17 @@ from rag.hybrid import BM25Index, reciprocal_rank_fusion
 from rag.reranker import SimpleReranker
 from rag.tenant_filter import is_duplicate_source, select_tenant_docs
 
+
+def _legacy_zepto_source(metadata: Dict) -> bool:
+    """Pre-tenant index rows for the canonical Zepto terms. Paths and other brands stay out."""
+    source = str((metadata or {}).get("source") or "").strip()
+    source_id = str((metadata or {}).get("source_id") or "").strip()
+    if is_duplicate_source(source):
+        return False
+    if source_id.startswith("zepto_terms"):
+        return True
+    return source in {"Zepto Terms of Use", "Zepto"}
+
 load_dotenv()
 
 
@@ -40,12 +51,20 @@ def _norm_text(text: str, n: int = 300) -> str:
     return t[:n]
 
 
-def _scope_pairs(pairs: List[Tuple[Document, float]], tenant_id: str) -> List[Tuple[Document, float]]:
+def _scope_pairs(
+    pairs: List[Tuple[Document, float]],
+    tenant_id: str,
+    snapshot_id: str = "",
+) -> List[Tuple[Document, float]]:
     scoped: List[Tuple[Document, float]] = []
+    snapshot = str(snapshot_id or "").strip()
     for doc, score in pairs:
-        if is_duplicate_source((doc.metadata or {}).get("source")):
+        metadata = doc.metadata or {}
+        if is_duplicate_source(metadata.get("source")):
             continue
-        if tenant_id and str((doc.metadata or {}).get("tenant_id") or "") != tenant_id:
+        if tenant_id and str(metadata.get("tenant_id") or "") != tenant_id:
+            continue
+        if snapshot and str(metadata.get("knowledge_snapshot") or "") != snapshot:
             continue
         scoped.append((doc, score))
     return scoped
@@ -120,6 +139,12 @@ class AdvancedRAGRetriever:
     ) -> List[Document]:
         print(f"\nAdvanced RAG Query: {query}")
         print(f"Hybrid search: {use_hybrid} | Rerank: {use_rerank}")
+        self.last_retrieval = {
+            "hybrid": bool(use_hybrid),
+            "fusion": "dense_only",
+            "dense_n": 0,
+            "sparse_n": 0,
+        }
 
         try:
             # Pull extra candidates so dedup + rerank still leave enough
@@ -131,25 +156,44 @@ class AdvancedRAGRetriever:
                 k=candidate_k,
                 filter=metadata_filter
             )
+            tenant_id = str((metadata_filter or {}).get("tenant_id") or "").strip()
+            if not dense_raw and tenant_id == "zepto":
+                # The August index has clause metadata and no tenant_id. Do not borrow another brand.
+                print("Dense tenant filter empty; loading legacy Zepto terms vectors")
+                dense_raw = self.vectorstore.similarity_search_with_score(query, k=candidate_k)
 
             dense_results: List[Tuple[Document, float]] = []
             for doc, score in dense_raw:
                 # copy metadata to avoid accidental shared mutation issues
                 doc.metadata = dict(doc.metadata or {})
+                existing = str(doc.metadata.get("tenant_id") or "").strip()
+                if tenant_id and existing and existing != tenant_id:
+                    continue
+                if tenant_id == "zepto" and not existing:
+                    if not _legacy_zepto_source(doc.metadata):
+                        continue
+                    doc.metadata["tenant_id"] = "zepto"
                 doc.metadata["dense_score"] = float(score)
                 dense_results.append((doc, float(score)))
 
             print(f"Dense results: {len(dense_results)}")
             tenant_id = str((metadata_filter or {}).get("tenant_id") or "").strip()
-            dense_results = _scope_pairs(dense_results, tenant_id)
+            snapshot_id = str((metadata_filter or {}).get("knowledge_snapshot") or "").strip()
+            dense_results = _scope_pairs(dense_results, tenant_id, snapshot_id)
+            self.last_retrieval["dense_n"] = len(dense_results)
 
             # -------- Sparse retrieval --------
             sparse_results: List[Tuple[Document, float]] = []
             if use_hybrid and self.bm25_index is not None:
-                sparse_results = _scope_pairs(self.bm25_index.search(query, k=candidate_k), tenant_id)
+                sparse_results = _scope_pairs(
+                    self.bm25_index.search(query, k=candidate_k),
+                    tenant_id,
+                    snapshot_id,
+                )
                 print(f"Sparse results: {len(sparse_results)}")
             elif use_hybrid and self.bm25_index is None:
                 print("Hybrid requested but BM25 index is not loaded")
+            self.last_retrieval["sparse_n"] = len(sparse_results)
 
             # -------- Fusion / ranking --------
             if use_hybrid and sparse_results:
@@ -158,6 +202,7 @@ class AdvancedRAGRetriever:
                     sparse_results,
                     k=candidate_k
                 )
+                self.last_retrieval["fusion"] = "rrf"
                 print("Used Reciprocal Rank Fusion")
             else:
                 dense_sorted = sorted(
@@ -196,7 +241,7 @@ class AdvancedRAGRetriever:
                 doc.metadata["citation"] = build_citation(doc)
 
             if tenant_id:
-                final_docs = select_tenant_docs(final_docs, tenant_id)
+                final_docs = select_tenant_docs(final_docs, tenant_id, snapshot_id or None)
             print(f"Final documents: {len(final_docs)}")
             for i, doc in enumerate(final_docs):
                 print(
@@ -208,6 +253,7 @@ class AdvancedRAGRetriever:
 
         except Exception as e:
             print(f"Retrieval error: {e}")
+            self.last_retrieval["fusion"] = "error"
             return []
 
     def retrieve_with_scores(self, query: str, k: int = 8):

@@ -1,0 +1,44 @@
+{% extends "app_base.html" %}
+{% block title %}Sandbox · D2C Support{% endblock %}
+{% block main %}
+<h1>Sandbox</h1>
+{% if passed %}
+<p class="banner ok">Sandbox passed</p>
+{% else %}
+<p class="banner wait">Sandbox not passed</p>
+{% endif %}
+<div class="layout">
+  <section class="panel">
+    <h2>Chat</h2>
+    <div class="chat-log">
+      {% if not turn %}
+      <p class="state-empty">Send a preset. The test widget key is used on the server.</p>
+      {% else %}
+      <div class="bubble user">{{ turn.message }}</div>
+      <div class="bubble">{{ turn.response }}</div>
+      {% endif %}
+    </div>
+    <div class="row-actions">
+      <form method="post" action="/app/sandbox/send"><input type="hidden" name="message" value="What is the return policy for damaged products?" /><button type="submit">1. Damaged policy</button></form>
+      <form method="post" action="/app/sandbox/send"><input type="hidden" name="message" value="My order #12345 is damaged. I want to return it." /><button type="submit">2. Damaged order</button></form>
+      <form method="post" action="/app/sandbox/send"><input type="hidden" name="message" value="Order 12345, phone 9999900000, refund 2500, photos uploaded." /><button type="submit">3. Hold ₹2500</button></form>
+    </div>
+    <form method="post" action="/app/sandbox/run" style="margin-top:0.8rem"><button type="submit">Run pilot script</button></form>
+    {% if steps %}
+    <ul>
+      {% for step in steps %}
+      <li>{{ step.id }}: {{ "pass" if step.passed else "fail" }} — {{ step.detail }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+  <aside class="panel side">
+    <h2>This turn</h2>
+    <dl>
+      <dt>citations</dt><dd>{{ citations or "—" }}</dd>
+      <dt>workflow_status</dt><dd class="mono">{{ workflow_status or "—" }}</dd>
+      <dt>missing_inputs</dt><dd>{{ missing or "—" }}</dd>
+    </dl>
+  </aside>
+</div>
+{% endblock %}

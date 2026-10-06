@@ -16,8 +16,10 @@ print("DEBUG: PINECONE_API_KEY loaded =", "YES" if os.getenv("PINECONE_API_KEY")
 print("DEBUG: LANGSMITH tracing =", os.getenv("LANGCHAIN_TRACING_V2"))
 print("DEBUG: TOOLS_MODE =", os.getenv("TOOLS_MODE", "mock"))
 
+from pathlib import Path
+
 from fastapi import FastAPI, Query, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from tools.bootstrap import register_default_tools
 register_default_tools()
 
@@ -90,7 +92,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="D2C AI Support Agent", lifespan=lifespan)
+app = FastAPI(title="D2C AI Support Agent", lifespan=lifespan, docs_url="/swagger")
 
 from gateway.routers.approvals import router as approvals_router
 from gateway.routers.cases import router as cases_router
@@ -109,6 +111,19 @@ app.include_router(copilot_router)
 app.include_router(sessions_router)
 app.include_router(ops_router)
 app.include_router(widget_router)
+
+from fastapi.staticfiles import StaticFiles
+
+from gateway.routers.console import router as console_router
+from gateway.routers.control import router as control_router
+
+app.include_router(console_router)
+app.include_router(control_router)
+app.mount(
+    "/static",
+    StaticFiles(directory=str(Path(__file__).resolve().parent / "static")),
+    name="site-static",
+)
 memory_service = MemoryService()
 interaction_service = InteractionService()
 
@@ -288,15 +303,7 @@ def health():
     }
 
 
-@app.get("/")
-def root():
-    return {
-        "service": "D2C AI Support Agent",
-        "status": "live",
-        "docs": "/docs",
-        "health": "/health",
-        "chat": "POST /chat",
-    }
+_WIDGET_PAGE = Path(__file__).resolve().parents[1] / "widget" / "index.html"
 
 
 @app.get("/interactions/recent")
@@ -789,8 +796,11 @@ async def chat(raw_request: Request):
                 missing_inputs.append("photos")
             photos_requested = True
 
+        workflow_status = result.get("workflow_status")
         if blocked:
             status = "blocked"
+        elif workflow_status in {"waiting_approval", "waiting_auth", "waiting_input"}:
+            status = "waiting_approval" if workflow_status == "waiting_approval" else "waiting_customer"
         elif escalated:
             status = "escalated"
         elif "photos" in missing_inputs and not photos_received:
@@ -915,9 +925,15 @@ async def chat(raw_request: Request):
             "escalated": False,
             "request_id": request_id,
             "session_id": session.session_id if session else request.session_id,
+            "case_id": case.case_id if case else None,
         }
     finally:
         ACTIVE_REQUESTS.dec()
+
+
+from controlplane.turns import set_chat_handler
+
+set_chat_handler(chat)
 
 
 @app.post("/chat/stream")

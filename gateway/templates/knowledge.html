@@ -1,0 +1,35 @@
+{% extends "app_base.html" %}
+{% block title %}Knowledge · D2C Support{% endblock %}
+{% block main %}
+<h1>Knowledge</h1>
+{% if not uploads_open %}
+<p class="state-error">Uploads for this tenant are blocked until the namespace isolation test passes. Tenant zepto can upload.</p>
+{% endif %}
+<form method="post" action="/app/knowledge/upload" enctype="multipart/form-data" class="panel">
+  <label>PDF <input type="file" name="file" accept="application/pdf" required /></label>
+  <button type="submit" {% if not uploads_open %}disabled{% endif %}>Upload</button>
+</form>
+<form method="post" action="/app/knowledge/sample" style="margin-top:0.6rem">
+  <button class="ghost" type="submit">Use Zepto sample pack</button>
+</form>
+{% if not documents %}
+<p class="state-empty">No documents yet.</p>
+{% else %}
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Snapshot</th><th>File</th><th>Pages</th><th>Ingested</th><th>Error</th></tr></thead>
+  <tbody>
+  {% for doc in documents %}
+    <tr>
+      <td class="mono">{{ doc.id }}</td>
+      <td>{{ doc.filename }}</td>
+      <td>{{ doc.page_count }}</td>
+      <td>{{ doc.created_at }}</td>
+      <td>{{ doc.error or "—" }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "app_base.html" %}
+{% block title %}Case · D2C Support{% endblock %}
+{% block main %}
+<h1>Case {{ case_id }}</h1>
+{% if workflow_status == "succeeded" %}
+<p class="banner ok">workflow_status is succeeded.</p>
+{% elif workflow_status == "waiting_approval" %}
+<p class="banner wait">workflow_status is waiting_approval. No refund has been paid.</p>
+{% else %}
+<p class="banner neutral">workflow_status is {{ workflow_status or "unknown" }}.</p>
+{% endif %}
+<div class="layout">
+  <section>
+    <h2>Timeline</h2>
+    {% if not items %}
+    <p class="state-empty">No timeline rows for this case.</p>
+    {% else %}
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>When</th><th>Kind</th><th>Detail</th></tr></thead>
+      <tbody>
+      {% for item in items %}
+        <tr>
+          <td>{{ item.at }}</td>
+          <td>{{ item.kind }}</td>
+          <td>
+            {{ item.title }}
+            {% if item.data %}
+              {% if item.data.text %}<div>{{ item.data.text }}</div>{% endif %}
+              {% if item.data.status %}<div class="mono">{{ item.data.status }}</div>{% endif %}
+              {% if item.data.role %}<div>{{ item.data.role }}</div>{% endif %}
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% endif %}
+  </section>
+  <aside class="panel side">
+    <h2>Case</h2>
+    <dl>
+      <dt>order id</dt><dd>{{ order_id or "—" }}</dd>
+      <dt>auth_level</dt><dd>{{ auth_level }}</dd>
+      <dt>missing_inputs</dt><dd>{{ missing_inputs or "—" }}</dd>
+      <dt>workflow_status</dt><dd class="mono">{{ workflow_status or "—" }}</dd>
+      <dt>run_id</dt><dd class="mono">{{ run_id or "—" }}</dd>
+    </dl>
+    {% if workflow_status == "waiting_approval" and task_id %}
+    <form method="post" action="/app/approvals/{{ task_id }}/approve">
+      <button type="submit">Approve</button>
+    </form>
+    <form method="post" action="/app/approvals/{{ task_id }}/reject">
+      <label>Reject note <input name="note" required /></label>
+      <button class="ghost" type="submit">Reject</button>
+    </form>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

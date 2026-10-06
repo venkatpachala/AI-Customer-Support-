@@ -8,7 +8,12 @@ DEFAULT_SQLITE_URL = "sqlite:///./data/d2c_agent.db"
 
 
 def get_database_url() -> str:
-    return os.getenv("DATABASE_URL", DEFAULT_SQLITE_URL)
+    url = os.getenv("DATABASE_URL", DEFAULT_SQLITE_URL)
+    if url.startswith("postgres://"):
+        url = "postgresql+psycopg2://" + url[len("postgres://"):]
+    elif url.startswith("postgresql://") and "+" not in url.split("://", 1)[0]:
+        url = "postgresql+psycopg2://" + url[len("postgresql://"):]
+    return url
 
 
 class Base(DeclarativeBase):

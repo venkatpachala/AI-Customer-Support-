@@ -1,0 +1,26 @@
+# Render. Mock tools. Secrets are set in the dashboard, not in this file.
+services:
+  - type: web
+    name: d2c-support
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: TOOLS_MODE
+        value: mock
+      - key: PORT
+        value: "8000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: d2c-db
+          property: connectionString
+      - key: OPS_PASSWORD
+        sync: false
+      - key: OPS_SESSION_SECRET
+        sync: false
+
+databases:
+  - name: d2c-db
+    plan: basic-256mb
+    databaseName: d2c
+    user: d2c

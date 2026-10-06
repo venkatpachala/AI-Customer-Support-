@@ -6,6 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel
 
+from controlplane.http import bearer_principal
 from identity.ops_session import COOKIE_NAME, ops_role
 from workflows.approvals import ApprovalError, approve_task, list_tasks, reject_task
 from workflows.engine import WorkflowEngine
@@ -26,14 +27,21 @@ class DecisionBody(BaseModel):
     note: Optional[str] = None
 
 
-def _tenant(x_tenant_id: Optional[str]) -> str:
+def _tenant(request: Request, x_tenant_id: Optional[str]):
+    principal = bearer_principal(request)
+    if principal is not None:
+        return principal, principal.tenant_id
     tenant = (x_tenant_id or "").strip()
     if not tenant:
         raise HTTPException(status_code=400, detail="X-Tenant-Id is required")
-    return tenant
+    return None, tenant
 
 
-def _supervisor(x_actor_role: Optional[str], request: Request) -> str:
+def _supervisor(x_actor_role: Optional[str], request: Request, principal) -> str:
+    if principal is not None:
+        if principal.role != "supervisor":
+            raise HTTPException(status_code=403, detail="widget key cannot approve")
+        return "supervisor"
     role = (x_actor_role or "").strip().lower()
     if role in {"supervisor", "admin"}:
         return role
@@ -59,8 +67,8 @@ def list_approvals(
     x_tenant_id: Optional[str] = Header(default=None),
     x_actor_role: Optional[str] = Header(default=None),
 ):
-    tenant = _tenant(x_tenant_id)
-    _supervisor(x_actor_role, request)
+    principal, tenant = _tenant(request, x_tenant_id)
+    _supervisor(x_actor_role, request, principal)
     if tenant_id and tenant_id != tenant:
         raise HTTPException(status_code=403, detail="tenant header does not match tenant_id")
     return {"approvals": list_tasks(tenant_id=tenant, status=status, limit=limit)}
@@ -75,8 +83,8 @@ def approve(
     x_actor_role: Optional[str] = Header(default=None),
     x_actor_id: Optional[str] = Header(default=None),
 ):
-    tenant = _tenant(x_tenant_id)
-    _supervisor(x_actor_role, request)
+    principal, tenant = _tenant(request, x_tenant_id)
+    _supervisor(x_actor_role, request, principal)
     actor = (x_actor_id or "").strip() or "supervisor"
     note = None if body is None else body.note
     return _call(
@@ -99,8 +107,8 @@ def reject(
     x_actor_role: Optional[str] = Header(default=None),
     x_actor_id: Optional[str] = Header(default=None),
 ):
-    tenant = _tenant(x_tenant_id)
-    _supervisor(x_actor_role, request)
+    principal, tenant = _tenant(request, x_tenant_id)
+    _supervisor(x_actor_role, request, principal)
     actor = (x_actor_id or "").strip() or "supervisor"
     note = None if body is None else (body.note or "").strip()
     if not note:

@@ -97,7 +97,9 @@ class StripeCreateRefund(BaseTool):
         high_value_limit = int(request.get("high_value_limit", 200000))
         require_approval_above_limit = bool(request.get("require_approval_above_limit", True))
 
-        tools_mode = os.getenv("TOOLS_MODE", "mock").strip().lower()
+        from controlplane.mode import current_tools_mode
+
+        tools_mode = current_tools_mode()
         stripe_mode = os.getenv("STRIPE_MODE", "test").strip().lower()
         if stripe_mode not in {"test", "live"}:
             stripe_mode = "test"

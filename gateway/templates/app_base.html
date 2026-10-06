@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block nav %}
+<a href="/app/inbox" {% if section == "inbox" %}aria-current="page"{% endif %}>Inbox</a>
+<a href="/app/approvals" {% if section == "approvals" %}aria-current="page"{% endif %}>Approvals</a>
+<a href="/app/sandbox" {% if section == "sandbox" %}aria-current="page"{% endif %}>Sandbox</a>
+<a href="/app/knowledge" {% if section == "knowledge" %}aria-current="page"{% endif %}>Knowledge</a>
+<a href="/app/connections" {% if section == "connections" %}aria-current="page"{% endif %}>Connections</a>
+<a href="/app/install" {% if section == "install" %}aria-current="page"{% endif %}>Install</a>
+<form method="post" action="/logout" style="margin:0"><button class="ghost" type="submit">Sign out</button></form>
+{% endblock %}

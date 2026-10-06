@@ -1,0 +1,26 @@
+{% extends "app_base.html" %}
+{% block title %}Connections · D2C Support{% endblock %}
+{% block main %}
+<h1>Connections</h1>
+{% if check %}<p class="banner neutral">{{ check }}</p>{% endif %}
+<div class="beats">
+{% for card in cards %}
+  <article class="card">
+    <h3>{{ card.provider }}</h3>
+    <span class="badge {% if card.badge == 'sandbox' %}ok{% elif card.badge == 'Disabled' %}off{% endif %}">{{ card.badge }}</span>
+    <p>{{ card.detail }}</p>
+    {% if card.shop_domain %}<p class="mono">{{ card.shop_domain }}</p>{% endif %}
+    {% if card.token_last4 %}<p>token ····{{ card.token_last4 }}</p>{% endif %}
+    {% if card.provider != "whatsapp" %}
+    <form method="post" action="/app/connections/{{ card.provider }}">
+      <label>Shop domain <input name="shop_domain" value="{{ card.shop_domain or '' }}" /></label>
+      <label>Token <input name="token" type="password" autocomplete="off" /></label>
+      <button type="submit">Save</button>
+    </form>
+    <form method="post" action="/app/connections/{{ card.provider }}/test"><button class="ghost" type="submit">Test connection</button></form>
+    {% endif %}
+    <p><button type="button" disabled>{{ card.live_toggle }}</button></p>
+  </article>
+{% endfor %}
+</div>
+{% endblock %}

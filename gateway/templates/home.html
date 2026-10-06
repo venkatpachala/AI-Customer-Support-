@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}D2C Support{% endblock %}
+{% block main %}
+<section class="hero" id="product">
+  <div>
+    <p class="kicker">For D2C brands</p>
+    <h1>Refunds stop until a human allows them.</h1>
+    <p class="lede">Upload the rules, connect the shop in sandbox, run one refund, approve it, and paste the widget. The customer sees an answer. The money waits.</p>
+  </div>
+  <div class="panel">
+    <h2>One loop</h2>
+    <ol>
+      <li>Cite the policy.</li>
+      <li>Ask for photos.</li>
+      <li>Hold ₹2500 until a supervisor approves.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="beats">
+  <article class="card"><h3>Cite the policy</h3><p>The reply points at the brand's own terms.</p></article>
+  <article class="card"><h3>Ask for photos</h3><p>A damaged item stops until photos are in the case.</p></article>
+  <article class="card"><h3>Hold ₹2500</h3><p>Above the auto cap, the refund stays in the queue.</p></article>
+</section>
+
+<section id="sandbox">
+  <h2>Sandbox result</h2>
+  <div class="demo-row beats">
+    <article class="demo">
+      <small>Inbox</small>
+      <strong>cust_zepto_12345</strong>
+      <p>intent refund · outcome waiting_approval</p>
+      <span class="badge">waiting_approval</span>
+    </article>
+    <article class="demo">
+      <small>Approval</small>
+      <p>Order 12345 · ₹2500 · damaged · photos yes</p>
+      <span class="badge">pending</span>
+    </article>
+    <article class="demo">
+      <small>Case</small>
+      <p>citation: zepto refund policy, damaged returns require photos</p>
+      <p>missing_inputs: photos</p>
+      <p class="mono">workflow_status waiting_approval</p>
+    </article>
+  </div>
+</section>
+
+<section>
+  <h2>API</h2>
+  <pre>curl -X POST $ORIGIN/v1/sessions \
+  -H "Authorization: Bearer d2c_test_..." \
+  -H "Content-Type: application/json" \
+  -d '{"customer_ref":"pilot"}'
+
+curl -X POST $ORIGIN/v1/chat \
+  -H "Authorization: Bearer d2c_test_..." \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Order 12345, phone 9999900000, refund 2500, photos uploaded.","customer_ref":"pilot"}'</pre>
+</section>
+<p class="footer">Mock tools. A person approves a refund before it is paid. Voice is not part of this product.</p>
+{% endblock %}

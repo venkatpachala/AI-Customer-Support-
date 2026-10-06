@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}D2C Support{% endblock %}</title>
+  <link rel="stylesheet" href="/static/site.css" />
+</head>
+<body>
+  <p class="state-loading" id="boot">Loading…</p>
+  <script>var boot = document.getElementById("boot"); if (boot) boot.remove();</script>
+  <header class="top">
+    <a class="brand" href="/">D2C Support</a>
+    <nav class="nav">
+      {% block nav %}
+      <a href="/#product">Product</a>
+      <a href="/#sandbox">Sandbox</a>
+      <a href="/docs">Docs</a>
+      <a href="/login">Sign in</a>
+      {% endblock %}
+    </nav>
+  </header>
+  <main class="wrap">
+    {% if error %}<p class="state-error">{{ error }}</p>{% endif %}
+    {% block main %}{% endblock %}
+  </main>
+</body>
+</html>

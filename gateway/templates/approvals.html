@@ -1,0 +1,36 @@
+{% extends "app_base.html" %}
+{% block title %}Approvals · D2C Support{% endblock %}
+{% block main %}
+<h1>Approvals</h1>
+{% if notice %}<p class="banner neutral">{{ notice }}</p>{% endif %}
+{% if not approvals %}
+<p class="state-empty">No pending approvals.</p>
+{% else %}
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>Amount</th><th>Order</th><th>Reason</th><th>Policy</th><th>Photos</th><th>Created</th><th></th></tr>
+  </thead>
+  <tbody>
+  {% for item in approvals %}
+    <tr>
+      <td>{{ item.amount }}</td>
+      <td>{{ item.order_id }}</td>
+      <td>{{ item.reason }}</td>
+      <td>{{ item.policy_version }}</td>
+      <td>{{ "yes" if item.photos_received else "no" }}</td>
+      <td>{{ item.created_at }}</td>
+      <td>
+        <form method="post" action="/app/approvals/{{ item.id }}/approve"><button type="submit">Approve</button></form>
+        <form method="post" action="/app/approvals/{{ item.id }}/reject">
+          <label>Note <input name="note" required /></label>
+          <button class="ghost" type="submit">Reject</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

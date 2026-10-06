@@ -1,0 +1,30 @@
+{% extends "app_base.html" %}
+{% block title %}Inbox · D2C Support{% endblock %}
+{% block main %}
+<h1>Inbox</h1>
+<div class="filters">
+  <a class="button {% if filt != 'escalated' %}ghost{% endif %}" href="/app/inbox?filter=escalated">Escalated</a>
+  <a class="button {% if filt != 'waiting_approval' %}ghost{% endif %}" href="/app/inbox?filter=waiting_approval">Waiting for approval</a>
+  <a class="button {% if filt != 'all' %}ghost{% endif %}" href="/app/inbox?filter=all">All</a>
+</div>
+{% if not items %}
+<p class="state-empty">No conversations yet. Run the sandbox.</p>
+{% else %}
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Time</th><th>customer_ref</th><th>Intent</th><th>Outcome</th><th>workflow_status</th></tr></thead>
+  <tbody>
+  {% for item in items %}
+    <tr class="link" onclick="location.href='/app/cases/{{ item.case_id }}'">
+      <td>{{ item.created_at }}</td>
+      <td>{{ item.customer_id }}</td>
+      <td>{{ item.intent or "—" }}</td>
+      <td>{{ item.outcome or "—" }}</td>
+      <td class="mono">{{ item.workflow_status or "—" }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Docs · D2C Support{% endblock %}
+{% block main %}
+<h1>API</h1>
+<p>Send <span class="mono">Authorization: Bearer d2c_test_…</span> or <span class="mono">d2c_live_…</span>. The key is the tenant. <span class="mono">tenant_id</span> and <span class="mono">auth_level</span> in the body are ignored. A test key forces mock tools. A live key returns 403 until the sandbox has passed, and this release still does not enable card charges.</p>
+<h2>Calls</h2>
+<ul>
+  <li><span class="mono">POST /v1/sessions</span> with <span class="mono">customer_ref</span>. Sets the customer cookie.</li>
+  <li><span class="mono">POST /v1/chat</span> with <span class="mono">message</span>. Returns reply, citations, missing_inputs, workflow_status.</li>
+  <li><span class="mono">GET /v1/cases/{case_id}</span> and <span class="mono">GET /v1/cases/{case_id}/timeline</span>.</li>
+  <li><span class="mono">GET /v1/approvals</span>, <span class="mono">POST /v1/approvals/{task_id}/approve</span>, <span class="mono">POST /v1/approvals/{task_id}/reject</span>. The widget key cannot approve. A second approve returns already decided.</li>
+</ul>
+<h2>Sandbox script</h2>
+<p><span class="mono">POST /v1/sandbox/run</span> on the test key sends three messages:</p>
+<ol>
+  <li>What is the return policy for damaged products?</li>
+  <li>My order #12345 is damaged. I want to return it.</li>
+  <li>Order 12345, phone 9999900000, refund 2500, photos uploaded.</li>
+</ol>
+<p>A pass needs a citation, a photo ask, and <span class="mono">workflow_status=waiting_approval</span> with no Stripe success. Only that pass sets <span class="mono">sandbox_passed_at</span>.</p>
+<h2>Refund status values</h2>
+<ul>
+  <li><span class="mono">waiting_auth</span> — the order contact is not proven.</li>
+  <li><span class="mono">waiting_input</span> — photos or another fact is missing.</li>
+  <li><span class="mono">waiting_approval</span> — a supervisor has not decided. Stripe has not been called.</li>
+  <li><span class="mono">succeeded</span> — the workflow finished. This is the only status that may be described as a completed refund.</li>
+  <li><span class="mono">failed</span> or <span class="mono">cancelled</span> — the run stopped. A reject cancels the run.</li>
+</ul>
+<p><a href="/openapi.json">OpenAPI</a> · <a href="/swagger">Swagger</a></p>
+{% endblock %}

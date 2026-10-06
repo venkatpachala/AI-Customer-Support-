@@ -1,0 +1,22 @@
+(function () {
+  var script = document.currentScript;
+  var source = script && script.src ? script.src : "";
+  var url = new URL(source, window.location.href);
+  var tenant = url.searchParams.get("tenant") || "zepto";
+  var frame = document.createElement("iframe");
+  frame.src = url.origin + "/w/" + encodeURIComponent(tenant);
+  frame.title = "Support";
+  frame.setAttribute("data-d2c-widget", tenant);
+  frame.style.border = "0";
+  frame.style.width = "380px";
+  frame.style.height = "560px";
+  frame.style.maxWidth = "calc(100vw - 24px)";
+  frame.style.position = "fixed";
+  frame.style.right = "12px";
+  frame.style.bottom = "12px";
+  frame.style.zIndex = "2147483000";
+  frame.style.borderRadius = "16px";
+  frame.style.boxShadow = "0 12px 40px rgba(28,25,21,0.2)";
+  frame.style.background = "#f3efe6";
+  document.body.appendChild(frame);
+})();

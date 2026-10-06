@@ -1,28 +1,17 @@
 """One script tag for the brand site. It posts the message and the session cookie."""
-from fastapi import APIRouter
+from pathlib import Path
+
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 
 router = APIRouter(tags=["widget"])
-
-_SCRIPT = """\
-(function () {
-  var script = document.currentScript;
-  var query = new URL(script && script.src ? script.src : "", window.location.href).searchParams;
-  var tenant = query.get("tenant") || "__TENANT__";
-  function send(message) {
-    return fetch("/chat", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: message, tenant_id: tenant })
-    }).then(function (response) { return response.json(); });
-  }
-  window.D2CSupport = { tenant: tenant, send: send };
-})();
-"""
+_SCRIPT_PATH = Path(__file__).resolve().parents[1] / "static" / "widget.js"
 
 
 @router.get("/widget.js")
 def widget_script(tenant: str = "zepto"):
+    if not _SCRIPT_PATH.is_file():
+        raise HTTPException(status_code=404, detail="widget script missing")
     safe = "".join(ch for ch in tenant if ch.isalnum() or ch in {"_", "-"}) or "zepto"
-    return Response(content=_SCRIPT.replace("__TENANT__", safe), media_type="application/javascript")
+    script = _SCRIPT_PATH.read_text(encoding="utf-8").replace("__TENANT__", safe)
+    return Response(content=script, media_type="application/javascript")

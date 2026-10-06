@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order help</title>
+  <link rel="stylesheet" href="/static/site.css" />
+</head>
+<body>
+  <p class="state-loading" id="boot">Loading…</p>
+  <script>var boot = document.getElementById("boot"); if (boot) boot.remove();</script>
+  <div class="widget-shell">
+    <h1>Order help</h1>
+    <p id="error" class="state-error" hidden></p>
+    <form id="start">
+      <label>Customer reference <input id="customer" name="customer_ref" autocomplete="username" required /></label>
+      <button type="submit">Start</button>
+    </form>
+    <div id="log" class="chat-log" hidden></div>
+    <form id="talk" hidden>
+      <label>Message <textarea id="message" rows="3" required></textarea></label>
+      <button type="submit">Send</button>
+    </form>
+    <p id="notice"></p>
+  </div>
+  <script>
+    var tenant = {{ tenant_json }};
+    var log = document.getElementById("log");
+    var errorBox = document.getElementById("error");
+    function showError(text) {
+      errorBox.hidden = !text;
+      errorBox.textContent = text || "";
+    }
+    function add(className, text) {
+      var node = document.createElement("div");
+      node.className = "bubble " + className;
+      node.textContent = text || "";
+      log.appendChild(node);
+      log.hidden = false;
+    }
+    document.getElementById("start").onsubmit = async function (event) {
+      event.preventDefault();
+      showError("");
+      var response = await fetch("/v1/sessions", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenant_id: tenant, customer_ref: document.getElementById("customer").value })
+      });
+      var body = await response.json();
+      if (!response.ok) {
+        showError(body.detail || "Could not start");
+        return;
+      }
+      document.getElementById("talk").hidden = false;
+      document.getElementById("notice").textContent = "Session started";
+    };
+    document.getElementById("talk").onsubmit = async function (event) {
+      event.preventDefault();
+      showError("");
+      var message = document.getElementById("message").value;
+      add("user", message);
+      var response = await fetch("/v1/chat", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message, tenant_id: tenant })
+      });
+      var body = await response.json();
+      if (!response.ok) {
+        showError(body.detail || "Send failed");
+        return;
+      }
+      var status = body.workflow_status || "";
+      var text = body.response || "";
+      if (status !== "succeeded") {
+        text = String(text).replace(/refund completed/ig, "the refund is not complete");
+      }
+      add("", text);
+      var cites = body.citations || [];
+      if (cites.length) add("", "citations: " + cites.join(", "));
+      if (status === "waiting_approval") {
+        document.getElementById("notice").textContent = "Waiting for approval";
+      } else if (status) {
+        document.getElementById("notice").textContent = "workflow_status: " + status;
+      }
+      document.getElementById("message").value = "";
+    };
+  </script>
+</body>
+</html>

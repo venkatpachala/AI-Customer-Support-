@@ -33,14 +33,21 @@ def belongs_to_tenant(metadata: Optional[Dict[str, Any]], tenant_id: str) -> boo
     return str((metadata or {}).get("tenant_id") or "") == str(tenant_id or "").strip()
 
 
-def select_tenant_docs(docs: Iterable[Document], tenant_id: str) -> List[Document]:
-    """Keep one tenant. Drop path copies. Never fill the gap from another tenant."""
+def select_tenant_docs(
+    docs: Iterable[Document],
+    tenant_id: str,
+    snapshot_id: Optional[str] = None,
+) -> List[Document]:
+    """Keep one tenant and, when set, one knowledge snapshot."""
     kept: List[Document] = []
+    snapshot = str(snapshot_id or "").strip()
     for doc in docs:
         metadata = dict(doc.metadata or {})
         if is_duplicate_source(metadata.get("source")):
             continue
         if not belongs_to_tenant(metadata, tenant_id):
+            continue
+        if snapshot and str(metadata.get("knowledge_snapshot") or "") != snapshot:
             continue
         kept.append(doc)
     return kept

@@ -100,7 +100,9 @@ class ShopifyGetOrder(BaseTool):
         if not order_id:
             raise ValidationError("order_id is required")
 
-        tools_mode = os.getenv("TOOLS_MODE", "mock").lower()
+        from controlplane.mode import current_tools_mode
+
+        tools_mode = current_tools_mode()
 
         def mock_order():
             return {

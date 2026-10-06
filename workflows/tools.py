@@ -67,7 +67,9 @@ def _lookup(registry: Any, name: str) -> Any:
 
 
 def _missing_tool(name: str, params: Dict[str, Any]) -> Dict[str, Any]:
-    mode = os.getenv("TOOLS_MODE", "mock").strip().lower()
+    from controlplane.mode import current_tools_mode
+
+    mode = current_tools_mode()
     if mode == "mock" and name == "shopify_get_order":
         order_id = str(params.get("order_id") or "")
         return {
