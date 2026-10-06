@@ -16,6 +16,8 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
       - run: python -m pytest tests/policy tests/platform tests/workflows tests/api tests/identity tests/evaluation tests/rag/test_tenant_isolation.py -q -rs
+      - name: rag metric lock
+        run: python -m pytest tests/evaluation/test_rag_metrics.py -q
       - name: tenant filter must not be skipped
         run: python -m pytest tests/rag/test_tenant_isolation.py -q -rs | tee tenant-filter.txt && ! grep -q skipped tenant-filter.txt
       - run: python -m evaluation.release_gate
@@ -36,6 +38,8 @@ jobs:
           TOOLS_MODE: mock
           EVAL_HTTP: "1"
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
+          PINECONE_INDEX_NAME: ${{ secrets.PINECONE_INDEX_NAME }}
           DATABASE_URL: sqlite:///./data/d2c_agent.db
         run: |
           python -m uvicorn gateway.main:app --host 127.0.0.1 --port 8000 &
@@ -44,3 +48,4 @@ jobs:
             sleep 2
           done
           python -m evaluation.release_gate
+          python -m evaluation.rag.run_retrieval

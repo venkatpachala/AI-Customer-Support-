@@ -168,6 +168,14 @@ A failed scenario or any unauthorized Stripe create prints `GATE FAIL` and exits
 
 `SKIP http goldens` means `/health` did not answer, so the 12 `/chat` goldens were not run. `SKIP retrieval` means Pinecone was not required for this gate. Neither skip hides an in-process Stripe failure.
 
+## Frozen retrieval benchmark
+
+`python -m evaluation.rag.run_retrieval` scores the 39 answerable rows in `evaluation/rag/dataset.json` with dense retrieval, `rag/bm25_corpus_zepto.pkl`, reciprocal rank fusion, dedup, and rerank. It exits 1 when the BM25 file is missing, and it does not copy `evaluation/reports/rag_benchmark_latest.json` unless `python -m evaluation.rag.validate` passes.
+
+On a frozen 39-question Zepto policy set, hybrid retrieval (dense + BM25 + RRF + dedup + rerank) reached Recall@5 1.0000 and MRR 0.7936; 0/39 gold clauses missed top 5. That line is the output of validate on `evaluation/reports/rag_benchmark_latest.json`. The August clause-chunk baseline in `evaluation/reports/retrieval_eval_20260811_185842.json` was Recall@5 0.9744 and MRR 0.7842 after rerank, from Recall@5 0.59 and MRR 0.36 before clause-level chunking.
+
+Pull-request CI runs `tests/evaluation/test_rag_metrics.py` only for this benchmark. The nightly job runs `python -m evaluation.rag.run_retrieval`.
+
 ## Getting Started
 
 ### Prerequisites

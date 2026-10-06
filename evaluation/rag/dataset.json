@@ -1,0 +1,775 @@
+[
+  {
+    "id": "policy_product_scope_1",
+    "tenant_id": "zepto",
+    "question": "What types of products can users purchase through Zepto?",
+    "answerable": true,
+    "gold_clause": "2.2",
+    "gold_page": 3,
+    "gold_keywords": [
+      "consumer",
+      "goods",
+      "grocery",
+      "apparel"
+    ],
+    "gold_answer_facts": [
+      "consumer goods such as grocery, apparel, electronics, health and wellness, caf\u00e9 products, Pet care"
+    ],
+    "gold_evidence": "consumer goods such as grocery, apparel, electronics, health and wellness, caf\u00e9 products, Pet care"
+  },
+  {
+    "id": "policy_service_area_1",
+    "tenant_id": "zepto",
+    "question": "Does Zepto provide its services in every area and city in India?",
+    "answerable": true,
+    "gold_clause": "2.3",
+    "gold_page": 3,
+    "gold_keywords": [
+      "reserves",
+      "right",
+      "provide",
+      "services"
+    ],
+    "gold_answer_facts": [
+      "Zepto reserves the right to provide the services in any area or city in India"
+    ],
+    "gold_evidence": "Zepto reserves the right to provide the services in any area or city in India"
+  },
+  {
+    "id": "policy_minimum_age_1",
+    "tenant_id": "zepto",
+    "question": "What is the minimum age required to use Zepto?",
+    "answerable": true,
+    "gold_clause": "3.1",
+    "gold_page": 4,
+    "gold_keywords": [
+      "products",
+      "services",
+      "available",
+      "minors"
+    ],
+    "gold_answer_facts": [
+      "Products and services are not available to minors under the age of 18"
+    ],
+    "gold_evidence": "Products and services are not available to minors under the age of 18"
+  },
+  {
+    "id": "policy_payment_failure_funds_1",
+    "tenant_id": "zepto",
+    "question": "What happens if a payment fails because I do not have sufficient funds in my bank account?",
+    "answerable": true,
+    "gold_clause": "5.4",
+    "gold_page": 7,
+    "gold_keywords": [
+      "insufficient",
+      "funds",
+      "bank",
+      "account"
+    ],
+    "gold_answer_facts": [
+      "Insufficient funds in Your bank account"
+    ],
+    "gold_evidence": "Insufficient funds in Your bank account"
+  },
+  {
+    "id": "policy_payment_failure_details_1",
+    "tenant_id": "zepto",
+    "question": "What happens if I provide incorrect payment details?",
+    "answerable": true,
+    "gold_clause": "5.4",
+    "gold_page": 7,
+    "gold_keywords": [
+      "provided",
+      "correct",
+      "payment",
+      "details"
+    ],
+    "gold_answer_facts": [
+      "You have not provided correct Payment Details"
+    ],
+    "gold_evidence": "You have not provided correct Payment Details"
+  },
+  {
+    "id": "policy_gift_card_usage_1",
+    "tenant_id": "zepto",
+    "question": "Can Zepto Gift Cards be used to purchase products on the Platform?",
+    "answerable": true,
+    "gold_clause": "5.6",
+    "gold_page": 7,
+    "gold_keywords": [
+      "gift",
+      "cards",
+      "purchases",
+      "platform"
+    ],
+    "gold_answer_facts": [
+      "You can use Zepto Gift Cards for purchases on the Platform"
+    ],
+    "gold_evidence": "You can use Zepto Gift Cards for purchases on the Platform"
+  },
+  {
+    "id": "policy_product_pricing_1",
+    "tenant_id": "zepto",
+    "question": "Who determines the prices of products sold on Zepto?",
+    "answerable": true,
+    "gold_clause": "6.1",
+    "gold_page": 8,
+    "gold_keywords": [
+      "prices",
+      "products",
+      "services",
+      "listed"
+    ],
+    "gold_answer_facts": [
+      "prices for Products and services listed by Sellers are determined entirely by the Sellers"
+    ],
+    "gold_evidence": "prices for Products and services listed by Sellers are determined entirely by the Sellers"
+  },
+  {
+    "id": "policy_checkout_charges_1",
+    "tenant_id": "zepto",
+    "question": "Where can I see the charges and fees that will be applied to my order?",
+    "answerable": true,
+    "gold_clause": "6.2",
+    "gold_page": 8,
+    "gold_keywords": [
+      "charges",
+      "fees",
+      "costs",
+      "delivery"
+    ],
+    "gold_answer_facts": [
+      "charges, fees, and costs including delivery fee displayed at the checkout page"
+    ],
+    "gold_evidence": "charges, fees, and costs including delivery fee displayed at the checkout page"
+  },
+  {
+    "id": "policy_delivery_eta_1",
+    "tenant_id": "zepto",
+    "question": "Does Zepto guarantee that every order will arrive within 10 minutes?",
+    "answerable": true,
+    "gold_clause": "7.1",
+    "gold_page": 9,
+    "gold_keywords": [
+      "endeavors",
+      "deliver",
+      "orders",
+      "minute"
+    ],
+    "gold_answer_facts": [
+      "Zepto endeavors to deliver orders within a 10-minute ETA, but actual delivery time may exceed this estimate"
+    ],
+    "gold_evidence": "Zepto endeavors to deliver orders within a 10-minute ETA, but actual delivery time may exceed this estimate"
+  },
+  {
+    "id": "policy_wrong_address_1",
+    "tenant_id": "zepto",
+    "question": "Who is responsible if an order is not delivered because I entered an incorrect address?",
+    "answerable": true,
+    "gold_clause": "7.3",
+    "gold_page": 9,
+    "gold_keywords": [
+      "sole",
+      "responsibility",
+      "ensure",
+      "delivery"
+    ],
+    "gold_answer_facts": [
+      "sole responsibility to ensure that the delivery address is complete and accurate"
+    ],
+    "gold_evidence": "sole responsibility to ensure that the delivery address is complete and accurate"
+  },
+  {
+    "id": "policy_cod_nonpayment_1",
+    "tenant_id": "zepto",
+    "question": "What happens if I do not make the full payment for a cash-on-delivery order?",
+    "answerable": true,
+    "gold_clause": "7.5",
+    "gold_page": 10,
+    "gold_keywords": [
+      "seller",
+      "delivery",
+      "service",
+      "provider"
+    ],
+    "gold_answer_facts": [
+      "Seller or delivery service provider may refuse delivery and Zepto shall treat such order as canceled"
+    ],
+    "gold_evidence": "Seller or delivery service provider may refuse delivery and Zepto shall treat such order as canceled"
+  },
+  {
+    "id": "policy_cod_delivery_fee_1",
+    "tenant_id": "zepto",
+    "question": "Do I have to pay delivery fees if my cash-on-delivery order is canceled because I did not make the payment?",
+    "answerable": true,
+    "gold_clause": "7.5",
+    "gold_page": 10,
+    "gold_keywords": [
+      "agree",
+      "delivery",
+      "fees",
+      "canceled"
+    ],
+    "gold_answer_facts": [
+      "You agree to pay the delivery fee or any other fees for such canceled order"
+    ],
+    "gold_evidence": "You agree to pay the delivery fee or any other fees for such canceled order"
+  },
+  {
+    "id": "policy_alcohol_id_1",
+    "tenant_id": "zepto",
+    "question": "Do I need to provide identification or age proof when ordering alcohol or tobacco products?",
+    "answerable": true,
+    "gold_clause": "7.6.1",
+    "gold_page": 10,
+    "gold_keywords": [
+      "sellers",
+      "request",
+      "identification",
+      "proof"
+    ],
+    "gold_answer_facts": [
+      "Zepto and/or Sellers may request identification and age proof documents"
+    ],
+    "gold_evidence": "Zepto and/or Sellers may request identification and age proof documents"
+  },
+  {
+    "id": "policy_alcohol_recipient_1",
+    "tenant_id": "zepto",
+    "question": "Can someone else receive my alcohol order on my behalf?",
+    "answerable": true,
+    "gold_clause": "7.6.1",
+    "gold_page": 10,
+    "gold_keywords": [
+      "delivered",
+      "person",
+      "whose",
+      "account"
+    ],
+    "gold_answer_facts": [
+      "shall be delivered only to the person from whose account the order has been placed"
+    ],
+    "gold_evidence": "shall be delivered only to the person from whose account the order has been placed"
+  },
+  {
+    "id": "policy_alcohol_eligibility_1",
+    "tenant_id": "zepto",
+    "question": "What age requirement applies when ordering alcoholic beverages or tobacco products?",
+    "answerable": true,
+    "gold_clause": "7.6.2",
+    "gold_page": 11,
+    "gold_keywords": [
+      "comply",
+      "eligibility",
+      "criteria",
+      "applicable"
+    ],
+    "gold_answer_facts": [
+      "comply with all eligibility criteria under applicable law including legal age"
+    ],
+    "gold_evidence": "comply with all eligibility criteria under applicable law including legal age"
+  },
+  {
+    "id": "policy_alcohol_public_address_1",
+    "tenant_id": "zepto",
+    "question": "Can I use a public place as the delivery address for an alcohol or tobacco order?",
+    "answerable": true,
+    "gold_clause": "7.6.3",
+    "gold_page": 11,
+    "gold_keywords": [
+      "provide",
+      "address",
+      "public",
+      "place"
+    ],
+    "gold_answer_facts": [
+      "not provide the address of any public place including educational institution, hospital, and religious places"
+    ],
+    "gold_evidence": "not provide the address of any public place including educational institution, hospital, and religious places"
+  },
+  {
+    "id": "policy_pharmacy_responsibility_1",
+    "tenant_id": "zepto",
+    "question": "Who is responsible for verifying and dispensing pharmaceutical products?",
+    "answerable": true,
+    "gold_clause": "7.7.1",
+    "gold_page": 11,
+    "gold_keywords": [
+      "pharmacy",
+      "solely",
+      "responsible",
+      "verification"
+    ],
+    "gold_answer_facts": [
+      "Pharmacy are solely responsible for the verification and dispensing of Pharmaceutical Products"
+    ],
+    "gold_evidence": "Pharmacy are solely responsible for the verification and dispensing of Pharmaceutical Products"
+  },
+  {
+    "id": "policy_pharmacy_order_acceptance_1",
+    "tenant_id": "zepto",
+    "question": "Who decides whether a pharmaceutical order is accepted?",
+    "answerable": true,
+    "gold_clause": "7.7.2",
+    "gold_page": 12,
+    "gold_keywords": [
+      "acceptance",
+      "offer",
+      "determined",
+      "respective"
+    ],
+    "gold_answer_facts": [
+      "acceptance of Your offer will be determined by the respective Pharmacy"
+    ],
+    "gold_evidence": "acceptance of Your offer will be determined by the respective Pharmacy"
+  },
+  {
+    "id": "policy_prescription_required_1",
+    "tenant_id": "zepto",
+    "question": "Do I need a prescription to purchase prescription drugs through Zepto?",
+    "answerable": true,
+    "gold_clause": "7.7.3",
+    "gold_page": 12,
+    "gold_keywords": [
+      "purchase",
+      "certain",
+      "pharmaceutical",
+      "products"
+    ],
+    "gold_answer_facts": [
+      "Users may purchase certain Pharmaceutical Products referred to as Prescription Drugs provided they submit a prescription"
+    ],
+    "gold_evidence": "Users may purchase certain Pharmaceutical Products referred to as Prescription Drugs provided they submit a prescription"
+  },
+  {
+    "id": "policy_prescription_cancel_1",
+    "tenant_id": "zepto",
+    "question": "Can a pharmacy cancel a prescription order if there are discrepancies in the prescription?",
+    "answerable": true,
+    "gold_clause": "7.7.3",
+    "gold_page": 12,
+    "gold_keywords": [
+      "pharmacy",
+      "reserves",
+      "right",
+      "cancel"
+    ],
+    "gold_answer_facts": [
+      "Pharmacy reserves the right to cancel the order immediately"
+    ],
+    "gold_evidence": "Pharmacy reserves the right to cancel the order immediately"
+  },
+  {
+    "id": "policy_prescription_delivery_1",
+    "tenant_id": "zepto",
+    "question": "Who collects prescription medicines from the pharmacy on my behalf?",
+    "answerable": true,
+    "gold_clause": "7.7.4",
+    "gold_page": 13,
+    "gold_keywords": [
+      "individual",
+      "capacity",
+      "agent",
+      "collect"
+    ],
+    "gold_answer_facts": [
+      "individual who shall act in the capacity of Your agent and collect the Prescription Drugs"
+    ],
+    "gold_evidence": "individual who shall act in the capacity of Your agent and collect the Prescription Drugs"
+  },
+  {
+    "id": "policy_prescription_reuse_1",
+    "tenant_id": "zepto",
+    "question": "Can I reuse a prescription that has already been fulfilled?",
+    "answerable": true,
+    "gold_clause": "7.7.5",
+    "gold_page": 13,
+    "gold_keywords": [
+      "agree",
+      "undertake",
+      "reuse",
+      "prescriptions"
+    ],
+    "gold_answer_facts": [
+      "Users agree and undertake not to reuse prescriptions that have already been fulfilled"
+    ],
+    "gold_evidence": "Users agree and undertake not to reuse prescriptions that have already been fulfilled"
+  },
+  {
+    "id": "policy_medicine_substitution_1",
+    "tenant_id": "zepto",
+    "question": "When can a prescribed medicine be substituted with an equivalent generic drug?",
+    "answerable": true,
+    "gold_clause": "7.7.6",
+    "gold_page": 13,
+    "gold_keywords": [
+      "processed",
+      "prescribing",
+      "physician",
+      "expressly"
+    ],
+    "gold_answer_facts": [
+      "only be processed if the prescribing physician has expressly authorized the dispensing of an equivalent generic drug"
+    ],
+    "gold_evidence": "only be processed if the prescribing physician has expressly authorized the dispensing of an equivalent generic drug"
+  },
+  {
+    "id": "policy_medical_emergency_1",
+    "tenant_id": "zepto",
+    "question": "What should users do in a medical emergency according to the Terms?",
+    "answerable": true,
+    "gold_clause": "7.7.9",
+    "gold_page": 14,
+    "gold_keywords": [
+      "immediately",
+      "seek",
+      "professional",
+      "medical"
+    ],
+    "gold_answer_facts": [
+      "immediately seek professional medical assistance from their nearest healthcare provider"
+    ],
+    "gold_evidence": "immediately seek professional medical assistance from their nearest healthcare provider"
+  },
+  {
+    "id": "policy_prescription_records_1",
+    "tenant_id": "zepto",
+    "question": "Can Zepto and the pharmacy retain prescription and transaction records?",
+    "answerable": true,
+    "gold_clause": "7.7.10",
+    "gold_page": 15,
+    "gold_keywords": [
+      "retain",
+      "records",
+      "prescriptions",
+      "transaction"
+    ],
+    "gold_answer_facts": [
+      "may retain records of prescriptions and transaction details"
+    ],
+    "gold_evidence": "may retain records of prescriptions and transaction details"
+  },
+  {
+    "id": "policy_return_wrong_item_1",
+    "tenant_id": "zepto",
+    "question": "Can I return a product if I received the wrong item?",
+    "answerable": true,
+    "gold_clause": "8.1.1.1",
+    "gold_page": 15,
+    "gold_keywords": [
+      "wrong",
+      "item",
+      "being",
+      "delivered"
+    ],
+    "gold_answer_facts": [
+      "wrong item being delivered other than what You had ordered"
+    ],
+    "gold_evidence": "wrong item being delivered other than what You had ordered"
+  },
+  {
+    "id": "policy_return_damaged_1",
+    "tenant_id": "zepto",
+    "question": "Can I return a product that was substantially damaged or deteriorated when delivered?",
+    "answerable": true,
+    "gold_clause": "8.1.1.2",
+    "gold_page": 15,
+    "gold_keywords": [
+      "items",
+      "substantially",
+      "damaged",
+      "deteriorated"
+    ],
+    "gold_answer_facts": [
+      "Items substantially damaged or deteriorated in quality at the time of delivery"
+    ],
+    "gold_evidence": "Items substantially damaged or deteriorated in quality at the time of delivery"
+  },
+  {
+    "id": "policy_return_proof_1",
+    "tenant_id": "zepto",
+    "question": "What proof do I need to provide for a damaged or problematic product return?",
+    "answerable": true,
+    "gold_clause": "8.1.1.2",
+    "gold_page": 15,
+    "gold_keywords": [
+      "requisite",
+      "proofs",
+      "images",
+      "products"
+    ],
+    "gold_answer_facts": [
+      "all the requisite proofs including but not limited to images of Products having issues"
+    ],
+    "gold_evidence": "all the requisite proofs including but not limited to images of Products having issues"
+  },
+  {
+    "id": "policy_return_timing_1",
+    "tenant_id": "zepto",
+    "question": "How soon do I need to request a return for an eligible unopened product?",
+    "answerable": true,
+    "gold_clause": "8.1.3",
+    "gold_page": 15,
+    "gold_keywords": [
+      "same",
+      "delivery",
+      "exchange",
+      "refund"
+    ],
+    "gold_answer_facts": [
+      "on the same day of delivery or as per the exchange/refund timeline suggested by Seller"
+    ],
+    "gold_evidence": "on the same day of delivery or as per the exchange/refund timeline suggested by Seller"
+  },
+  {
+    "id": "policy_return_seller_approval_1",
+    "tenant_id": "zepto",
+    "question": "Does the seller have to accept a return request before it can be processed?",
+    "answerable": true,
+    "gold_clause": "8.1.3",
+    "gold_page": 15,
+    "gold_keywords": [
+      "request",
+      "exchange",
+      "return",
+      "processed"
+    ],
+    "gold_answer_facts": [
+      "request for exchange or return shall only be processed if the relevant Seller accepts such request"
+    ],
+    "gold_evidence": "request for exchange or return shall only be processed if the relevant Seller accepts such request"
+  },
+  {
+    "id": "policy_digital_refund_1",
+    "tenant_id": "zepto",
+    "question": "Can I return or get a refund for a digital product such as a gift card or voucher?",
+    "answerable": true,
+    "gold_clause": "8.1.4",
+    "gold_page": 15,
+    "gold_keywords": [
+      "digital",
+      "products",
+      "gift",
+      "cards"
+    ],
+    "gold_answer_facts": [
+      "For digital products, including gift cards and vouchers, no returns or refunds are permitted"
+    ],
+    "gold_evidence": "For digital products, including gift cards and vouchers, no returns or refunds are permitted"
+  },
+  {
+    "id": "policy_cancel_before_acceptance_1",
+    "tenant_id": "zepto",
+    "question": "Can I cancel my order before the seller accepts it?",
+    "answerable": true,
+    "gold_clause": "8.2",
+    "gold_page": 16,
+    "gold_keywords": [
+      "cancel",
+      "order",
+      "without",
+      "charge"
+    ],
+    "gold_answer_facts": [
+      "You may cancel an order without charge at any time before the Seller accepts the order"
+    ],
+    "gold_evidence": "You may cancel an order without charge at any time before the Seller accepts the order"
+  },
+  {
+    "id": "policy_cancel_unavailable_1",
+    "tenant_id": "zepto",
+    "question": "Can Zepto cancel an order if a product is unavailable?",
+    "answerable": true,
+    "gold_clause": "8.2",
+    "gold_page": 16,
+    "gold_keywords": [
+      "order",
+      "canceled",
+      "reasons",
+      "shortage"
+    ],
+    "gold_answer_facts": [
+      "order may be canceled for reasons including shortage or unavailability of certain Products"
+    ],
+    "gold_evidence": "order may be canceled for reasons including shortage or unavailability of certain Products"
+  },
+  {
+    "id": "policy_refund_timeline_1",
+    "tenant_id": "zepto",
+    "question": "How long does an eligible return refund take to be processed?",
+    "answerable": true,
+    "gold_clause": "8.3",
+    "gold_page": 16,
+    "gold_keywords": [
+      "processed",
+      "period",
+      "seven",
+      "business"
+    ],
+    "gold_answer_facts": [
+      "processed within a period of seven business days from the date of verifying and confirming the refund request"
+    ],
+    "gold_evidence": "processed within a period of seven business days from the date of verifying and confirming the refund request"
+  },
+  {
+    "id": "policy_prepaid_refund_1",
+    "tenant_id": "zepto",
+    "question": "Where is the refund for a prepaid order credited?",
+    "answerable": true,
+    "gold_clause": "8.3",
+    "gold_page": 16,
+    "gold_keywords": [
+      "refund",
+      "amount",
+      "prepaid",
+      "orders"
+    ],
+    "gold_answer_facts": [
+      "refund amount of prepaid orders will be credited to the source account"
+    ],
+    "gold_evidence": "refund amount of prepaid orders will be credited to the source account"
+  },
+  {
+    "id": "policy_cod_refund_1",
+    "tenant_id": "zepto",
+    "question": "How is a refund for a cash-on-delivery order credited?",
+    "answerable": true,
+    "gold_clause": "8.3",
+    "gold_page": 16,
+    "gold_keywords": [
+      "credited",
+      "cash",
+      "account",
+      "form"
+    ],
+    "gold_answer_facts": [
+      "credited to the User's Zepto Cash account in the form of a Zepto Gift Card"
+    ],
+    "gold_evidence": "credited to the User's Zepto Cash account in the form of a Zepto Gift Card"
+  },
+  {
+    "id": "policy_order_support_1",
+    "tenant_id": "zepto",
+    "question": "Where should I go for help with a Zepto order or refund issue?",
+    "answerable": true,
+    "gold_clause": "9.8",
+    "gold_page": 19,
+    "gold_keywords": [
+      "click",
+      "help",
+      "section"
+    ],
+    "gold_answer_facts": [
+      "click on the Get Help section on the App"
+    ],
+    "gold_evidence": "click on the Get Help section on the App"
+  },
+  {
+    "id": "policy_grievance_contact_1",
+    "tenant_id": "zepto",
+    "question": "How can I contact Zepto about an order-related issue?",
+    "answerable": true,
+    "gold_clause": "17.1.1",
+    "gold_page": 26,
+    "gold_keywords": [
+      "reach",
+      "chat",
+      "support",
+      "real"
+    ],
+    "gold_answer_facts": [
+      "reach out via chat support on the App for real time basis resolution"
+    ],
+    "gold_evidence": "reach out via chat support on the App for real time basis resolution"
+  },
+  {
+    "id": "policy_grievance_timeline_1",
+    "tenant_id": "zepto",
+    "question": "How long does Zepto have to resolve a grievance after it is submitted?",
+    "answerable": true,
+    "gold_clause": "17.2",
+    "gold_page": 27,
+    "gold_keywords": [
+      "acknowledge",
+      "hours",
+      "endeavour",
+      "redress"
+    ],
+    "gold_answer_facts": [
+      "acknowledge within 48 hours and endeavour to redress at the earliest and no later than 30 days"
+    ],
+    "gold_evidence": "acknowledge within 48 hours and endeavour to redress at the earliest and no later than 30 days"
+  },
+  {
+    "id": "policy_unanswerable_airline_miles_1",
+    "tenant_id": "zepto",
+    "question": "Does Zepto credit airline frequent-flyer miles on every grocery order?",
+    "answerable": false,
+    "gold_clause": null,
+    "gold_keywords": [],
+    "gold_answer_facts": []
+  },
+  {
+    "id": "policy_unanswerable_electricity_bill_1",
+    "tenant_id": "zepto",
+    "question": "Can I pay my home electricity bill in the Zepto app?",
+    "answerable": false,
+    "gold_clause": null,
+    "gold_keywords": [],
+    "gold_answer_facts": []
+  },
+  {
+    "id": "policy_unanswerable_two_minute_1",
+    "tenant_id": "zepto",
+    "question": "Does Zepto guarantee delivery in under two minutes in every city?",
+    "answerable": false,
+    "gold_clause": null,
+    "gold_keywords": [],
+    "gold_answer_facts": []
+  },
+  {
+    "id": "policy_unanswerable_lifetime_produce_1",
+    "tenant_id": "zepto",
+    "question": "Is there a lifetime replacement warranty on fresh vegetables?",
+    "answerable": false,
+    "gold_clause": null,
+    "gold_keywords": [],
+    "gold_answer_facts": []
+  },
+  {
+    "id": "policy_unanswerable_eighteen_month_1",
+    "tenant_id": "zepto",
+    "question": "Can I return an opened grocery item 18 months after delivery?",
+    "answerable": false,
+    "gold_clause": null,
+    "gold_keywords": [],
+    "gold_answer_facts": []
+  },
+  {
+    "id": "policy_unanswerable_credit_card_1",
+    "tenant_id": "zepto",
+    "question": "Does Zepto issue a credit card with fifty percent cashback on all orders?",
+    "answerable": false,
+    "gold_clause": null,
+    "gold_keywords": [],
+    "gold_answer_facts": []
+  },
+  {
+    "id": "policy_unanswerable_sell_account_1",
+    "tenant_id": "zepto",
+    "question": "Can I sell my Zepto account to another person?",
+    "answerable": false,
+    "gold_clause": null,
+    "gold_keywords": [],
+    "gold_answer_facts": []
+  },
+  {
+    "id": "policy_unanswerable_in_person_care_1",
+    "tenant_id": "zepto",
+    "question": "Does Zepto provide in-person medical treatment for pharmacy customers?",
+    "answerable": false,
+    "gold_clause": null,
+    "gold_keywords": [],
+    "gold_answer_facts": []
+  }
+]
