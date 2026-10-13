@@ -41,11 +41,11 @@
     document.getElementById("start").onsubmit = async function (event) {
       event.preventDefault();
       showError("");
-      var response = await fetch("/v1/sessions", {
+      var response = await fetch("/w/" + encodeURIComponent(tenant) + "/session", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tenant_id: tenant, customer_ref: document.getElementById("customer").value })
+        body: JSON.stringify({ customer_ref: document.getElementById("customer").value })
       });
       var body = await response.json();
       if (!response.ok) {
@@ -64,7 +64,7 @@
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: message, tenant_id: tenant })
+        body: JSON.stringify({ message: message })
       });
       var body = await response.json();
       if (!response.ok) {

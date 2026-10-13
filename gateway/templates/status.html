@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Status · D2C Support{% endblock %}
+{% block main %}
+<h1>Status</h1>
+<p>The public host is the free Render service named in SHIP.md. It sleeps after about 15 minutes without traffic. The next request wakes it. A deploy is announced here before the URL is given to a brand.</p>
+<p>Check <a href="/health">/health</a>. It returns ok when the database answers, including when Shopify is unset.</p>
+<p>A red release gate blocks a deploy. The command is <span class="mono">python -m evaluation.release_gate</span>.</p>
+{% endblock %}

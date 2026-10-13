@@ -16,6 +16,9 @@ router = APIRouter(prefix="/v1/cases", tags=["cases"])
 def _tenant(request: Request, x_tenant_id: Optional[str]) -> str:
     principal = bearer_principal(request)
     if principal is not None:
+        supplied = (x_tenant_id or "").strip()
+        if supplied and supplied != principal.tenant_id:
+            raise HTTPException(status_code=403, detail="tenant mismatch")
         return principal.tenant_id
     tenant = (x_tenant_id or "").strip()
     if not tenant:

@@ -1,0 +1,28 @@
+# Paid web service. The free plan sleeps and is not this host.
+# Apply only when you are ready to pay. Secrets stay in the dashboard.
+services:
+  - type: web
+    name: d2c-support
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: TOOLS_MODE
+        value: mock
+      - key: PORT
+        value: "8000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: d2c-db
+          property: connectionString
+      - key: OPS_PASSWORD
+        sync: false
+      - key: OPS_SESSION_SECRET
+        sync: false
+
+databases:
+  - name: d2c-db
+    plan: basic-256mb
+    databaseName: d2c
+    user: d2c

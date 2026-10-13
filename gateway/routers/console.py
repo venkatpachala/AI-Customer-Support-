@@ -1,20 +1,42 @@
 """Owner console and the public site. Server-rendered. One CSS file."""
 from __future__ import annotations
 
+import hashlib
+import hmac
 import json
+import os
+import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from controlplane.connections import list_cards, mock_health, save_connection
-from controlplane.keys import ensure_tenant, issue_key, list_keys, set_killed, take_unrevealed, tenant_record
-from controlplane.knowledge import list_documents, store_pdf, uploads_allowed, use_sample_pack
+from controlplane.connections import list_cards, probe_connection, save_connection
+from controlplane.keys import (
+    ensure_tenant,
+    issue_key,
+    list_keys,
+    rotate_key,
+    set_killed,
+    set_live_enabled,
+    take_unrevealed,
+    tenant_record,
+)
+from controlplane.purge import queue_purge, run_purge
+from controlplane.knowledge import (
+    delete_snapshot,
+    list_documents,
+    reingest_snapshot,
+    store_pdf,
+    uploads_allowed,
+    use_sample_pack,
+)
+from controlplane.ratelimit import login_allowed, note_login_failure, note_login_success, signup_allowed
 from controlplane.sandbox import STEPS, judge
 from controlplane.turns import run_product_chat
 from controlplane.webhooks import get_endpoint, save_endpoint
-from db.models import CaseRow, HumanTaskRow
+from db.models import CaseRow, HumanTaskRow, IntakeRequestRow
 from db.session import SessionLocal
 from identity.accounts import signup, tenant_for_credentials
 from identity.owner_session import COOKIE_NAME, TTL_SECONDS, issue_owner_token, read_owner
@@ -64,16 +86,26 @@ async def _email_password(request: Request) -> tuple[str, str]:
     return str(form.get("email") or ""), str(form.get("password") or "")
 
 
-def _owner_cookie(response, tenant_id: str):
+def _owner_cookie(response, tenant_id: str, request: Request):
     response.set_cookie(
         key=COOKIE_NAME,
         value=issue_owner_token(tenant_id),
         httponly=True,
         samesite="lax",
+        secure=request.url.scheme == "https",
         max_age=TTL_SECONDS,
         path="/",
     )
     return response
+
+
+def _client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for") or ""
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    if request.client is None:
+        return "unknown"
+    return request.client.host or "unknown"
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -96,16 +128,23 @@ def login_form(request: Request):
 @router.post("/login")
 async def login_submit(request: Request):
     email, password = await _email_password(request)
+    allowed, reason = login_allowed(email)
+    if not allowed:
+        if _wants_json(request):
+            return JSONResponse({"detail": reason}, status_code=429)
+        return _render(request, "login.html", status_code=429, error=reason)
     tenant = tenant_for_credentials(email, password)
     if not tenant:
+        note_login_failure(email)
         if _wants_json(request):
             return JSONResponse({"detail": "invalid credentials"}, status_code=401)
         return _render(request, "login.html", status_code=401, error="Invalid email or password")
+    note_login_success(email)
     if _wants_json(request):
         response = JSONResponse({"ok": True, "tenant_id": tenant})
     else:
         response = RedirectResponse("/app/inbox", status_code=303)
-    return _owner_cookie(response, tenant)
+    return _owner_cookie(response, tenant, request)
 
 
 @router.get("/signup", response_class=HTMLResponse)
@@ -117,6 +156,11 @@ def signup_form(request: Request):
 
 @router.post("/signup")
 async def signup_submit(request: Request):
+    allowed, reason = signup_allowed(_client_ip(request))
+    if not allowed:
+        if _wants_json(request):
+            return JSONResponse({"detail": reason}, status_code=429)
+        return _render(request, "signup.html", status_code=429, error=reason)
     email, password = await _email_password(request)
     try:
         account = signup(email, password)
@@ -137,7 +181,7 @@ async def signup_submit(request: Request):
         )
     else:
         response = RedirectResponse("/app/install", status_code=303)
-    return _owner_cookie(response, account["tenant_id"])
+    return _owner_cookie(response, account["tenant_id"], request)
 
 
 @router.post("/logout")
@@ -387,6 +431,7 @@ def knowledge_page(request: Request):
         section="knowledge",
         documents=list_documents(tenant),
         uploads_open=uploads_allowed(tenant),
+        tenant=tenant,
     )
 
 
@@ -405,8 +450,29 @@ async def knowledge_upload(request: Request, file: UploadFile = File(...)):
         section="knowledge",
         documents=list_documents(tenant),
         uploads_open=uploads_allowed(tenant),
+        tenant=tenant,
         error=error,
     )
+
+
+@router.post("/app/knowledge/{snapshot_id}/delete")
+def knowledge_delete(request: Request, snapshot_id: str):
+    tenant = _require(request)
+    try:
+        delete_snapshot(tenant, snapshot_id)
+    except Exception as exc:
+        return RedirectResponse(f"/app/knowledge?error={str(exc)[:180]}", status_code=303)
+    return RedirectResponse("/app/knowledge", status_code=303)
+
+
+@router.post("/app/knowledge/{snapshot_id}/reingest")
+def knowledge_reingest(request: Request, snapshot_id: str):
+    tenant = _require(request)
+    try:
+        reingest_snapshot(tenant, snapshot_id)
+    except Exception as exc:
+        return RedirectResponse(f"/app/knowledge?error={str(exc)[:180]}", status_code=303)
+    return RedirectResponse("/app/knowledge", status_code=303)
 
 
 @router.post("/app/knowledge/sample")
@@ -427,7 +493,11 @@ def connections_page(request: Request):
         request,
         "connections.html",
         section="connections",
-        cards=list_cards(tenant, sandbox_passed=bool(row and row.sandbox_passed_at)),
+        cards=list_cards(
+            tenant,
+            sandbox_passed=bool(row and row.sandbox_passed_at),
+            live_enabled=bool(row and row.live_enabled_at),
+        ),
         check=request.query_params.get("check"),
     )
 
@@ -449,8 +519,8 @@ def connections_save(
 
 @router.post("/app/connections/{provider}/test")
 def connections_test(request: Request, provider: str):
-    _require(request)
-    result = mock_health(provider)
+    tenant = _require(request)
+    result = probe_connection(tenant, provider)
     detail = result["detail"].replace(" ", "+")
     return RedirectResponse(f"/app/connections?check={detail}", status_code=303)
 
@@ -468,6 +538,7 @@ def _key_context(request: Request, tenant: str) -> dict:
         "tenant": tenant,
         "origin": origin,
         "sandbox_passed": bool(row and row.sandbox_passed_at),
+        "live_enabled": bool(row and row.live_enabled_at),
         "killed": bool(row and row.killed_at),
         "test_prefix": None if test is None else test["prefix"],
         "live_prefix": None if live is None else live["prefix"],
@@ -491,6 +562,25 @@ def install_page(request: Request):
 def install_test_key(request: Request):
     tenant = _require(request)
     issue_key(tenant, role="widget", mode="test")
+    return RedirectResponse("/app/install", status_code=303)
+
+
+@router.post("/app/install/rotate-test-key")
+def install_rotate_test_key(request: Request):
+    tenant = _require(request)
+    rotate_key(tenant, role="widget", mode="test")
+    return RedirectResponse("/app/install", status_code=303)
+
+
+@router.post("/app/install/purge")
+def install_purge(request: Request, ops_password: str = Form("")):
+    tenant = _require(request)
+    expected = os.getenv("OPS_PASSWORD", "")
+    given = hashlib.sha256((ops_password or "").encode("utf-8")).hexdigest()
+    wanted = hashlib.sha256(expected.encode("utf-8")).hexdigest()
+    if not expected or not hmac.compare_digest(given, wanted):
+        return RedirectResponse("/app/install?error=Admin+password+required", status_code=303)
+    run_purge(tenant)
     return RedirectResponse("/app/install", status_code=303)
 
 
@@ -520,6 +610,77 @@ def install_kill(request: Request):
     row = tenant_record(tenant)
     set_killed(tenant, not bool(row and row.killed_at))
     return RedirectResponse("/app/install", status_code=303)
+
+
+@router.post("/app/install/live")
+def install_live(request: Request, ops_password: str = Form("")):
+    """Admin enable. The brand password is not enough to turn on live shop calls."""
+    tenant = _require(request)
+    expected = os.getenv("OPS_PASSWORD", "")
+    given = hashlib.sha256((ops_password or "").encode("utf-8")).hexdigest()
+    wanted = hashlib.sha256(expected.encode("utf-8")).hexdigest()
+    if not expected or not hmac.compare_digest(given, wanted):
+        return RedirectResponse("/app/install?error=Admin+password+required", status_code=303)
+    row = tenant_record(tenant)
+    try:
+        set_live_enabled(tenant, not bool(row and row.live_enabled_at))
+    except ValueError as exc:
+        return RedirectResponse(f"/app/install?error={str(exc)[:180]}", status_code=303)
+    return RedirectResponse("/app/install", status_code=303)
+
+
+def _save_intake(kind: str, email: str, note: str, tenant_id: str | None = None) -> None:
+    with SessionLocal() as db:
+        db.add(
+            IntakeRequestRow(
+                id=str(uuid.uuid4()),
+                kind=kind,
+                email=(email or "").strip().lower()[:256],
+                tenant_id=tenant_id,
+                note=(note or "").strip()[:2000],
+            )
+        )
+        db.commit()
+
+
+@router.get("/privacy", response_class=HTMLResponse)
+def privacy_page(request: Request):
+    return _render(request, "privacy.html")
+
+
+@router.post("/privacy/delete")
+def privacy_delete(request: Request, email: str = Form(...), note: str = Form("")):
+    tenant = _owner(request)
+    _save_intake("deletion", email, note, tenant)
+    if tenant:
+        queue_purge(tenant, email, note)
+    return _render(request, "privacy.html", error="Deletion request received. A person will process it. Stripe is not called.")
+
+
+@router.get("/terms", response_class=HTMLResponse)
+def terms_page(request: Request):
+    return _render(request, "terms.html")
+
+
+@router.get("/pricing", response_class=HTMLResponse)
+def pricing_page(request: Request):
+    return _render(request, "pricing.html")
+
+
+@router.get("/status", response_class=HTMLResponse)
+def status_page(request: Request):
+    return _render(request, "status.html")
+
+
+@router.get("/support", response_class=HTMLResponse)
+def support_page(request: Request):
+    return _render(request, "support.html")
+
+
+@router.post("/support")
+def support_submit(request: Request, email: str = Form(...), note: str = Form(...)):
+    _save_intake("stuck_case", email, note, _owner(request))
+    return _render(request, "support.html", error="Received. This does not retry a payment.")
 
 
 @router.get("/w/{tenant}", response_class=HTMLResponse)

@@ -263,6 +263,9 @@ def planner_node(state: AgentState) -> Dict:
 """
 
     try:
+        from observability.prompts import log_prompt_template
+
+        log_prompt_template("planner", request_id, node="planner")
         response = llm.invoke(
             planner_prompt.format(
                 query=query,

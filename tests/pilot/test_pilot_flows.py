@@ -240,11 +240,19 @@ def test_retention_clears_message_and_contact_is_hashed():
 
 
 def test_widget_posts_message_only_and_tenants_do_not_share_chunks():
+    from pathlib import Path
+
     response = client.get("/widget.js", params={"tenant": "zepto"})
     assert response.status_code == 200
     script = response.text
     assert "auth_level" not in script
-    assert "JSON.stringify({ message: message, tenant_id: tenant })" in script
+    assert "verified" not in script
+    assert "/w/" in script
+    page = Path("gateway/templates/widget.html").read_text(encoding="utf-8")
+    assert "auth_level" not in page
+    assert "verified" not in page
+    assert "JSON.stringify({ message: message })" in page
+    assert "/session" in page
     zepto = normalize_chunks(
         [Document(page_content="zepto clause", metadata={"clause": "4.1"})],
         tenant_id="zepto",

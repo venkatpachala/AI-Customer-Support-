@@ -6,14 +6,27 @@ from tools.shopify.auth import get_shopify_auth, get_shopify_base_url
 
 
 class ShopifyClient:
-    def __init__(self, timeout_seconds: float = 10.0):
+    def __init__(self, timeout_seconds: float = 10.0, token: Optional[str] = None, domain: Optional[str] = None):
+        from tools.base.auth import ApiKeyAuth
+
         self.http = HttpClient(default_timeout=timeout_seconds)
-        self.auth = get_shopify_auth()
+        if token and domain:
+            host = domain.replace("https://", "").replace("http://", "").strip().strip("/")
+            version = os.getenv("SHOPIFY_API_VERSION", "2024-10").strip()
+            self.auth = ApiKeyAuth("X-Shopify-Access-Token", token)
+            self.base_url = f"https://{host}/admin/api/{version}"
+            return
         mode = os.getenv("TOOLS_MODE", "mock").strip().lower()
         # Live domain is required only when a real Shopify call is constructed.
         if mode == "live":
             self.base_url = get_shopify_base_url()
+            auth = get_shopify_auth()
+            if isinstance(auth, dict):
+                self.auth = ApiKeyAuth("X-Shopify-Access-Token", auth.get("access_token") or "")
+            else:
+                self.auth = auth
         else:
+            self.auth = ApiKeyAuth("X-Shopify-Access-Token", "mock-token")
             self.base_url = "https://mock.myshopify.com/admin/api/2024-10"
 
     def _headers(self, context: ToolContext) -> Dict[str, str]:

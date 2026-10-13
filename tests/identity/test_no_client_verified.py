@@ -81,7 +81,7 @@ def test_verified_body_without_session_is_401():
 
 def test_session_tenant_mismatch_is_403():
     init_db()
-    opened = client.post("/v1/sessions", json={"tenant_id": "zepto", "customer_ref": "pilot-a"})
+    opened = client.post("/w/zepto/session", json={"customer_ref": "pilot-a"})
     assert opened.status_code == 200
     assert opened.json()["session_id"]
     assert "d2c_session" in opened.cookies

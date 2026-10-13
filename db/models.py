@@ -380,6 +380,8 @@ class TenantAccountRow(Base):
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     name: Mapped[str] = mapped_column(String(128), default="")
     sandbox_passed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    live_enabled_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    purge_requested_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     killed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
@@ -473,3 +475,30 @@ class ConnectionRow(Base):
     secret_value: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+
+class DailyUsageRow(Base):
+    """Chat requests for one tenant on one UTC day."""
+
+    __tablename__ = "daily_usage"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "day", name="uq_daily_usage_tenant_day"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    day: Mapped[str] = mapped_column(String(10), index=True)
+    requests: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class IntakeRequestRow(Base):
+    """Deletion or stuck-case request. It does not call Stripe."""
+
+    __tablename__ = "intake_requests"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    kind: Mapped[str] = mapped_column(String(32), index=True)
+    email: Mapped[str] = mapped_column(String(256), default="")
+    tenant_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    note: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)

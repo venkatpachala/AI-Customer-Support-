@@ -9,23 +9,33 @@
   <label>PDF <input type="file" name="file" accept="application/pdf" required /></label>
   <button type="submit" {% if not uploads_open %}disabled{% endif %}>Upload</button>
 </form>
+{% if tenant == "zepto" %}
 <form method="post" action="/app/knowledge/sample" style="margin-top:0.6rem">
   <button class="ghost" type="submit">Use Zepto sample pack</button>
 </form>
+{% else %}
+<p>This tenant starts empty. Upload your own policy PDF. The Zepto sample is not copied here.</p>
+{% endif %}
 {% if not documents %}
-<p class="state-empty">No documents yet.</p>
+<p class="state-empty">No documents yet. Upload a PDF. A failed parse shows the error and is not marked ingested.</p>
 {% else %}
 <div class="table-wrap">
 <table>
-  <thead><tr><th>Snapshot</th><th>File</th><th>Pages</th><th>Ingested</th><th>Error</th></tr></thead>
+  <thead><tr><th>Snapshot</th><th>File</th><th>Pages</th><th>Status</th><th>Error</th><th></th></tr></thead>
   <tbody>
   {% for doc in documents %}
     <tr>
       <td class="mono">{{ doc.id }}</td>
       <td>{{ doc.filename }}</td>
       <td>{{ doc.page_count }}</td>
-      <td>{{ doc.created_at }}</td>
+      <td>{{ doc.status }}</td>
       <td>{{ doc.error or "—" }}</td>
+      <td>
+        {% if doc.status != "deleted" %}
+        <form method="post" action="/app/knowledge/{{ doc.id }}/reingest"><button class="ghost" type="submit">Re-ingest</button></form>
+        <form method="post" action="/app/knowledge/{{ doc.id }}/delete"><button class="ghost" type="submit">Delete</button></form>
+        {% endif %}
+      </td>
     </tr>
   {% endfor %}
   </tbody>

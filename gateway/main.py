@@ -119,6 +119,70 @@ from gateway.routers.control import router as control_router
 
 app.include_router(console_router)
 app.include_router(control_router)
+
+
+def _edge_tenant(request: Request) -> str:
+    """Key, owner cookie, then customer session. The body is not read."""
+    from controlplane.http import bearer_principal
+    from identity.owner_session import COOKIE_NAME as OWNER_COOKIE
+    from identity.owner_session import read_owner
+    from identity.session import COOKIE_NAME, load_customer_session
+
+    try:
+        principal = bearer_principal(request)
+    except Exception:
+        principal = None
+    if principal is not None:
+        return principal.tenant_id
+    owner = read_owner(request.cookies.get(OWNER_COOKIE))
+    if owner:
+        return owner
+    loaded = load_customer_session(request.cookies.get(COOKIE_NAME))
+    if loaded is not None:
+        return loaded.tenant_id
+    return ""
+
+
+@app.middleware("http")
+async def request_context(request: Request, call_next):
+    from controlplane.tenant_context import bind_scope, reset_scope
+
+    request_id = request.headers.get("x-request-id") or new_request_id()
+    request.state.request_id = request_id
+    tenant_id = _edge_tenant(request)
+    request.state.tenant_id = tenant_id or None
+    token = bind_scope(tenant_id=tenant_id, request_id=request_id)
+    started = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception:
+        log_event(
+            "request_error",
+            request_id,
+            node="gateway",
+            data={"path": request.url.path, "tenant_id": tenant_id or None},
+            level="error",
+        )
+        raise
+    finally:
+        reset_scope(token)
+    elapsed = time.perf_counter() - started
+    response.headers["x-request-id"] = request_id
+    log_event(
+        "request",
+        request_id,
+        node="gateway",
+        data={
+            "path": request.url.path,
+            "status": response.status_code,
+            "latency_ms": int(elapsed * 1000),
+            "tenant_id": getattr(request.state, "tenant_id", None) or tenant_id or None,
+        },
+    )
+    from observability.alerts import observe_request
+
+    observe_request(response.status_code, elapsed, path=request.url.path, request_id=request_id)
+    return response
 app.mount(
     "/static",
     StaticFiles(directory=str(Path(__file__).resolve().parent / "static")),
@@ -341,11 +405,13 @@ async def chat(raw_request: Request):
     Public chat. Auth comes from the session cookie and order ownership.
     Client auth fields are logged and dropped.
     """
-    request_id = new_request_id()
+    request_id = getattr(raw_request.state, "request_id", None) or new_request_id()
     ACTIVE_REQUESTS.inc()
     start_time = time.time()
     session = None
     case = None
+    request = None
+    scope_token = None
 
     try:
         body = await raw_request.json()
@@ -361,18 +427,23 @@ async def chat(raw_request: Request):
         log_event("ignored_client_auth", request_id, data={"fields": forged})
         for key in forged:
             body.pop(key, None)
-    request = ChatRequest(**body)
+    supplied_tenant = str(body.get("tenant_id") or "").strip()
 
     from identity.session import COOKIE_NAME, load_customer_session
+    from controlplane.tenant_context import bind_scope, reset_scope, set_case_id
 
     customer_session = load_customer_session(raw_request.cookies.get(COOKIE_NAME))
     if customer_session is None:
         ACTIVE_REQUESTS.dec()
         return JSONResponse(status_code=401, content={"detail": "session required"})
-    if request.tenant_id != customer_session.tenant_id:
+    if supplied_tenant and supplied_tenant != customer_session.tenant_id:
         ACTIVE_REQUESTS.dec()
         return JSONResponse(status_code=403, content={"detail": "tenant mismatch"})
+    body["tenant_id"] = customer_session.tenant_id
+    request = ChatRequest(**body)
     request.customer_id = customer_session.customer_ref
+    scope_token = bind_scope(tenant_id=customer_session.tenant_id, request_id=request_id)
+    raw_request.state.tenant_id = customer_session.tenant_id
     from gateway.limits import allow_chat
 
     client_host = raw_request.client.host if raw_request.client else "unknown"
@@ -425,6 +496,7 @@ async def chat(raw_request: Request):
             session_id=request.session_id,
         )
         case = memory_service.get_or_create_active_case(session)
+        set_case_id(case.case_id)
 
         # -------- sticky escalation --------
         if case.status == "escalated":
@@ -916,7 +988,8 @@ async def chat(raw_request: Request):
 
     except Exception as e:
         try:
-            REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="error").inc()
+            label = request.tenant_id if request is not None else "unknown"
+            REQUEST_COUNT.labels(tenant_id=label, status="error").inc()
         except Exception:
             pass
         log_event("request_failed", request_id, data={"error": str(e)}, level="error")
@@ -924,10 +997,12 @@ async def chat(raw_request: Request):
             "error": str(e),
             "escalated": False,
             "request_id": request_id,
-            "session_id": session.session_id if session else request.session_id,
+            "session_id": session.session_id if session else (request.session_id if request is not None else None),
             "case_id": case.case_id if case else None,
         }
     finally:
+        if scope_token is not None:
+            reset_scope(scope_token)
         ACTIVE_REQUESTS.dec()
 
 

@@ -183,11 +183,57 @@ def tenant_record(tenant_id: str, session_factory=SessionLocal) -> Optional[Tena
         return row
 
 
+def rotate_key(
+    tenant_id: str,
+    *,
+    role: str,
+    mode: str,
+    session_factory=SessionLocal,
+) -> tuple[ApiKeyRow, str]:
+    """Issue a new key and revoke every older key with the same role and mode."""
+    with session_factory() as db:
+        rows = db.execute(
+            select(ApiKeyRow)
+            .where(ApiKeyRow.tenant_id == tenant_id)
+            .where(ApiKeyRow.role == role)
+            .where(ApiKeyRow.mode == mode)
+            .where(ApiKeyRow.revoked_at.is_(None))
+        ).scalars().all()
+        now = datetime.utcnow()
+        for row in rows:
+            row.revoked_at = now
+            row.reveal_once = None
+        db.commit()
+    return issue_key(tenant_id, role=role, mode=mode, session_factory=session_factory)
+
+
 def set_killed(tenant_id: str, killed: bool, session_factory=SessionLocal) -> None:
     ensure_tenant(tenant_id, session_factory=session_factory)
     with session_factory() as db:
         row = db.get(TenantAccountRow, tenant_id)
         row.killed_at = datetime.utcnow() if killed else None
+        db.commit()
+
+
+def tenant_tools_live(tenant_id: str, *, key_mode: str, session_factory=SessionLocal) -> bool:
+    """Live shop calls require a live key, a passed sandbox, and an admin enable."""
+    if key_mode != "live":
+        return False
+    row = tenant_record(tenant_id, session_factory=session_factory)
+    if row is None or row.sandbox_passed_at is None or row.live_enabled_at is None:
+        return False
+    if row.killed_at is not None:
+        return False
+    return True
+
+
+def set_live_enabled(tenant_id: str, enabled: bool, session_factory=SessionLocal) -> None:
+    ensure_tenant(tenant_id, session_factory=session_factory)
+    with session_factory() as db:
+        row = db.get(TenantAccountRow, tenant_id)
+        if enabled and row.sandbox_passed_at is None:
+            raise ValueError("sandbox must pass before live tools are enabled")
+        row.live_enabled_at = datetime.utcnow() if enabled else None
         db.commit()
 
 

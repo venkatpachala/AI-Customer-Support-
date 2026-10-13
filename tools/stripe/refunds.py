@@ -97,13 +97,16 @@ class StripeCreateRefund(BaseTool):
         high_value_limit = int(request.get("high_value_limit", 200000))
         require_approval_above_limit = bool(request.get("require_approval_above_limit", True))
 
+        from controlplane.credentials import resolve_stripe_secret, scrub_tool_params
         from controlplane.mode import current_tools_mode
+        from tools.base.auth import BearerTokenAuth
 
+        request = scrub_tool_params(request)
         tools_mode = current_tools_mode()
         stripe_mode = os.getenv("STRIPE_MODE", "test").strip().lower()
         if stripe_mode not in {"test", "live"}:
             stripe_mode = "test"
-        secret = os.getenv("STRIPE_SECRET_KEY", "").strip()
+        secret = resolve_stripe_secret(context.tenant_id)
         if tools_mode == "live" and stripe_mode != "live" and secret.startswith("sk_live"):
             raise BusinessRuleError("STRIPE_MODE=live is required before a live secret can refund")
         if tools_mode != "live":
@@ -115,6 +118,10 @@ class StripeCreateRefund(BaseTool):
                 "order_id": order_id,
                 "idempotency_key": request.get("idempotency_key"),
             }
+
+        if not secret:
+            raise BusinessRuleError("stripe credential is not stored for this tenant")
+        self.client.auth = BearerTokenAuth(token=secret)
 
         if not payment_intent_id and not charge_id:
             # In a full system, resolve from order mapping DB.

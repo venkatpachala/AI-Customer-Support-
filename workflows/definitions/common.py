@@ -260,7 +260,9 @@ def execute_refund(rt: StepRuntime) -> StepResult:
             output={"denied": True, "stripe_called": False, "policy": policy},
             error=str(policy.get("deny_code") or "policy_not_allowed"),
         )
-    tools_live = os.getenv("TOOLS_MODE", "mock").strip().lower() == "live"
+    from controlplane.mode import current_tools_mode
+
+    tools_live = current_tools_mode() == "live"
     stripe_mode = os.getenv("STRIPE_MODE", "test").strip().lower()
     force_fail = os.getenv("WORKFLOW_STRIPE_FAIL", "").strip() == "1"
     if force_fail and not (tools_live and stripe_mode in {"test", "live"}) and rt.attempt < 3:

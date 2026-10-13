@@ -13,6 +13,7 @@
   <p class="mono">{{ test_prefix or "No test key yet" }}</p>
   {% endif %}
   <form method="post" action="/app/install/test-key"><button type="submit">Create test widget key</button></form>
+  <form method="post" action="/app/install/rotate-test-key"><button class="ghost" type="submit">Rotate test key</button></form>
 </section>
 <section class="panel">
   <h2>Live key</h2>
@@ -26,8 +27,16 @@
   <p class="mono">{{ live_prefix or "Not created" }}</p>
   {% endif %}
   <form method="post" action="/app/install/live-key"><button type="submit">Create live key</button></form>
-  <p>Card charges stay off in this release.</p>
+  <p>A live key still uses test tools until an admin enables this tenant. Refunds above the cap stay waiting for approval.</p>
   {% endif %}
+</section>
+<section class="panel">
+  <h2>Live tools</h2>
+  <p>{{ "Enabled" if live_enabled else "Off" }}. Card charges stay behind approval. WhatsApp is not available.</p>
+  <form method="post" action="/app/install/live">
+    <label>Admin password <input name="ops_password" type="password" autocomplete="off" /></label>
+    <button type="submit">{{ "Turn live tools off" if live_enabled else "Enable live tools" }}</button>
+  </form>
 </section>
 <section class="panel">
   <h2>Widget</h2>
@@ -41,6 +50,14 @@
     <button type="submit">Save</button>
   </form>
   <p>Last delivery: {{ last_status or "none" }}{% if last_error %} — {{ last_error }}{% endif %}</p>
+</section>
+<section class="panel">
+  <h2>Deletion</h2>
+  <p>An admin password queues a purge of documents, cases, and shop credentials for this tenant. It does not call Stripe.</p>
+  <form method="post" action="/app/install/purge">
+    <label>Admin password <input name="ops_password" type="password" autocomplete="off" /></label>
+    <button type="submit">Purge this tenant</button>
+  </form>
 </section>
 <section class="panel">
   <h2>Kill switch</h2>

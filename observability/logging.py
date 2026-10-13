@@ -43,12 +43,18 @@ def log_event(
     data: Optional[Dict[str, Any]] = None,
     level: str = "info"
 ):
+    from controlplane.tenant_context import current_scope
+
+    scope = current_scope()
+    payload = dict(data or {})
+    payload.setdefault("tenant_id", scope.tenant_id or None)
+    payload.setdefault("case_id", scope.case_id or None)
     extra = {
         "extra_data": {
             "event": event,
-            "request_id": request_id,
+            "request_id": request_id or scope.request_id,
             "node": node,
-            **(data or {})
+            **payload,
         }
     }
 

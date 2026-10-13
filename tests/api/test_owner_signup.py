@@ -1,7 +1,11 @@
 """Signup creates an isolated tenant. Passwords are hashed. Wrong password is 401."""
 from __future__ import annotations
 
+import os
 import uuid
+
+os.environ.setdefault("OPS_PASSWORD", "test-ops-password")
+os.environ.setdefault("OPS_SESSION_SECRET", "test-ops-secret")
 
 from fastapi.testclient import TestClient
 

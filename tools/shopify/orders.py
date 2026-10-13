@@ -127,6 +127,19 @@ class ShopifyGetOrder(BaseTool):
         if tools_mode != "live":
             return mock_order()
 
+        from controlplane.credentials import shopify_for_tenant
+        from tools.base.exceptions import BusinessRuleError
+
+        creds = shopify_for_tenant(context.tenant_id)
+        if creds:
+            self.client = ShopifyClient(
+                timeout_seconds=self.timeout_seconds,
+                token=creds["token"],
+                domain=creds["domain"],
+            )
+        elif os.getenv("TOOLS_MODE", "mock").strip().lower() != "live":
+            raise BusinessRuleError("shopify credential is not stored for this tenant")
+
         try:
             # existing live Shopify logic here...
             if not order_id.isdigit():

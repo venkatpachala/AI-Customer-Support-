@@ -17,6 +17,7 @@ from rag.tenant_filter import select_tenant_docs
 
 _ROOT = Path(__file__).resolve().parents[1]
 _TEST = _ROOT / "tests" / "rag" / "test_namespace_isolation.py"
+MAX_PDF_BYTES = 8 * 1024 * 1024
 
 
 def namespace_filter_holds() -> bool:
@@ -83,10 +84,14 @@ def store_pdf(
     *,
     session_factory=SessionLocal,
 ) -> Dict[str, Any]:
+    if not namespace_filter_holds():
+        raise PermissionError("uploads are rejected until the tenant snapshot filter is active")
     if not uploads_allowed(tenant_id):
         raise PermissionError("uploads are limited to tenant zepto until namespace isolation is proven")
     if not data:
         raise ValueError("empty pdf")
+    if len(data) > MAX_PDF_BYTES:
+        raise ValueError("pdf is over the 8 MB limit")
     snapshot_id = "snap_" + uuid.uuid4().hex[:12]
     folder = _ROOT / "tenants" / tenant_id / "knowledge" / "uploads"
     folder.mkdir(parents=True, exist_ok=True)
@@ -129,7 +134,35 @@ def store_pdf(
     return view
 
 
+def delete_snapshot(tenant_id: str, snapshot_id: str, session_factory=SessionLocal) -> None:
+    with session_factory() as db:
+        row = db.get(KnowledgeSnapshotRow, snapshot_id)
+        if row is None or row.tenant_id != tenant_id:
+            raise ValueError("document not found")
+        row.status = "deleted"
+        db.commit()
+    path = _ROOT / "tenants" / tenant_id / "knowledge" / "uploads" / f"{snapshot_id}.pdf"
+    if path.is_file():
+        path.unlink()
+
+
+def reingest_snapshot(tenant_id: str, snapshot_id: str, session_factory=SessionLocal) -> Dict[str, Any]:
+    path = _ROOT / "tenants" / tenant_id / "knowledge" / "uploads" / f"{snapshot_id}.pdf"
+    with session_factory() as db:
+        row = db.get(KnowledgeSnapshotRow, snapshot_id)
+        if row is None or row.tenant_id != tenant_id:
+            raise ValueError("document not found")
+        filename = row.filename
+    if not path.is_file():
+        raise ValueError("the stored pdf is missing")
+    data = path.read_bytes()
+    delete_snapshot(tenant_id, snapshot_id, session_factory=session_factory)
+    return store_pdf(tenant_id, filename, data, session_factory=session_factory)
+
+
 def use_sample_pack(tenant_id: str, session_factory=SessionLocal) -> Dict[str, Any]:
+    if tenant_id != "zepto":
+        raise PermissionError("The Zepto sample pack is only for the seeded tenant")
     if list_documents(tenant_id, session_factory=session_factory):
         return list_documents(tenant_id, session_factory=session_factory)[0]
     source = _ROOT / "tenants" / "zepto" / "knowledge" / "Zepto Terms of Use.pdf"

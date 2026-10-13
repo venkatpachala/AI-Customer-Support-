@@ -7,12 +7,15 @@ from fastapi import APIRouter, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel
 
 from controlplane.http import bearer_principal, require_principal
-from controlplane.keys import mark_sandbox_passed, set_killed, tenant_record
+from controlplane.keys import mark_sandbox_passed, set_killed, tenant_record, tenant_tools_live
 from controlplane.knowledge import list_documents, store_pdf, uploads_allowed
+from controlplane.quota import consume_chat
 from controlplane.sandbox import STEPS, judge
+from controlplane.tenant_context import reject_body_tenant, use_tenant
 from controlplane.turns import run_product_chat
 from controlplane.webhooks import get_endpoint, save_endpoint
 from identity.session import COOKIE_NAME, create_customer_session, load_customer_session
+from observability.logging import log_event
 
 router = APIRouter(tags=["control-plane"])
 
@@ -59,14 +62,31 @@ async def product_chat(body: ChatBody, request: Request):
         row = tenant_record(tenant_id)
         if row is not None and row.killed_at is not None:
             raise HTTPException(status_code=403, detail="tenant chat is disabled")
-    payload = await run_product_chat(
-        request,
-        tenant_id=tenant_id,
-        customer_ref=customer_ref,
-        message=body.message,
-        session_cookie=session_id,
-        force_mock=True,
-    )
+    # A JSON tenant_id cannot switch the brand. The key or cookie already chose it.
+    mismatch = reject_body_tenant(body.tenant_id, tenant_id)
+    if mismatch:
+        log_event(
+            "tenant_body_ignored",
+            getattr(request.state, "request_id", "") or "",
+            node="gateway",
+            data={"edge_tenant": tenant_id, "body_tenant": body.tenant_id},
+        )
+    if not consume_chat(tenant_id):
+        raise HTTPException(status_code=429, detail="daily request cap reached")
+    live = principal is not None and tenant_tools_live(tenant_id, key_mode=principal.mode)
+    with use_tenant(tenant_id, request_id=getattr(request.state, "request_id", "") or ""):
+        payload = await run_product_chat(
+            request,
+            tenant_id=tenant_id,
+            customer_ref=customer_ref,
+            message=body.message,
+            session_cookie=session_id,
+            force_mock=not live,
+        )
+    if payload.get("case_id"):
+        from controlplane.tenant_context import set_case_id
+
+        set_case_id(str(payload["case_id"]))
     if payload.get("detail") and not payload.get("response") and not payload.get("case_id"):
         raise HTTPException(status_code=400, detail=payload["detail"])
     payload["tenant_id"] = tenant_id

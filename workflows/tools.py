@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import time
 from typing import Any, Dict
 
 from tools.base.context import ToolContext
@@ -11,9 +12,15 @@ _AUTH_ERRORS = {"unauthorized", "forbidden", "auth", "authentication", "not_auth
 
 
 def invoke_tool(registry: Any, name: str, params: Dict[str, Any], *, request_id: str, tenant_id: str, customer_id: str, case_id: str, session_id: str | None) -> Dict[str, Any]:
+    from controlplane.credentials import scrub_tool_params
+
+    params = scrub_tool_params(params)
+    started = time.perf_counter()
     tool = _lookup(registry, name)
     if tool is None:
-        return _missing_tool(name, params)
+        result = _missing_tool(name, params)
+        _audit(name, params, result, request_id, tenant_id, customer_id, case_id, started)
+        return result
 
     context = ToolContext(
         request_id=request_id or "workflow",
@@ -31,13 +38,17 @@ def invoke_tool(registry: Any, name: str, params: Dict[str, Any], *, request_id:
             except TypeError:
                 raw = tool.execute(params)
     except Exception as exc:
-        return {
+        result = {
             "status": "error",
             "error": str(exc),
             "error_code": getattr(exc, "code", None) or "tool_exception",
             "retryable": bool(getattr(exc, "retryable", False)),
         }
-    return _normalize(raw)
+        _audit(name, params, result, request_id, tenant_id, customer_id, case_id, started)
+        return result
+    result = _normalize(raw)
+    _audit(name, params, result, request_id, tenant_id, customer_id, case_id, started)
+    return result
 
 
 def is_retryable(result: Dict[str, Any]) -> bool:
@@ -100,6 +111,35 @@ def _missing_tool(name: str, params: Dict[str, Any]) -> Dict[str, Any]:
         "error_code": "tool_not_registered",
         "retryable": False,
     }
+
+
+def _audit(name, params, result, request_id, tenant_id, customer_id, case_id, started) -> None:
+    try:
+        from tools.audit import ToolAuditService
+
+        latency_ms = (time.perf_counter() - started) * 1000
+        service = ToolAuditService()
+        call_id = service.start(
+            tool_name=name,
+            params=params,
+            request_id=request_id,
+            case_id=case_id,
+            tenant_id=tenant_id,
+            customer_id=customer_id,
+            provider=name.split("_", 1)[0],
+            idempotency_key=str((params or {}).get("idempotency_key") or "") or None,
+        )
+        status = str((result or {}).get("status") or "success")
+        service.finish(
+            call_id,
+            status="success" if status == "success" else "error",
+            result={"status": status},
+            error=None if status == "success" else str((result or {}).get("error") or ""),
+            error_code=str((result or {}).get("error_code") or "") or None,
+            latency_ms=latency_ms,
+        )
+    except Exception:
+        return
 
 
 def _normalize(raw: Any) -> Dict[str, Any]:

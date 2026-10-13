@@ -6,7 +6,13 @@ Hosted control plane around the existing agent kernel. A brand uploads rules, co
 
 Public pilot, mock tools, free Render web service: https://d2c-support-agent-0360.onrender.com
 
-`TOOLS_MODE=mock`. Shopify is unset. `/health` returns ok. The free instance sleeps after 15 idle minutes and wakes on the next request. Do not upgrade the service or add a paid database. Card charges are not enabled.
+`TOOLS_MODE=mock` on the public host. Shopify is unset. `/health` returns ok. The free instance sleeps after 15 idle minutes and the next request wakes it. That wake can take longer than 10 seconds. Do not upgrade the service or add a paid database.
+
+Test keys always use the sandbox. A live key calls the tenant's stored Shopify, Stripe, or Gmail credential only after the sandbox has passed and an admin enables live tools with `OPS_PASSWORD` on `/app/install`. Refunds above the cap stay `waiting_approval`. A chat body cannot pass a token or choose another tenant. WhatsApp has no save button.
+
+The edge sets `tenant_id` from the bearer key, the `d2c_owner` cookie, or the customer session. `POST /v1/chat` ignores a JSON `tenant_id` and answers as that edge tenant. `POST /v1/sessions` and `POST /w/{tenant}/session` return 400 when the body names a different tenant. Case reads return 403 when `X-Tenant-Id` disagrees with the key. Cookie `/chat` returns 403 when the body names a different tenant. Retrieval with no tenant filter returns no chunks. Postgres enables row-level security on the tenant data tables when `DATABASE_URL` is Postgres. SQLite still relies on the application filter.
+
+`deployments/render.paid.yaml` is the host that does not sleep. The free service in `deployments/render.yaml` is still the one that is deployed. Switching plans spends money and is a separate step. A local SQLite backup restore check is `tests/platform/test_production_controls.py::test_sqlite_backup_restores_a_tenant_row`. The production Postgres backup has not been restored from this session.
 
 Owner sign-up is `POST /signup` (email and password). Sign-in is `POST /login` and sets `d2c_owner`. The seeded Zepto door remains `ops@zepto.local` with `OPS_PASSWORD` for the pilot script.
 

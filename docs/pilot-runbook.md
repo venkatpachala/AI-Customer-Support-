@@ -24,6 +24,26 @@ Set `OPS_USER` and `OPS_PASSWORD` in the API environment. Those two people sign 
 
 In `/ops`, write a note, then Reject. The note is required. The workflow run becomes `cancelled` and Stripe is not called.
 
+## Rotate a key
+
+On `/app/install`, create a new test widget key. The previous raw key is not shown again. Revoke a leaked key by issuing a replacement and treating the old prefix as dead. Connection tokens are replaced by saving the provider form again. The page keeps the last four characters.
+
+## Disable a tenant
+
+On `/app/install`, use Disable chat. `/v1/chat` for that tenant returns 403. Enable chat turns it back on. This does not call Stripe.
+
+## Read a failed sandbox
+
+Open `/app/sandbox` after Run pilot script. A pass needs a citation, a photo ask, and `waiting_approval` with no Stripe success. The failure text is the judge reason on that page. `tenants.sandbox_passed_at` stays empty when the script fails.
+
+## Roll back a deploy
+
+Redeploy the previous green commit on the Render service. Do not flip `TOOLS_MODE` to live to "fix" a red sandbox. A red `python -m evaluation.release_gate` blocks the next deploy.
+
+## Live tools
+
+Live shop calls stay off until the sandbox has passed and an admin submits the host `OPS_PASSWORD` on `/app/install`. A live key without that flag still uses test tools. Refunds above the auto cap stay `waiting_approval`. A second approve does not call Stripe again.
+
 ## Keep Stripe in test
 
 Leave `STRIPE_MODE` unset or set `STRIPE_MODE=test`. A live secret (`sk_live_...`) is refused unless `STRIPE_MODE=live` is set on purpose. Do that only after one week on test with the brand's real orders. `TOOLS_MODE=mock` does not need Shopify or Stripe secrets.

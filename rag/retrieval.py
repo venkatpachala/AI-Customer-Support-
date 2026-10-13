@@ -146,6 +146,20 @@ class AdvancedRAGRetriever:
             "sparse_n": 0,
         }
 
+        tenant_id = str((metadata_filter or {}).get("tenant_id") or "").strip()
+        snapshot_id = str((metadata_filter or {}).get("knowledge_snapshot") or "").strip()
+        if not tenant_id:
+            from observability.logging import log_event
+
+            log_event(
+                "retrieval_missing_tenant",
+                "retrieval",
+                node="rag",
+                data={"reason": "tenant filter absent"},
+                level="error",
+            )
+            return []
+
         try:
             # Pull extra candidates so dedup + rerank still leave enough
             candidate_k = max(k, final_k * 3, 8)
@@ -156,11 +170,6 @@ class AdvancedRAGRetriever:
                 k=candidate_k,
                 filter=metadata_filter
             )
-            tenant_id = str((metadata_filter or {}).get("tenant_id") or "").strip()
-            if not dense_raw and tenant_id == "zepto":
-                # The August index has clause metadata and no tenant_id. Do not borrow another brand.
-                print("Dense tenant filter empty; loading legacy Zepto terms vectors")
-                dense_raw = self.vectorstore.similarity_search_with_score(query, k=candidate_k)
 
             dense_results: List[Tuple[Document, float]] = []
             for doc, score in dense_raw:
@@ -177,8 +186,6 @@ class AdvancedRAGRetriever:
                 dense_results.append((doc, float(score)))
 
             print(f"Dense results: {len(dense_results)}")
-            tenant_id = str((metadata_filter or {}).get("tenant_id") or "").strip()
-            snapshot_id = str((metadata_filter or {}).get("knowledge_snapshot") or "").strip()
             dense_results = _scope_pairs(dense_results, tenant_id, snapshot_id)
             self.last_retrieval["dense_n"] = len(dense_results)
 

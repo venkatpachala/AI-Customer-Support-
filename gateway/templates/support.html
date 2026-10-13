@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Support · D2C Support{% endblock %}
+{% block main %}
+<h1>This case is stuck</h1>
+<p>Send the tenant and the case id. A failed note is stored. It is not turned into another Stripe call.</p>
+<form method="post" action="/support" class="panel">
+  <label>Email <input name="email" type="email" required /></label>
+  <label>Case <textarea name="note" rows="5" required placeholder="tenant, case id, what you expected"></textarea></label>
+  <button type="submit">Send</button>
+</form>
+{% endblock %}

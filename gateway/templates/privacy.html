@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Privacy · D2C Support{% endblock %}
+{% block main %}
+<h1>Privacy</h1>
+<p>The account email, the policy PDF, and the case text stay on the tenant that created them. Another brand cannot read them.</p>
+<p>Logs keep a request id, a tenant id, and a case id. They do not keep a raw card number or a full shop token. A customer reference is the id you choose, not a payment instrument.</p>
+<p>Passwords and API keys are stored as hashes. Connection tokens are sealed and the screen shows the last four characters.</p>
+<form method="post" action="/privacy/delete" class="panel">
+  <h2>Request deletion</h2>
+  <label>Email <input name="email" type="email" required /></label>
+  <label>What to delete <textarea name="note" rows="4"></textarea></label>
+  <button type="submit">Request deletion</button>
+</form>
+{% endblock %}

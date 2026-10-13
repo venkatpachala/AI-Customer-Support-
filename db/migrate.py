@@ -39,7 +39,25 @@ def apply_migrations() -> None:
                 text("INSERT INTO schema_migrations (version, applied_at) VALUES (:version, CURRENT_TIMESTAMP)"),
                 {"version": _BOOT},
             )
+    ensure_tenant_live_column()
     relax_interaction_text_columns()
+    from db.rls import apply_tenant_rls
+
+    apply_tenant_rls()
+
+
+def ensure_tenant_live_column() -> None:
+    """create_all does not add columns to an existing tenants table."""
+    from sqlalchemy import inspect
+
+    if "tenants" not in set(inspect(engine).get_table_names()):
+        return
+    names = {column["name"] for column in inspect(engine).get_columns("tenants")}
+    with engine.begin() as conn:
+        if "live_enabled_at" not in names:
+            conn.execute(text("ALTER TABLE tenants ADD COLUMN live_enabled_at TIMESTAMP"))
+        if "purge_requested_at" not in names:
+            conn.execute(text("ALTER TABLE tenants ADD COLUMN purge_requested_at TIMESTAMP"))
 
 
 def relax_interaction_text_columns() -> None:

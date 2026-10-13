@@ -45,6 +45,26 @@ engine = _build_engine()
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 
 
+def _bind_tenant_guc(session, transaction, connection) -> None:
+    """Postgres RLS reads app.tenant_id. An empty value matches no rows."""
+    if connection.dialect.name != "postgresql":
+        return
+    from sqlalchemy import text
+
+    from controlplane.tenant_context import current_scope
+
+    connection.execute(
+        text("SELECT set_config('app.tenant_id', :tenant_id, true)"),
+        {"tenant_id": current_scope().tenant_id or ""},
+    )
+
+
+from sqlalchemy import event
+from sqlalchemy.orm import Session as _OrmSession
+
+event.listen(_OrmSession, "after_begin", _bind_tenant_guc)
+
+
 def init_db() -> None:
     """Create tables if they do not exist, then apply the pilot SQL once."""
     from db import models  # noqa: F401
