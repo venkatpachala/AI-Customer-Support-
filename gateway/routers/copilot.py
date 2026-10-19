@@ -3,9 +3,10 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
 from sqlalchemy import select
 
+from controlplane.http import session_principal
 from db.models import InteractionRow
 from db.session import SessionLocal
 from interactions.intelligence import IntelligenceError, case_timeline
@@ -14,7 +15,18 @@ router = APIRouter(tags=["copilot"])
 _LIMIT = 240
 
 
-def _tenant(header: Optional[str]) -> str:
+def _tenant(request: Request, header: Optional[str]) -> str:
+    principal = session_principal(request)
+    if principal is not None:
+        if principal.role != "supervisor":
+            raise HTTPException(status_code=403, detail="operator credential required")
+        supplied = (header or "").strip()
+        if supplied and supplied != principal.tenant_id:
+            raise HTTPException(status_code=403, detail="tenant mismatch")
+        return principal.tenant_id
+    from controlplane.settings import legacy_headers_allowed
+    if not legacy_headers_allowed():
+        raise HTTPException(status_code=401, detail="authenticated credential required")
     tenant = (header or "").strip()
     if not tenant:
         raise HTTPException(status_code=400, detail="X-Tenant-Id is required")
@@ -27,8 +39,12 @@ def _clip(text: Any) -> str:
 
 
 @router.get("/v1/cases/{case_id}/copilot")
-def get_copilot(case_id: str, x_tenant_id: Optional[str] = Header(default=None)) -> Dict[str, Any]:
-    tenant = _tenant(x_tenant_id)
+def get_copilot(
+    case_id: str,
+    request: Request,
+    x_tenant_id: Optional[str] = Header(default=None),
+) -> Dict[str, Any]:
+    tenant = _tenant(request, x_tenant_id)
     try:
         timeline = case_timeline(case_id, tenant)
     except IntelligenceError as exc:

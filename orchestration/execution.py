@@ -1,6 +1,7 @@
 import time
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from common.concurrency import submit_with_context
 from typing import Dict, Any, Set, Optional
 
 from orchestration.planner import BANNED_EXECUTOR_TOOLS, READ_TOOL_ALLOWLIST, workflow_for_intent
@@ -168,6 +169,11 @@ def invoke_registry_tool(
     - idempotent replay for side-effecting tools (refunds etc.)
     Retries/timeouts/auth remain inside BaseTool.
     """
+    from controlplane.mode import current_tools_mode
+    if current_tools_mode() == "live" and tool_name == "shopify_get_order":
+        from identity.verification import verified_order
+        if not context.case_id or not verified_order(context.case_id, str(params.get("order_id") or "")):
+            return {"status": "error", "error": "order verification required", "error_code": "authentication_error"}
     tool = (registry or TOOL_REGISTRY).get(tool_name)
     if tool is None:
         return {
@@ -553,9 +559,7 @@ def execution_engine_node(state: AgentState) -> Dict:
                     continue
 
                 # Money movement and other writes belong to the workflow engine.
-                if tool_name in BANNED_EXECUTOR_TOOLS or (
-                    workflow_name and tool_name not in READ_TOOL_ALLOWLIST
-                ):
+                if tool_name in BANNED_EXECUTOR_TOOLS or tool_name not in READ_TOOL_ALLOWLIST:
                     tool_results[tool_name] = {
                         "status": "skipped",
                         "reason": "redirected_to_workflow",
@@ -671,9 +675,9 @@ def execution_engine_node(state: AgentState) -> Dict:
                         completed_steps.add(step_num)
                     continue
 
-                print(f"Invoking {tool_name} with params={params}")
-                future = executor.submit(
-                    invoke_registry_tool, tool_name, params, context, registry
+                log_event("tool_invocation", request_id, node="executor", data={"tool": tool_name})
+                future = submit_with_context(
+                    executor, invoke_registry_tool, tool_name, params, context, registry
                 )
                 future_to_step[future] = step
 

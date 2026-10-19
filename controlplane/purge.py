@@ -62,6 +62,9 @@ def run_purge(tenant_id: str, session_factory=SessionLocal) -> dict:
             path.unlink()
             removed_files += 1
     with session_factory() as db:
+        from db.models import KnowledgeContentRow, EvidenceFileRow, VerificationChallengeRow, OutboxRow, OperatorCaseRow, ChatReceiptRow, OrderPaymentRow, RefundBudgetRow, RefundReservationRow
+        for table in (KnowledgeContentRow, EvidenceFileRow, VerificationChallengeRow, OutboxRow, OperatorCaseRow, ChatReceiptRow, OrderPaymentRow, RefundBudgetRow, RefundReservationRow):
+            db.execute(delete(table).where(table.tenant_id == tenant_id))
         documents = db.execute(
             delete(KnowledgeSnapshotRow).where(KnowledgeSnapshotRow.tenant_id == tenant_id)
         ).rowcount or 0

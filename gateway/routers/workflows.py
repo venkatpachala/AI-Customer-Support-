@@ -3,16 +3,28 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
 from sqlalchemy import select
 
+from controlplane.http import session_principal
 from db.models import WorkflowRunRow, WorkflowStepRow
 from db.session import SessionLocal
 
 router = APIRouter(prefix="/v1/workflows", tags=["workflows"])
 
 
-def _tenant(x_tenant_id: Optional[str]) -> str:
+def _tenant(request: Request, x_tenant_id: Optional[str]) -> str:
+    principal = session_principal(request)
+    if principal is not None:
+        if principal.role != "supervisor":
+            raise HTTPException(status_code=403, detail="operator credential required")
+        supplied = (x_tenant_id or "").strip()
+        if supplied and supplied != principal.tenant_id:
+            raise HTTPException(status_code=403, detail="tenant mismatch")
+        return principal.tenant_id
+    from controlplane.settings import legacy_headers_allowed
+    if not legacy_headers_allowed():
+        raise HTTPException(status_code=401, detail="authenticated credential required")
     tenant = (x_tenant_id or "").strip()
     if not tenant:
         raise HTTPException(status_code=400, detail="X-Tenant-Id is required")
@@ -22,10 +34,11 @@ def _tenant(x_tenant_id: Optional[str]) -> str:
 @router.get("/{run_id}")
 def get_workflow(
     run_id: str,
+    request: Request,
     x_tenant_id: Optional[str] = Header(default=None),
     x_actor_role: Optional[str] = Header(default=None),
 ):
-    tenant = _tenant(x_tenant_id)
+    tenant = _tenant(request, x_tenant_id)
     if x_actor_role is not None and x_actor_role.strip().lower() not in {"supervisor", "admin"}:
         raise HTTPException(status_code=403, detail="supervisor role required")
     with SessionLocal() as db:

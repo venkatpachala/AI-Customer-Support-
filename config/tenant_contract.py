@@ -115,6 +115,17 @@ def load_platform_tenant(tenant_id: str) -> PlatformTenant:
     tid = _safe_tenant_id(tenant_id)
     path = platform_tenant_yaml_path(tid)
     if not path.is_file():
+        from db.session import SessionLocal
+        from db.models import PlatformTenantRow, TenantAccountRow
+        with SessionLocal() as db:
+            stored = db.get(PlatformTenantRow, tid)
+            account = db.get(TenantAccountRow, tid)
+            config = dict((stored.config_json or {}).get("tenant_contract") or {}) if stored else {}
+            if account:
+                config.setdefault("brand", account.name or tid)
+                config.setdefault("limits", {"auto_refund_max": 0, "manager_refund_max": 0})
+                config["id"] = tid
+                return PlatformTenant(**config)
         return PlatformTenant(id=tid)
 
     data = _read_yaml_mapping(path)

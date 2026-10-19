@@ -37,6 +37,7 @@ class HttpClient:
                 json=json,
                 data=data,
                 timeout=timeout or self.default_timeout,
+                allow_redirects=False,
             )
         except requests.Timeout as e:
             raise ToolTimeoutError(str(e)) from e

@@ -16,7 +16,10 @@ def call_api(query: str, customer_id: str = "eval_user", tenant_id: str = "zepto
         "tenant_id": tenant_id
     }
     try:
-        response = requests.post(API_URL, json=payload, timeout=120)
+        import uuid
+        from evaluation.http_session import open_evaluation_session
+        http, origin = open_evaluation_session(customer_id + "_" + uuid.uuid4().hex, tenant_id)
+        response = http.post(origin + "/chat", json=payload, timeout=120)
         response.raise_for_status()
         return response.json()
     except Exception as e:
@@ -37,6 +40,9 @@ def evaluate_case(case: dict) -> dict:
 
     checks = {}
     passed = True
+    if result.get("error") or (not response_text and not blocked):
+        passed = False
+        checks["transport"] = "FAIL (request failed or response is empty)"
 
     # 1. Block check
     if expected["should_block"] != blocked:

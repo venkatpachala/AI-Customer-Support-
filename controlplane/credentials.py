@@ -79,6 +79,9 @@ def resolve_stripe_secret(tenant_id: str, session_factory=SessionLocal) -> str:
     stored = credential_for(tenant_id, "stripe", session_factory=session_factory)
     if stored:
         return stored
+    from controlplane.settings import production
+    if production():
+        return ""
     return os.getenv("STRIPE_SECRET_KEY", "").strip()
 
 
@@ -86,4 +89,7 @@ def resolve_gmail_token(tenant_id: str, session_factory=SessionLocal) -> str:
     stored = credential_for(tenant_id, "gmail", session_factory=session_factory)
     if stored:
         return stored
+    from controlplane.settings import production
+    if production():
+        return ""
     return os.getenv("GMAIL_REFRESH_TOKEN", "").strip()
