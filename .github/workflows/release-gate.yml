@@ -17,7 +17,6 @@ jobs:
         run: pip install uv
       - run: uv sync --frozen
       - name: Dependency scan
-        continue-on-error: true
         run: |
           pip install pip-audit
           pip-audit -r requirements.txt

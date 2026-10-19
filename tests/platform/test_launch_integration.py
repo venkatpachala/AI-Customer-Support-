@@ -347,3 +347,28 @@ def test_support_intake_is_authenticated_and_persistent():
     with SessionLocal() as db:
         row = db.get(IntakeRequestRow, response.json()["id"])
         assert row.tenant_id == tenant and row.note == body["note"]
+
+
+def test_unknown_policy_abstains_without_model_call():
+    from agents.qa import qa_node
+    from langchain_core.messages import HumanMessage
+    tenant, _ = brand()
+    result = qa_node({"tenant_id": tenant, "request_id": "abstain",
+        "messages": [HumanMessage(content="Do you offer tours to Jupiter?")],
+        "current_plan": {"intent": "policy_query"}})
+    assert result["abstained"] is True
+    assert result["citations"] == []
+    assert "does not specify" in result["messages"][0].content
+
+
+def test_chat_service_returns_503_for_runtime_failure():
+    import asyncio
+    from runtime.chat_service import ChatService
+    from runtime.chat_command import ChatCommand
+    from identity.session import create_customer_session
+    tenant, _ = brand()
+    session = create_customer_session(tenant, "synthetic")
+    async def failed(command):
+        return {"error": "temporarily unavailable", "response": "Please retry"}
+    response = asyncio.run(ChatService(failed).handle(ChatCommand(body={"message": "hello"}, session_id=session.id)))
+    assert response.status_code == 503

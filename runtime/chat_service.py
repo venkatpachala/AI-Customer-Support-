@@ -33,6 +33,8 @@ class ChatService:
                         return dict(receipt.response_json)
             result = await self.handler(command)
             lease.assert_owned()
+            if isinstance(result, dict) and result.get("error"):
+                return JSONResponse(status_code=503, content=result)
             if command.idempotency_key and isinstance(result, dict) and not result.get("error"):
                 with SessionLocal() as db:
                     db.add(ChatReceiptRow(id=receipt_id, tenant_id=session.tenant_id, session_id=session.id,

@@ -48,8 +48,6 @@ def qa_node(state: AgentState) -> Dict:
     # --- Identity challenge short-circuit (Phase 2.3) ---
     challenge = state.get("identity_challenge")
     if state.get("needs_identity") and isinstance(challenge, dict) and challenge.get("message"):
-        from langchain_core.messages import AIMessage
-
         msg = str(challenge["message"]).strip()
         log_event(
             "qa_identity_challenge",
