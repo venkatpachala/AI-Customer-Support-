@@ -5,3 +5,12 @@ data
 evaluation/reports
 .git
 *.db
+.env
+.env.*
+cookies.txt
+web/node_modules
+web/.output
+web/.vercel
+web/.nitro
+web/screenshots
+artifacts

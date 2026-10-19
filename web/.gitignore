@@ -1,0 +1,12 @@
+node_modules/
+.project_id
+.github_repo
+.env
+.env.*
+
+.output/
+.vercel/
+.nitro/
+dist/
+screenshots/
+*.log

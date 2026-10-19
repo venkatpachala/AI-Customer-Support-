@@ -158,6 +158,12 @@ def case_auth(case_id: str, session_factory=SessionLocal) -> tuple[str, List[str
         orders = [str(item) for item in (summary.get("verified_order_ids") or [])]
         checked = bool(summary.get("ownership_checked"))
         level = str(case.auth_level or "anonymous")
+        from controlplane.mode import current_tools_mode
+        if current_tools_mode() == "live":
+            from identity.verification import verified_order
+            orders = [order for order in orders if verified_order(case_id, order)]
+            if not orders and level == "verified":
+                level = "identified"
         return level, orders, checked
 
 
@@ -178,7 +184,10 @@ def apply_ownership(case_id: str, tenant_id: str, order_id: str, contact: str) -
             if str(order_id) not in orders:
                 orders.append(str(order_id))
             summary["verified_order_ids"] = orders
-            case.auth_level = "verified"
+            from controlplane.mode import current_tools_mode
+            from identity.verification import verified_order
+            strong = current_tools_mode() != "live" or verified_order(case_id, str(order_id))
+            case.auth_level = "verified" if strong else "identified"
             if proof.get("customer_id"):
                 summary["owner_customer_id"] = proof["customer_id"]
         else:

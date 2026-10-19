@@ -14,12 +14,17 @@ class StripeClient:
         self,
         context: ToolContext,
         idempotency_key: Optional[str] = None,
+        auth_token: Optional[str] = None,
     ) -> Dict[str, str]:
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded",
         }
-        headers = self.auth.apply(headers, context)
+        if auth_token:
+            from tools.base.auth import BearerTokenAuth
+            headers = BearerTokenAuth(auth_token).apply(headers, context)
+        else:
+            headers = self.auth.apply(headers, context)
         if idempotency_key:
             headers["Idempotency-Key"] = idempotency_key
         return headers
@@ -48,12 +53,13 @@ class StripeClient:
         form_data: Dict[str, Any],
         idempotency_key: Optional[str] = None,
         timeout: Optional[float] = None,
+        auth_token: Optional[str] = None,
     ) -> Dict[str, Any]:
         url = f"{self.base_url}{path}"
         response = self.http.request(
             "POST",
             url,
-            headers=self._headers(context, idempotency_key=idempotency_key),
+            headers=self._headers(context, idempotency_key=idempotency_key, auth_token=auth_token),
             data=form_data,
             timeout=timeout,
         )

@@ -4,7 +4,8 @@ from __future__ import annotations
 import os
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
+from sqlalchemy.exc import IntegrityError
 
 from db.models import DailyUsageRow
 from db.session import SessionLocal
@@ -30,17 +31,24 @@ def consume_chat(tenant_id: str, session_factory=SessionLocal) -> bool:
     cap = daily_request_cap()
     day = _day()
     with session_factory() as db:
-        row = db.execute(
-            select(DailyUsageRow)
-            .where(DailyUsageRow.tenant_id == tenant)
-            .where(DailyUsageRow.day == day)
-        ).scalars().first()
-        if row is None:
-            row = DailyUsageRow(tenant_id=tenant, day=day, requests=0)
-            db.add(row)
-        if int(row.requests or 0) >= cap:
+        changed = db.execute(update(DailyUsageRow).where(DailyUsageRow.tenant_id == tenant,
+            DailyUsageRow.day == day, DailyUsageRow.requests < cap)
+            .values(requests=DailyUsageRow.requests + 1)).rowcount
+        if changed:
             db.commit()
+            return True
+        row = db.execute(select(DailyUsageRow.id).where(DailyUsageRow.tenant_id == tenant,
+            DailyUsageRow.day == day)).scalar_one_or_none()
+        if row is not None:
             return False
-        row.requests = int(row.requests or 0) + 1
-        db.commit()
-        return True
+        db.add(DailyUsageRow(tenant_id=tenant, day=day, requests=1))
+        try:
+            db.commit()
+            return True
+        except IntegrityError:
+            db.rollback()
+            changed = db.execute(update(DailyUsageRow).where(DailyUsageRow.tenant_id == tenant,
+                DailyUsageRow.day == day, DailyUsageRow.requests < cap)
+                .values(requests=DailyUsageRow.requests + 1)).rowcount
+            db.commit()
+            return changed == 1

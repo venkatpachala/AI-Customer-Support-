@@ -12,7 +12,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from db.models import CaseRow, HumanTaskRow, PlatformEventRow, WorkflowRunRow
 from db.session import SessionLocal
@@ -167,16 +167,23 @@ def _ensure_pending(task: HumanTaskRow) -> None:
 
 def _decide(session_factory, task_id: str, *, status: str, actor_id: str, note: Optional[str]) -> None:
     with session_factory() as db:
-        row = db.get(HumanTaskRow, task_id)
-        if row is None:
-            raise ApprovalError(404, "approval task not found")
-        if row.status != "pending":
+        now = datetime.utcnow()
+        changed = db.execute(update(HumanTaskRow).where(HumanTaskRow.id == task_id,
+            HumanTaskRow.status == "pending").values(status=status, decided_by=actor_id,
+            decided_at=now, updated_at=now,
+            resolution_json={"note": note, "actor": actor_id, "decision": status})).rowcount
+        if changed != 1:
+            db.rollback()
             raise ApprovalError(409, "already decided")
-        row.status = status
-        row.decided_by = actor_id
-        row.decided_at = datetime.utcnow()
-        row.resolution_json = {"note": note, "actor": actor_id, "decision": status}
-        row.updated_at = datetime.utcnow()
+        task = db.get(HumanTaskRow, task_id)
+        if status == "approved" and task.workflow_run_id:
+            from controlplane.outbox import enqueue
+            enqueue(db, tenant_id=task.tenant_id, key=f"resume:{task_id}",
+                    kind="workflow.resume", payload={"run_id": task.workflow_run_id})
+        if status == "rejected" and task.workflow_run_id:
+            from controlplane.outbox import enqueue
+            enqueue(db, tenant_id=task.tenant_id, key=f"cancel:{task_id}", kind="workflow.cancel",
+                    payload={"run_id": task.workflow_run_id, "case_id": task.case_id})
         db.commit()
 
 

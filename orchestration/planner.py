@@ -27,8 +27,6 @@ READ_TOOL_ALLOWLIST = frozenset({
     "shopify_identify_customer",
     "health",
     "rag_search",
-    "stripe_get_payment_intent",
-    "stripe_get_refund",
 })
 
 _KNOWLEDGE_INTENTS = frozenset({
@@ -96,11 +94,12 @@ def _fill_slots(plan: ExecutionPlan, query: str, memory: Dict) -> Dict:
             amount = int(found.group(1))
     if amount:
         try:
-            amount_int = int(float(amount))
+            from common.money import to_minor
+            amount_minor = to_minor(amount)
         except (TypeError, ValueError):
-            amount_int = 0
-        if amount_int > 0:
-            slots["amount"] = amount_int
+            amount_minor = 0
+        if amount_minor > 0:
+            slots["amount"] = amount_minor // 100 if amount_minor % 100 == 0 else str(__import__("decimal").Decimal(amount_minor) / 100)
         else:
             slots.pop("amount", None)
 

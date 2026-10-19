@@ -52,6 +52,9 @@ def clear_policy_cache() -> None:
 
 def load_resolved_pack(tenant_id: str) -> ResolvedPolicyPack:
     key = (tenant_id or "").strip()
+    from config.tenant_contract import platform_tenant_yaml_path
+    if not platform_tenant_yaml_path(key).is_file():
+        return _build_pack(key)  # DB configuration is versioned and shared across workers.
     cached = _PACKS.get(key)
     if cached is not None:
         return cached

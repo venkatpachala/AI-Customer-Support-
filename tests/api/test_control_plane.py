@@ -44,6 +44,11 @@ def test_missing_key_is_401():
 
 def test_body_auth_level_does_not_verify(monkeypatch):
     _silence_llm(monkeypatch)
+    from langchain_core.messages import AIMessage
+    class GreetingModel:
+        def invoke(self, *_args, **_kwargs):
+            return AIMessage(content="Hello. How can I help with your order?")
+    monkeypatch.setattr("agents.qa.get_qa_llm", lambda **kwargs: GreetingModel())
     init_db()
     _row, secret = issue_key("zepto", role="widget", mode="test")
     response = client.post(

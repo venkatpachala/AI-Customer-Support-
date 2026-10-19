@@ -9,3 +9,16 @@ wheels/
 # Virtual environments
 .venv
 .env
+
+# Desk app
+web/node_modules/
+web/dist/
+web/.output/
+web/.vercel/
+cookies.txt
+*.db
+*.db-shm
+*.db-wal
+web/.nitro/
+web/screenshots/
+artifacts/

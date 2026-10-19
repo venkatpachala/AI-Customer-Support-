@@ -1,0 +1,54 @@
+# Reverse-proxy HTTPS to API. Deploy web/ separately with D2C_API_ORIGIN.
+# Existing local compose and free-host manifests are intentionally unchanged.
+x-app: &app
+  build: .
+  env_file: ${D2C_PRODUCTION_ENV_FILE:-deployments/production.env}
+  environment:
+    APP_ENV: production
+    DATABASE_URL: postgresql+psycopg2://d2c_app:${D2C_APP_DB_PASSWORD}@db:5432/d2c
+  restart: unless-stopped
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: d2c_migrator
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: d2c
+      D2C_APP_DB_PASSWORD: ${D2C_APP_DB_PASSWORD:?}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deployments/init-postgres.sh:/docker-entrypoint-initdb.d/10-app-role.sh:ro
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U d2c_migrator -d d2c]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  migrate:
+    <<: *app
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql+psycopg2://d2c_migrator:${POSTGRES_PASSWORD}@db:5432/d2c
+    command: [python, -m, db.migrate]
+    depends_on:
+      db:
+        condition: service_healthy
+  api:
+    <<: *app
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+  worker:
+    <<: *app
+    command: [python, -m, controlplane.worker]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+volumes:
+  postgres_data:

@@ -5,7 +5,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Header, HTTPException, Query, Request
 
-from controlplane.http import bearer_principal
+from controlplane.http import session_principal
 from interactions.intelligence import (
     IntelligenceError,
     case_timeline,
@@ -17,10 +17,18 @@ router = APIRouter(tags=["intelligence"])
 
 
 def _tenant(request: Request, header: Optional[str], query: Optional[str]) -> str:
-    principal = bearer_principal(request)
+    principal = session_principal(request)
     if principal is not None:
+        if principal.role != "supervisor":
+            raise HTTPException(status_code=403, detail="operator credential required")
+        supplied = (header or "").strip()
+        if supplied and supplied != principal.tenant_id:
+            raise HTTPException(status_code=403, detail="tenant mismatch")
         tenant = principal.tenant_id
     else:
+        from controlplane.settings import legacy_headers_allowed
+        if not legacy_headers_allowed():
+            raise HTTPException(status_code=401, detail="authenticated credential required")
         tenant = (header or "").strip()
         if not tenant:
             raise HTTPException(status_code=400, detail="X-Tenant-Id is required")

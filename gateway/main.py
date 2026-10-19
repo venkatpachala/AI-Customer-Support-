@@ -6,9 +6,9 @@ from typing import Optional, List, Any, Dict
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
-load_dotenv(override=True)
+load_dotenv(override=False)
 
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ.setdefault("LANGCHAIN_TRACING_V2", "false")
 os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT", "d2c-support-agent")
 
 print("DEBUG: OPENAI_API_KEY loaded =", "YES" if os.getenv("OPENAI_API_KEY") else "NO")
@@ -19,7 +19,7 @@ print("DEBUG: TOOLS_MODE =", os.getenv("TOOLS_MODE", "mock"))
 from pathlib import Path
 
 from fastapi import FastAPI, Query, Request
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse, Response
 from tools.bootstrap import register_default_tools
 register_default_tools()
 
@@ -82,7 +82,10 @@ from runtime import SupportRuntime, RequestContext, AuthContext
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_db()
+    from controlplane.settings import validate_environment
+    validate_environment()
+    from db.session import ensure_schema
+    ensure_schema()
     try:
         from interactions.retention import sweep_interaction_text
 
@@ -93,6 +96,16 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="D2C AI Support Agent", lifespan=lifespan, docs_url="/swagger")
+
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:8080", "http://localhost:8080"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 from gateway.routers.approvals import router as approvals_router
 from gateway.routers.cases import router as cases_router
@@ -114,6 +127,11 @@ app.include_router(widget_router)
 
 from fastapi.staticfiles import StaticFiles
 
+from gateway.routers.desk import router as desk_router
+app.include_router(desk_router)
+from gateway.routers.customer import router as customer_router
+app.include_router(customer_router)
+
 from gateway.routers.console import router as console_router
 from gateway.routers.control import router as control_router
 
@@ -128,6 +146,10 @@ def _edge_tenant(request: Request) -> str:
     from identity.owner_session import read_owner
     from identity.session import COOKIE_NAME, load_customer_session
 
+    from identity.session import request_session_token
+    if request.headers.get("authorization", "").lower().startswith("session "):
+        session = load_customer_session(request_session_token(request))
+        return session.tenant_id if session else ""
     try:
         principal = bearer_principal(request)
     except Exception:
@@ -146,6 +168,18 @@ def _edge_tenant(request: Request) -> str:
 @app.middleware("http")
 async def request_context(request: Request, call_next):
     from controlplane.tenant_context import bind_scope, reset_scope
+
+    if request.method not in {"GET", "HEAD", "OPTIONS"} and request.cookies.get("d2c_owner"):
+        from urllib.parse import urlsplit
+        origin = request.headers.get("origin")
+        allowed = {str(request.base_url).rstrip("/"), os.getenv("PUBLIC_APP_URL", "").rstrip("/")}
+        from controlplane.settings import production
+        if not production():
+            allowed.update({"http://127.0.0.1:8080", "http://localhost:8080", "http://127.0.0.1:8081", "http://localhost:8081"})
+        if origin and origin.rstrip("/") not in allowed:
+            return JSONResponse(status_code=403, content={"detail": "untrusted request origin"})
+        if request.headers.get("sec-fetch-site") == "cross-site":
+            return JSONResponse(status_code=403, content={"detail": "cross-site mutation rejected"})
 
     request_id = request.headers.get("x-request-id") or new_request_id()
     request.state.request_id = request_id
@@ -193,7 +227,7 @@ interaction_service = InteractionService()
 
 
 class ChatRequest(BaseModel):
-    message: str
+    message: str = Field(min_length=1, max_length=8000)
     customer_id: str = "default"
     tenant_id: str = "zepto"
     session_id: Optional[str] = None
@@ -343,8 +377,32 @@ def seed_missing_photos(message: str, case, photos_received: bool) -> bool:
     return False
 
 @app.get("/metrics")
-def metrics():
+def metrics(request: Request):
+    from controlplane.settings import production
+    if production():
+        import hmac
+        expected = os.getenv("METRICS_TOKEN", "")
+        if not expected or not hmac.compare_digest(request.headers.get("authorization", ""), "Bearer " + expected):
+            return JSONResponse(status_code=401, content={"detail": "metrics credential required"})
     return metrics_endpoint()
+
+
+@app.get("/ready")
+def ready():
+    from datetime import datetime, timedelta
+    from sqlalchemy import select, func
+    from db.models import WorkerHeartbeatRow
+    from db.session import SessionLocal
+    from controlplane.settings import production
+    try:
+        with SessionLocal() as db:
+            updated = db.execute(select(func.max(WorkerHeartbeatRow.updated_at))).scalar_one_or_none()
+        worker_ok = bool(updated and updated > datetime.utcnow() - timedelta(seconds=60))
+        checks = {"db": "ok", "worker": "ok" if worker_ok else "not_running"}
+        ok = worker_ok or not production()
+        return JSONResponse(status_code=200 if ok else 503, content={"ready": ok, **checks})
+    except Exception:
+        return JSONResponse(status_code=503, content={"ready": False, "db": "unavailable"})
 
 
 @app.get("/health")
@@ -372,11 +430,17 @@ _WIDGET_PAGE = Path(__file__).resolve().parents[1] / "widget" / "index.html"
 
 @app.get("/interactions/recent")
 def get_recent_interactions(
+    request: Request,
     limit: int = Query(20, ge=1, le=200),
     tenant_id: Optional[str] = None,
     customer_id: Optional[str] = None,
     escalated: Optional[bool] = None,
 ):
+    from gateway.routers.desk import staff
+    principal = staff(request)
+    if tenant_id and tenant_id != principal.tenant_id:
+        return JSONResponse(status_code=403, content={"detail": "tenant mismatch"})
+    tenant_id = principal.tenant_id
     records = interaction_service.get_recent(
         limit=limit,
         tenant_id=tenant_id,
@@ -387,8 +451,11 @@ def get_recent_interactions(
 
 
 @app.get("/interactions/conversation/{conversation_id}")
-def get_conversation_interactions(conversation_id: str):
+def get_conversation_interactions(conversation_id: str, request: Request):
+    from gateway.routers.desk import staff
+    principal = staff(request)
     records = interaction_service.store.list_by_conversation(conversation_id)
+    records = [row for row in records if row.tenant_id == principal.tenant_id]
     return {
         "conversation_id": conversation_id,
         "count": len(records),
@@ -399,8 +466,7 @@ def get_conversation_interactions(conversation_id: str):
 _FORGED_AUTH_FIELDS = ("auth_level", "verified", "verified_order_ids", "verified_customer")
 
 
-@app.post("/chat")
-async def chat(raw_request: Request):
+async def _execute_chat(raw_request):
     """
     Public chat. Auth comes from the session cookie and order ownership.
     Client auth fields are logged and dropped.
@@ -440,7 +506,11 @@ async def chat(raw_request: Request):
         ACTIVE_REQUESTS.dec()
         return JSONResponse(status_code=403, content={"detail": "tenant mismatch"})
     body["tenant_id"] = customer_session.tenant_id
-    request = ChatRequest(**body)
+    try:
+        request = ChatRequest(**body)
+    except ValueError:
+        ACTIVE_REQUESTS.dec()
+        return JSONResponse(status_code=422, content={"detail": "invalid chat input"})
     request.customer_id = customer_session.customer_ref
     scope_token = bind_scope(tenant_id=customer_session.tenant_id, request_id=request_id)
     raw_request.state.tenant_id = customer_session.tenant_id
@@ -448,8 +518,14 @@ async def chat(raw_request: Request):
 
     client_host = raw_request.client.host if raw_request.client else "unknown"
     if not allow_chat(customer_session.id, client_host):
+        reset_scope(scope_token)
         ACTIVE_REQUESTS.dec()
         return JSONResponse(status_code=429, content={"detail": "rate limit"})
+    from controlplane.quota import consume_chat
+    if not consume_chat(customer_session.tenant_id):
+        reset_scope(scope_token)
+        ACTIVE_REQUESTS.dec()
+        return JSONResponse(status_code=429, content={"detail": "daily request cap reached"})
 
     auth_level = "anonymous"
     is_verified = False
@@ -474,21 +550,6 @@ async def chat(raw_request: Request):
             REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="error").inc()
             return {"error": f"Invalid tenant: {str(e)}", "request_id": request_id}
 
-        # -------- policy cache short-circuit --------
-        if looks_like_policy_query(request.message):
-            cached = policy_cache.get(request.tenant_id, request.message)
-            if cached:
-                try:
-                    REQUEST_COUNT.labels(tenant_id=request.tenant_id, status="success").inc()
-                    REQUEST_LATENCY.labels(tenant_id=request.tenant_id).observe(time.time() - start_time)
-                except Exception:
-                    pass
-                cached = dict(cached)
-                cached["request_id"] = request_id
-                cached["cached"] = True
-                cached["auth_level"] = auth_level
-                return cached
-
         # -------- memory bootstrap --------
         session = memory_service.get_or_create_session(
             customer_id=request.customer_id,
@@ -497,6 +558,17 @@ async def chat(raw_request: Request):
         )
         case = memory_service.get_or_create_active_case(session)
         set_case_id(case.case_id)
+        from db.models import OperatorCaseRow, MessageRow
+        from db.session import SessionLocal
+        with SessionLocal() as db:
+            owned = db.get(OperatorCaseRow, case.case_id)
+            if owned and owned.human_owned and not owned.resolved:
+                db.add(MessageRow(session_id=session.session_id, case_id=case.case_id,
+                                  role="user", content=request.message))
+                db.commit()
+                return {"response": "Your message has been sent to the support team.",
+                        "case_id": case.case_id, "session_id": session.session_id,
+                        "status": "human_owned", "citations": []}
 
         # -------- sticky escalation --------
         if case.status == "escalated":
@@ -568,7 +640,8 @@ async def chat(raw_request: Request):
 
         photos_received = bool(case.photos_received)
         missing_inputs: List[str] = list(case.missing_inputs or [])
-        if detect_photos_received(request.message):
+        from controlplane.mode import current_tools_mode
+        if current_tools_mode() == "mock" and detect_photos_received(request.message):
             photos_received = True
             missing_inputs = [m for m in missing_inputs if m != "photos"]
             case = memory_service.update_case_from_result(
@@ -587,6 +660,10 @@ async def chat(raw_request: Request):
             apply_ownership(case.case_id, request.tenant_id, owned_order, owned_contact)
             case = memory_service.get_case(case.case_id) or case
         auth_level = getattr(case, "auth_level", None) or "anonymous"
+        from controlplane.mode import current_tools_mode
+        if current_tools_mode() == "live":
+            from identity.ownership import case_auth
+            auth_level, _, _ = case_auth(case.case_id)
         is_verified = auth_level == "verified"
         verified_order_ids = list((case.tool_results_summary or {}).get("verified_order_ids") or [])
 
@@ -652,7 +729,13 @@ async def chat(raw_request: Request):
         }
 
         # -------- CORE: SupportRuntime invokes shared agent brain --------
-        runtime_result = support_runtime.invoke_agent(ctx, inputs)
+        from starlette.concurrency import run_in_threadpool
+        from observability.models import begin_usage, end_usage
+        model_usage, usage_token = begin_usage()
+        try:
+            runtime_result = await run_in_threadpool(support_runtime.invoke_agent, ctx, inputs)
+        finally:
+            end_usage(usage_token)
         result = runtime_result.raw or {}
 
         latency = time.time() - start_time
@@ -898,6 +981,7 @@ async def chat(raw_request: Request):
         )
 
         response_payload = {
+            "usage": model_usage.snapshot(),
             "response": response_text,
             "confidence": result.get("confidence", 0.0),
             "citations": citations,
@@ -921,9 +1005,6 @@ async def chat(raw_request: Request):
                 result.get("workflow_status"),
             ),
         }
-
-        if not escalated and not blocked and looks_like_policy_query(request.message):
-            policy_cache.set(request.tenant_id, request.message, response_payload)
 
         try:
             interaction_service.log_chat_turn(
@@ -950,6 +1031,7 @@ async def chat(raw_request: Request):
                 request_id=request_id,
                 metadata={
                     "tools_mode": os.getenv("TOOLS_MODE", "mock"),
+                    "model_usage": model_usage.snapshot(),
                     "verification_passed": result.get("verification_passed", True),
                     "auth_level": result_auth_level,
                     "verified": is_verified,
@@ -994,7 +1076,8 @@ async def chat(raw_request: Request):
             pass
         log_event("request_failed", request_id, data={"error": str(e)}, level="error")
         return {
-            "error": str(e),
+            "error": "Support is temporarily unavailable. Please retry or contact support.",
+            "response": "Support is temporarily unavailable. Please retry or contact support.",
             "escalated": False,
             "request_id": request_id,
             "session_id": session.session_id if session else (request.session_id if request is not None else None),
@@ -1006,35 +1089,49 @@ async def chat(raw_request: Request):
         ACTIVE_REQUESTS.dec()
 
 
-from controlplane.turns import set_chat_handler
+from runtime.chat_service import ChatService
+process_chat = ChatService(_execute_chat).handle
 
-set_chat_handler(chat)
+
+@app.post("/chat")
+async def chat(request: Request):
+    from runtime.chat_command import ChatCommand
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse(status_code=400, content={"detail": "json body required"})
+    if not isinstance(body, dict):
+        return JSONResponse(status_code=400, content={"detail": "json body required"})
+    from identity.session import request_session_token, load_customer_session
+    from controlplane.keys import tenant_tools_live
+    from controlplane.mode import force_tools_mode, reset_tools_mode
+    session_id = request_session_token(request)
+    session = load_customer_session(session_id)
+    live = bool(session and tenant_tools_live(session.tenant_id, key_mode="live"))
+    token = force_tools_mode("live" if live else "mock")
+    try:
+        result = await process_chat(ChatCommand(body=body, session_id=session_id,
+            request_id=getattr(request.state, "request_id", ""), client_host=request.client.host if request.client else "unknown",
+            idempotency_key=request.headers.get("Idempotency-Key", "")))
+        if isinstance(result, dict) and result.get("error"):
+            return JSONResponse(status_code=503, content=result)
+        return result
+    finally:
+        reset_tools_mode(token)
+
+from controlplane.turns import set_chat_handler
+set_chat_handler(process_chat)
 
 
 @app.post("/chat/stream")
-async def chat_stream(request: ChatRequest):
-    if looks_like_policy_query(request.message):
-        cached = policy_cache.get(request.tenant_id, request.message)
-        if cached and cached.get("response"):
-            text = cached["response"]
-
-            async def cached_gen():
-                for word in text.split(" "):
-                    yield word + " "
-                yield "\n"
-
-            return StreamingResponse(cached_gen(), media_type="text/plain")
-
+async def chat_stream(request: Request):
     result = await chat(request)
+    if isinstance(result, JSONResponse):
+        return result
     if isinstance(result, dict) and result.get("response"):
-        text = result["response"]
-
-        async def gen():
-            for word in text.split(" "):
-                yield word + " "
-            yield "\n"
-
-        return StreamingResponse(gen(), media_type="text/plain")
+        # Generation is currently buffered. Do not simulate token streaming.
+        return Response(result["response"], media_type="text/plain",
+                        headers={"X-Generation-Mode": "buffered"})
 
     async def err_gen():
         yield json.dumps(result)

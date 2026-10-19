@@ -79,6 +79,9 @@ class WorkflowEngine:
         idempotency_key: Optional[str] = None,
     ) -> WorkflowRunView:
         definition = get_workflow(name)
+        from controlplane.automations import automation_enabled
+        if not automation_enabled(ctx.tenant_id, name):
+            raise ValueError(f"{name} is disabled for this brand")
         if not ctx.case_id:
             raise ValueError("case_id is required to persist a workflow run")
         key = idempotency_key or build_idempotency_key(
@@ -98,6 +101,7 @@ class WorkflowEngine:
             case_id=ctx.case_id,
             customer_id=ctx.customer_id,
             auth_level=ctx.auth_level,
+            tools_mode=ctx.tools_mode,
             conversation_id=ctx.conversation_id,
             slots=dict(ctx.slots),
             tool_registry=registry,
@@ -119,6 +123,8 @@ class WorkflowEngine:
                         started_at=datetime.utcnow(),
                     )
                 )
+                from controlplane.outbox import enqueue
+                enqueue(db, tenant_id=stored.tenant_id, key=f"start:{run_id}", kind="workflow.resume", payload={"run_id": run_id})
                 db.commit()
         except IntegrityError:
             raced = self._reusable(key)
@@ -138,19 +144,54 @@ class WorkflowEngine:
                 return _view(row)
             if row.status == RUN_FAILED and not slots:
                 return _view(row)
-        if slots:
-            self._merge_slots(run_id, slots)
-        ctx = self._context_for(run_id)
-        return self._execute(run_id, ctx)
+        from workflows.lease import ExecutionLease
+        with ExecutionLease(run_id, self.session_factory) as lease:
+            if not lease.acquired:
+                return self._load_view(run_id)
+            if slots:
+                self._merge_slots(run_id, slots)
+            ctx = self._context_for(run_id)
+            return self._walk(run_id, ctx, lease)
 
     def _execute(self, run_id: str, ctx: WorkflowContext) -> WorkflowRunView:
+        from workflows.lease import ExecutionLease
+        with ExecutionLease(run_id, self.session_factory) as lease:
+            if not lease.acquired:
+                return self._load_view(run_id)
+            return self._walk(run_id, ctx, lease)
+
+    def _walk(self, run_id: str, ctx: WorkflowContext, lease) -> WorkflowRunView:
+        from controlplane.mode import force_tools_mode, reset_tools_mode, current_tools_mode
+        from controlplane.settings import production
+        mode = ctx.tools_mode
+        if mode not in {"live", "mock"}:
+            if production():
+                raise ValueError("workflow tools mode is unknown; operator review required")
+            mode = current_tools_mode()
+        if production() and mode == "live":
+            from controlplane.keys import tenant_tools_live
+            if not tenant_tools_live(ctx.tenant_id, key_mode="live"):
+                raise ValueError("live connection is disabled; workflow remains held")
+        token = force_tools_mode(mode)
+        try:
+            return self._walk_steps(run_id, ctx, lease)
+        finally:
+            reset_tools_mode(token)
+
+    def _walk_steps(self, run_id: str, ctx: WorkflowContext, lease) -> WorkflowRunView:
         definition = get_workflow(self._workflow_name(run_id))
         self._update_run(run_id, status=RUN_RUNNING, error=None)
         for index, (step_name, fn) in enumerate(definition.steps):
+            lease.assert_owned()
             status = self._step_status(run_id, step_name)
             if status == STEP_SUCCESS:
                 continue
-            result = self._run_step(run_id, ctx, index, step_name, fn)
+            def guarded(rt):
+                lease.assert_owned()
+                result = fn(rt)
+                lease.assert_owned()
+                return result
+            result = self._run_step(run_id, ctx, index, step_name, guarded)
             self._merge_output(run_id, result)
             if result.status == STEP_SUCCESS:
                 continue
@@ -228,6 +269,12 @@ class WorkflowEngine:
                 raise KeyError(f"workflow run not found: {run_id}")
             payload = dict(row.input_json or {})
             previous_slots = dict(payload.get("slots") or {})
+            # A committed financial operation has an immutable payload and stable key.
+            paid = db.execute(select(WorkflowStepRow).where(WorkflowStepRow.run_id == run_id,
+                WorkflowStepRow.step_name == "execute_refund", WorkflowStepRow.status == STEP_SUCCESS)).scalars().first()
+            if paid is not None and any(slots.get(key, previous_slots.get(key)) != previous_slots.get(key)
+                                       for key in ("amount", "currency", "order_id", "payment_intent_id")):
+                raise ValueError("completed refund inputs cannot be changed")
             merged = dict(previous_slots)
             merged.update(slots)
             payload["slots"] = merged
@@ -256,11 +303,18 @@ class WorkflowEngine:
             row.error = None
             row.finished_at = None
             row.updated_at = datetime.utcnow()
+            from controlplane.outbox import enqueue
+            enqueue(db, tenant_id=row.tenant_id, key=f"input:{run_id}:{uuid.uuid4().hex}", kind="workflow.resume", payload={"run_id": run_id})
             db.commit()
 
     def _ensure_human_task(self, run_id: str, ctx: WorkflowContext, result: StepResult) -> None:
-        task = result.human_task or {}
-        task_type = str(task.get("type") or "refund_approval")
+        from workflows.idempotency import approval_fingerprint
+        task = dict(result.human_task or {})
+        payload = {"amount": ctx.slots.get("amount"), "order_id": ctx.slots.get("order_id"),
+                   "reason": result.error, **dict(task.get("payload") or {}),
+                   "action_fingerprint": approval_fingerprint(ctx.slots)}
+        task["payload"] = payload
+        task_type = str(task.get("type") or "policy_exception")
         with self.session_factory() as db:
             existing = db.execute(
                 select(HumanTaskRow)
@@ -269,7 +323,11 @@ class WorkflowEngine:
                 .where(HumanTaskRow.status == "pending")
             ).scalars().first()
             if existing is not None:
-                return
+                new_fingerprint = (task.get("payload") or {}).get("action_fingerprint")
+                if not new_fingerprint or (existing.payload_json or {}).get("action_fingerprint") == new_fingerprint:
+                    return
+                existing.status = "rejected"
+                existing.resolution_json = {"reason": "action_inputs_changed"}
             db.add(
                 HumanTaskRow(
                     id=str(uuid.uuid4()),

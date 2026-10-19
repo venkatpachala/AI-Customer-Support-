@@ -9,7 +9,25 @@ def load_tenant_config(tenant_id: str) -> TenantConfig:
     path = os.path.join("config", "tenants", tenant_id, "config.yaml")
 
     if not os.path.exists(path):
-        raise FileNotFoundError(f"Tenant config not found for '{tenant_id}' at {path}")
+        from controlplane.keys import tenant_record
+        from config.schema import BrandConfig, ApprovalThresholds, ToolEndpoints, EscalationConfig
+
+        row = tenant_record(tenant_id)
+        if row is None:
+            raise FileNotFoundError(f"Unknown tenant '{tenant_id}'")
+        platform = load_platform_tenant(tenant_id)
+        from db.models import PlatformTenantRow
+        from db.session import SessionLocal
+        with SessionLocal() as db:
+            stored = db.get(PlatformTenantRow, tenant_id)
+            settings = (stored.config_json or {}).get("brand_settings", {}) if stored else {}
+        return TenantConfig(
+            tenant_id=tenant_id,
+            brand=BrandConfig(brand_name=row.name or tenant_id, support_email=settings.get("support_email", ""), tone=platform.tone or "professional, polite, concise"),
+            approval=ApprovalThresholds(refund_auto_approve_limit=platform.limits.auto_refund_max, high_value_refund_limit=platform.limits.auto_refund_max),
+            tools=ToolEndpoints(), escalation=EscalationConfig(), policy_namespace=tenant_id,
+            active=row.killed_at is None,
+        )
 
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)

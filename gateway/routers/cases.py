@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Header, HTTPException, Request
 from sqlalchemy import select
 
-from controlplane.http import bearer_principal
+from controlplane.http import session_principal
 from db.models import CaseRow, HumanTaskRow, WorkflowRunRow
 from db.session import SessionLocal
 
@@ -14,12 +14,17 @@ router = APIRouter(prefix="/v1/cases", tags=["cases"])
 
 
 def _tenant(request: Request, x_tenant_id: Optional[str]) -> str:
-    principal = bearer_principal(request)
+    principal = session_principal(request)
     if principal is not None:
+        if principal.role != "supervisor":
+            raise HTTPException(status_code=403, detail="operator credential required")
         supplied = (x_tenant_id or "").strip()
         if supplied and supplied != principal.tenant_id:
             raise HTTPException(status_code=403, detail="tenant mismatch")
         return principal.tenant_id
+    from controlplane.settings import legacy_headers_allowed
+    if not legacy_headers_allowed():
+        raise HTTPException(status_code=401, detail="authenticated credential required")
     tenant = (x_tenant_id or "").strip()
     if not tenant:
         raise HTTPException(status_code=400, detail="X-Tenant-Id is required")
