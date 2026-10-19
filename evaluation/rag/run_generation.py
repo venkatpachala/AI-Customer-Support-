@@ -154,6 +154,7 @@ def run(report_path: Path | None = None) -> Path:
     citation_flags: List[float] = []
     faith_flags: List[float] = []
     abstain_flags: List[float] = []
+    answerable_abstentions: List[float] = []
     for query in report["queries"]:
         row = by_id.get(query["id"])
         if row is None or float(query.get("recall@5") or 0) < 1:
@@ -161,7 +162,8 @@ def run(report_path: Path | None = None) -> Path:
         reply, docs = _answer(retriever, row, _docs_from_query(query))
         gold = str(row.get("gold_clause") or "")
         cited = cites_clause(reply, gold)
-        supported = facts_supported(list(row.get("gold_answer_facts") or []), _gold_chunk_text(gold, docs))
+        # This is a gold-fact answer coverage proxy, not semantic faithfulness.
+        supported = facts_supported(list(row.get("gold_answer_facts") or []), reply)
         faithful = supported and not claims_refund_processed(reply)
         query["reply"] = reply
         query["citation_hit"] = bool(cited)
@@ -169,7 +171,7 @@ def run(report_path: Path | None = None) -> Path:
         query["abstained"] = abstains(reply)
         citation_flags.append(1.0 if cited else 0.0)
         faith_flags.append(1.0 if faithful else 0.0)
-        abstain_flags.append(0.0 if query["abstained"] else 1.0)
+        answerable_abstentions.append(1.0 if query["abstained"] else 0.0)
 
     extra = []
     for row in dataset:
@@ -188,7 +190,10 @@ def run(report_path: Path | None = None) -> Path:
     report["unanswerable_queries"] = extra
 
     report["citation_hit"] = round(mean(citation_flags), 4) if citation_flags else None
-    report["faithfulness"] = round(mean(faith_flags), 4) if faith_flags else None
+    report.pop("faithfulness", None)
+    report["answer_fact_coverage_proxy"] = round(mean(faith_flags), 4) if faith_flags else None
+    report["false_abstention"] = round(mean(answerable_abstentions), 4) if answerable_abstentions else None
+    report["semantic_groundedness"] = "not_measured_requires_review"
     report["abstention"] = round(mean(abstain_flags), 4) if abstain_flags else None
     path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     reasons = failures_of(report)
@@ -199,7 +204,7 @@ def run(report_path: Path | None = None) -> Path:
         raise SystemExit(1)
     if path.resolve() != LATEST.resolve():
         shutil.copyfile(path, LATEST)
-    print(f"citation_hit={report['citation_hit']} faithfulness={report['faithfulness']} abstention={report['abstention']}")
+    print(f"citation_hit={report['citation_hit']} answer_fact_coverage_proxy={report['answer_fact_coverage_proxy']} abstention={report['abstention']}")
     return path
 
 

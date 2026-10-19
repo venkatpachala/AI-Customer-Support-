@@ -5,6 +5,7 @@ from pathlib import Path
 from datetime import datetime
 
 API_URL = "http://127.0.0.1:8000/chat"
+_http_sessions = {}
 GOLDEN_SET_PATH = Path(__file__).parent / "golden_set_multiturn.json"
 REPORTS_DIR = Path(__file__).parent / "reports"
 REPORTS_DIR.mkdir(exist_ok=True)
@@ -19,7 +20,11 @@ def call_api(message: str, customer_id: str, tenant_id: str = "zepto", session_i
     if session_id:
         payload["session_id"] = session_id
 
-    response = requests.post(API_URL, json=payload, timeout=120)
+    from evaluation.http_session import open_evaluation_session
+    if customer_id not in _http_sessions:
+        _http_sessions[customer_id] = open_evaluation_session(customer_id, tenant_id)
+    http, origin = _http_sessions[customer_id]
+    response = http.post(origin + "/chat", json=payload, timeout=120)
     response.raise_for_status()
     return response.json()
 
@@ -36,6 +41,9 @@ def evaluate_turn(result: dict, expected: dict) -> tuple[bool, dict]:
 
     checks = {}
     passed = True
+    if result.get("error") or (not response_text and not blocked):
+        passed = False
+        checks["transport"] = "FAIL (request failed or response is empty)"
 
     if expected["should_block"] != blocked:
         checks["block"] = f"FAIL (expected {expected['should_block']}, got {blocked})"
