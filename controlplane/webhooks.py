@@ -17,8 +17,8 @@ from db.session import SessionLocal
 
 def save_endpoint(tenant_id: str, url: str, session_factory=SessionLocal) -> Dict[str, Any]:
     target = (url or "").strip()
-    if not target.startswith("https://") and not target.startswith("http://"):
-        raise ValueError("webhook url must start with http:// or https://")
+    from security.urls import validate_webhook_url
+    validate_webhook_url(target)
     secret = hashlib.sha256(uuid.uuid4().bytes).hexdigest()
     with session_factory() as db:
         row = db.execute(
@@ -59,12 +59,16 @@ def deliver_decision(
     run_id: Optional[str],
     session_factory=SessionLocal,
 ) -> None:
-    """POST once. Never calls Stripe and never retries."""
-    payload = {
-        "case_id": case_id,
-        "workflow_status": workflow_status,
-        "run_id": run_id,
-    }
+    """Enqueue delivery; network failures never repeat the business operation."""
+    from controlplane.outbox import enqueue
+    with session_factory() as db:
+        enqueue(db, tenant_id=tenant_id, key=f"decision:{run_id}:{workflow_status}", kind="webhook",
+                payload={"case_id": case_id, "workflow_status": workflow_status, "run_id": run_id})
+        db.commit()
+
+
+def send_delivery(payload: dict, *, tenant_id: str, event_id: str, session_factory=SessionLocal) -> None:
+    case_id, run_id = payload.get("case_id"), payload.get("run_id")
     raw = json.dumps(payload, separators=(",", ":")).encode("utf-8")
     with session_factory() as db:
         row = db.execute(
@@ -75,6 +79,8 @@ def deliver_decision(
         endpoint_id = row.id
         url = row.url
         secret = row.secret or ""
+    from security.urls import validate_webhook_url
+    validate_webhook_url(url)
     signature = hmac.new(secret.encode("utf-8"), raw, hashlib.sha256).hexdigest()
     status_code = None
     err = None
@@ -85,10 +91,15 @@ def deliver_decision(
             headers={
                 "Content-Type": "application/json",
                 "X-D2C-Signature": signature,
+                "X-D2C-Event-Id": event_id,
             },
             method="POST",
         )
-        with request.urlopen(req, timeout=3) as response:
+        class NoRedirect(request.HTTPRedirectHandler):
+            def redirect_request(self, req, fp, code, msg, headers, newurl):
+                return None
+        opener = request.build_opener(request.ProxyHandler({}), NoRedirect())
+        with opener.open(req, timeout=3) as response:
             status_code = int(response.status)
     except error.HTTPError as exc:
         status_code = int(exc.code)
@@ -117,6 +128,8 @@ def deliver_decision(
                 endpoint.last_status = "delivered"
                 endpoint.last_error = None
         db.commit()
+    if err or status_code is None or not 200 <= status_code < 300:
+        raise RuntimeError("webhook delivery failed")
 
 
 def _view(row: WebhookEndpointRow) -> Dict[str, Any]:

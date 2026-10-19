@@ -17,9 +17,13 @@ class WorkflowContext:
     conversation_id: Optional[str] = None
     slots: Dict[str, Any] = field(default_factory=dict)
     tool_registry: Any = None
+    tools_mode: Optional[str] = None
     session_factory: Callable[[], Any] = SessionLocal
 
     def __post_init__(self) -> None:
+        if self.tools_mode is None:
+            from controlplane.mode import current_tools_mode
+            self.tools_mode = current_tools_mode()
         if self.tool_registry is None:
             self.tool_registry = TOOL_REGISTRY
         self.slots = dict(self.slots or {})
@@ -34,6 +38,7 @@ class WorkflowContext:
             "customer_id": self.customer_id,
             "conversation_id": self.conversation_id,
             "auth_level": self.auth_level,
+            "tools_mode": self.tools_mode,
             "slots": dict(self.slots),
         }
 
@@ -50,6 +55,7 @@ class WorkflowContext:
             case_id=str(payload.get("case_id") or ""),
             customer_id=str(payload.get("customer_id") or ""),
             auth_level=str(payload.get("auth_level") or "anonymous"),
+            tools_mode=payload.get("tools_mode") or "unknown",
             conversation_id=payload.get("conversation_id"),
             slots=dict(payload.get("slots") or {}),
             tool_registry=tool_registry,
