@@ -27,6 +27,10 @@ def _prune(bucket: Deque[float], now: float, window: float) -> None:
 
 
 def signup_allowed(ip: str, *, now: float | None = None) -> Tuple[bool, str]:
+    from controlplane.settings import production
+    if production() and now is None:
+        from controlplane.shared_limits import allow
+        return (True, "") if allow(f"signup:{ip}", _SIGNUP_LIMIT, 3600) else (False, "Too many signup attempts")
     current = time.time() if now is None else now
     bucket = _signup_hits[ip or "unknown"]
     _prune(bucket, current, _WINDOW)
@@ -37,6 +41,10 @@ def signup_allowed(ip: str, *, now: float | None = None) -> Tuple[bool, str]:
 
 
 def login_allowed(email: str, *, now: float | None = None) -> Tuple[bool, str]:
+    from controlplane.settings import production
+    if production() and now is None:
+        from controlplane.shared_limits import allow
+        return (True, "") if allow(f"login:{email.lower().strip()}", _LOCK_AFTER, 900) else (False, "Too many sign-in attempts")
     current = time.time() if now is None else now
     key = (email or "").strip().lower()
     until = _locked_until.get(key, 0.0)

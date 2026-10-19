@@ -12,6 +12,13 @@ COOKIE_NAME = "d2c_session"
 SESSION_TTL = timedelta(hours=12)
 
 
+def request_session_token(request) -> str:
+    header = request.headers.get("authorization", "")
+    if header.lower().startswith("session "):
+        return header.split(" ", 1)[1].strip()
+    return request.cookies.get(COOKIE_NAME, "")
+
+
 def create_customer_session(tenant_id: str, customer_ref: str, *, now: Optional[datetime] = None) -> CustomerSessionRow:
     tenant = (tenant_id or "").strip()
     ref = (customer_ref or "").strip()
@@ -39,6 +46,11 @@ def load_customer_session(session_id: Optional[str], *, now: Optional[datetime] 
         return None
     current = now or datetime.utcnow()
     with SessionLocal() as db:
+        if db.get_bind().dialect.name == "postgresql":
+            # Before tenant discovery, expose only the exact opaque auth record.
+            # LOCAL prevents the capability leaking through a pooled connection.
+            from sqlalchemy import text
+            db.execute(text("SELECT set_config('app.customer_session_id', :token, true)"), {"token": token})
         row = db.get(CustomerSessionRow, token)
         if row is None or row.expires_at <= current:
             return None

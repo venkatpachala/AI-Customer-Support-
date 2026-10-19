@@ -22,6 +22,10 @@ def _allow(key: str, limit: int, now: float) -> bool:
 
 
 def allow_chat(session_id: str, ip: str, *, now: float | None = None) -> bool:
+    from controlplane.settings import production
+    if production() and now is None:
+        from controlplane.shared_limits import allow
+        return allow(f"chat-session:{session_id}", _SESSION_LIMIT) and allow(f"chat-ip:{ip}", _IP_LIMIT)
     current = time.monotonic() if now is None else now
     session_ok = _allow(f"session:{session_id}", _SESSION_LIMIT, current)
     ip_ok = _allow(f"ip:{ip}", _IP_LIMIT, current)
