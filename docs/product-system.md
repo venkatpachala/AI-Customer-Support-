@@ -117,6 +117,7 @@ touching an existing local database:
 ```powershell
 Set-Location D:\D2C
 uv sync --frozen
+uv run python -m controlplane.dev_setup
 $env:DATABASE_URL = "sqlite:///./data/local-support.db"
 $env:LLM_PROVIDER = "openai"
 $env:SUPERVISOR_MODEL = "gpt-4o-mini"
@@ -134,7 +135,7 @@ as `qwen2.5:3b`. Mixing OpenAI with Qwen model names is rejected.
 
 ```powershell
 # Another terminal, with the same backend environment:
-uv run python -m controlplane.worker
+uv run --env-file .env python -m controlplane.worker
 
 # Frontend terminal:
 Set-Location D:\D2C\web
@@ -147,3 +148,18 @@ Open `http://127.0.0.1:8080/enter`, register your own brand, upload a policy, an
 use the Install page's widget URL. Test fixtures are not application servers and
 must never be deployed. Production requires PostgreSQL, HTTPS, secrets, worker
 readiness, restore verification and the release gates in the launch runbook.
+
+
+For a visible interactive walkthrough with a new synthetic brand and sample
+policy, keep the API, worker and frontend running, then use:
+
+```powershell
+Set-Location D:\D2C
+uv run python tests/make_browser_pdf.py
+Set-Location web
+node scripts/local-product-demo.mjs
+```
+
+This opens separate operator and customer windows and exercises the configured
+model, citation display, takeover and human replies. It leaves both windows open.
+Synthetic account details are saved only under the ignored `artifacts/` folder.

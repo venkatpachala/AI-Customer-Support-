@@ -372,3 +372,28 @@ def test_chat_service_returns_503_for_runtime_failure():
         return {"error": "temporarily unavailable", "response": "Please retry"}
     response = asyncio.run(ChatService(failed).handle(ChatCommand(body={"message": "hello"}, session_id=session.id)))
     assert response.status_code == 503
+
+
+def test_signup_without_signing_secret_returns_configuration_error(monkeypatch):
+    monkeypatch.delenv("OPS_SESSION_SECRET", raising=False)
+    monkeypatch.delenv("OPS_PASSWORD", raising=False)
+    response = TestClient(app).post("/signup", json={"email": "not-created@example.test", "password": "synthetic-only"})
+    assert response.status_code == 503
+    assert "OPS_SESSION_SECRET" in response.json()["detail"]
+
+
+def test_local_setup_preserves_an_existing_secret(tmp_path, monkeypatch):
+    from controlplane.dev_setup import ensure_local_secret
+    from dotenv import dotenv_values
+    monkeypatch.delenv("OPS_SESSION_SECRET", raising=False)
+    monkeypatch.delenv("OPS_PASSWORD", raising=False)
+    monkeypatch.setenv("APP_ENV", "development")
+    path = tmp_path / ".env"
+    assert ensure_local_secret(path)
+    first = dotenv_values(path)["OPS_SESSION_SECRET"]
+    assert len(first) >= 32
+    assert not ensure_local_secret(path)
+    assert dotenv_values(path)["OPS_SESSION_SECRET"] == first
+    monkeypatch.setenv("APP_ENV", "production")
+    with pytest.raises(RuntimeError):
+        ensure_local_secret(tmp_path / "production.env")

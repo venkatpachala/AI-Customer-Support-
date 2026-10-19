@@ -93,6 +93,11 @@ async def _email_password(request: Request) -> tuple[str, str]:
     return str(form.get("email") or ""), str(form.get("password") or "")
 
 
+def _require_owner_secret() -> None:
+    if not (os.getenv("OPS_SESSION_SECRET") or os.getenv("OPS_PASSWORD")):
+        raise HTTPException(503, "Owner sign-in is not configured. Configure OPS_SESSION_SECRET and restart the API.")
+
+
 def _owner_cookie(response, tenant_id: str, request: Request):
     response.set_cookie(
         key=COOKIE_NAME,
@@ -134,6 +139,7 @@ def login_form(request: Request):
 
 @router.post("/login")
 async def login_submit(request: Request):
+    _require_owner_secret()
     email, password = await _email_password(request)
     allowed, reason = login_allowed(email)
     if not allowed:
@@ -163,6 +169,7 @@ def signup_form(request: Request):
 
 @router.post("/signup")
 async def signup_submit(request: Request):
+    _require_owner_secret()
     allowed, reason = signup_allowed(_client_ip(request))
     if not allowed:
         if _wants_json(request):
