@@ -141,7 +141,7 @@ tokens or attachments belong in a public repository or demo.
 ## Verification recorded for this change
 
 - An isolated `uv sync --frozen` environment installed the declared dependencies.
-- Backend: 145 tests passed, including atomic refund budget contention, exact
+- Backend: 147 tests passed, including atomic refund budget contention, exact
   Shopify order matching, customer ownership, approval replay and support intake.
 - Frontend: TypeScript and build passed; 252 tests passed and four optional
   exported-template documentation tests were explicitly skipped.
@@ -150,8 +150,9 @@ tokens or attachments belong in a public repository or demo.
 - The browser regression uses a fake model and an isolated SQL database.
 - PostgreSQL 16 CI passed restricted-role case/message isolation, customer
   session capability lookup, pooled-connection reset and forbidden insertion.
-  Docker was unavailable locally, so no local PostgreSQL result is claimed. Real model, SMTP, Shopify and Stripe sandbox
-  contract tests, backup restore, load tests and public deployment remain gates.
+  Docker was unavailable locally, so no local PostgreSQL result is claimed. The two-question real-model smoke passed, including unsupported-question
+  abstention. Representative model evaluation, SMTP/Shopify/Stripe sandbox
+  contracts, backup restore, load tests and public deployment remain gates.
 
 Daily financial limits reserve capacity atomically before provider calls. A
 reservation remains consumed after a crash, rejection or uncertain result.
