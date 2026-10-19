@@ -3,6 +3,7 @@
 Tests must not mutate the developer's database or use real provider credentials.
 """
 import os
+import sys
 import tempfile
 import pytest
 from pathlib import Path
@@ -30,5 +31,7 @@ def no_paid_model_calls(monkeypatch):
 
 
 def pytest_sessionfinish(session, exitstatus):
-    from db.session import engine
-    engine.dispose()
+    # Cleanup must not obscure collection errors by importing application code.
+    database = sys.modules.get("db.session")
+    if database is not None:
+        database.engine.dispose()
