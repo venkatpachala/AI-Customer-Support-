@@ -12,6 +12,7 @@ from sqlalchemy import (
     JSON,
     Index,
     UniqueConstraint,
+    LargeBinary,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -502,3 +503,121 @@ class IntakeRequestRow(Base):
     tenant_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     note: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class KnowledgeContentRow(Base):
+    """Durable source and normalized chunks; committed atomically with activation."""
+    __tablename__ = "knowledge_contents"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    pdf: Mapped[bytes] = mapped_column(LargeBinary)
+    chunks_json: Mapped[list] = mapped_column(JSON, default=list)
+    sha256: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class ExecutionLeaseRow(Base):
+    __tablename__ = "execution_leases"
+    id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    owner: Mapped[str] = mapped_column(String(64))
+    expires_at: Mapped[datetime] = mapped_column(DateTime, index=True)
+
+
+class OutboxRow(Base):
+    __tablename__ = "delivery_outbox"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    dedup_key: Mapped[str] = mapped_column(String(256), unique=True)
+    kind: Mapped[str] = mapped_column(String(32))
+    payload_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    status: Mapped[str] = mapped_column(String(32), default="pending", index=True)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    available_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
+    last_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class OperatorCaseRow(Base):
+    __tablename__ = "operator_cases"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    assigned_to: Mapped[str] = mapped_column(String(128), default="")
+    human_owned: Mapped[bool] = mapped_column(Boolean, default=False)
+    resolved: Mapped[bool] = mapped_column(Boolean, default=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+
+class VerificationChallengeRow(Base):
+    __tablename__ = "verification_challenges"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    session_id: Mapped[str] = mapped_column(String(64), index=True)
+    case_id: Mapped[str] = mapped_column(String(64), index=True)
+    order_id: Mapped[str] = mapped_column(String(64))
+    code_hash: Mapped[str] = mapped_column(String(64))
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    verified_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class EvidenceFileRow(Base):
+    __tablename__ = "evidence_files"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    case_id: Mapped[str] = mapped_column(String(64), index=True)
+    filename: Mapped[str] = mapped_column(String(256))
+    media_type: Mapped[str] = mapped_column(String(64))
+    content: Mapped[bytes] = mapped_column(LargeBinary)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class RateLimitBucketRow(Base):
+    __tablename__ = "rate_limit_buckets"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    requests: Mapped[int] = mapped_column(Integer, default=0)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, index=True)
+
+
+class WorkerHeartbeatRow(Base):
+    __tablename__ = "worker_heartbeats"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class ChatReceiptRow(Base):
+    __tablename__ = "chat_receipts"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    session_id: Mapped[str] = mapped_column(String(64), index=True)
+    body_hash: Mapped[str] = mapped_column(String(64))
+    response_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+class OrderPaymentRow(Base):
+    """Server-provisioned, recently checked merchant payment mapping; never LLM input."""
+    __tablename__ = "order_payments"
+    __table_args__ = (UniqueConstraint("tenant_id", "order_id", name="uq_order_payment_tenant_order"),)
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    order_id: Mapped[str] = mapped_column(String(64))
+    payment_intent_id: Mapped[str] = mapped_column(String(128))
+    currency: Mapped[str] = mapped_column(String(8))
+    refundable_minor: Mapped[int] = mapped_column(Integer)
+    verified_at: Mapped[datetime] = mapped_column(DateTime)
+
+
+class RefundBudgetRow(Base):
+    __tablename__ = "refund_budgets"
+    id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    reserved_minor: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class RefundReservationRow(Base):
+    __tablename__ = "refund_reservations"
+    run_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    budget_id: Mapped[str] = mapped_column(String(128))
+    amount_minor: Mapped[int] = mapped_column(Integer)

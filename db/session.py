@@ -72,7 +72,22 @@ def init_db() -> None:
 
     Base.metadata.create_all(bind=engine)
     apply_migrations()
-    print(f"[DB] Initialized database: {get_database_url()}")
+    print(f"[DB] Initialized {engine.dialect.name} database")
+
+
+def ensure_schema() -> None:
+    from controlplane.settings import production
+    if not production():
+        init_db()
+        return
+    from sqlalchemy import inspect, text
+    required = {"cases", "delivery_outbox", "knowledge_contents", "execution_leases", "operator_cases", "verification_challenges", "evidence_files", "chat_receipts", "worker_heartbeats", "rate_limit_buckets", "order_payments", "refund_budgets", "refund_reservations"}
+    if required - set(inspect(engine).get_table_names()):
+        raise RuntimeError("database migrations are required before starting production")
+    with engine.connect() as connection:
+        flags = connection.execute(text("SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname=current_user")).one()
+    if flags[0] or flags[1]:
+        raise RuntimeError("production database role must not bypass row-level security")
 
 
 def get_db():

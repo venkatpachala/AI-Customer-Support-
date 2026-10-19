@@ -120,3 +120,8 @@ def relax_interaction_text_columns() -> None:
         conn.exec_driver_sql("ALTER TABLE interactions__text_nullable RENAME TO interactions")
         for statement in index_sql:
             conn.exec_driver_sql(statement)
+
+
+if __name__ == "__main__":
+    from db.session import init_db
+    init_db()
