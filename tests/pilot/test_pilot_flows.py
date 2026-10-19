@@ -62,7 +62,7 @@ def test_live_stripe_posts_paise_and_run_key(monkeypatch):
     tool = StripeCreateRefund()
     seen = {}
 
-    def post_form(path, context, form_data, idempotency_key, timeout):
+    def post_form(path, context, form_data, idempotency_key, timeout, auth_token=None):
         seen["path"] = path
         seen["form"] = form_data
         seen["key"] = idempotency_key
@@ -72,7 +72,7 @@ def test_live_stripe_posts_paise_and_run_key(monkeypatch):
     tool._run(
         {
             "order_id": "12345",
-            "amount": 2500,
+            "amount": 250000,
             "currency": "inr",
             "payment_intent_id": "pi_test",
             "idempotency_key": "run1:execute_refund",
@@ -98,6 +98,8 @@ def test_live_secret_requires_explicit_live_mode(monkeypatch):
 
 
 def test_daily_cap_stays_waiting_without_stripe(monkeypatch):
+    monkeypatch.setattr("identity.verification.verified_order", lambda *_args: True)
+    monkeypatch.setenv("LIVE_REFUNDS_ENABLED", "1")
     monkeypatch.setenv("TOOLS_MODE", "live")
     init_db()
     memory = MemoryService()
