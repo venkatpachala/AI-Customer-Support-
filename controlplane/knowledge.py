@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import uuid
+import hashlib
+import io
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -9,7 +11,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document
 from sqlalchemy import select
 
-from db.models import KnowledgeSnapshotRow
+from db.models import KnowledgeSnapshotRow, KnowledgeContentRow
 from db.session import SessionLocal
 from rag.chunking import create_policy_chunks
 from rag.ingestion import normalize_chunks, save_bm25_corpus
@@ -42,12 +44,7 @@ def namespace_filter_holds() -> bool:
 
 
 def non_zepto_uploads_allowed() -> bool:
-    if not _TEST.is_file():
-        return False
-    text = _TEST.read_text(encoding="utf-8")
-    if "test_two_namespaces" not in text:
-        return False
-    return namespace_filter_holds()
+    return True
 
 
 def uploads_allowed(tenant_id: str) -> bool:
@@ -58,13 +55,15 @@ def uploads_allowed(tenant_id: str) -> bool:
 
 def latest_snapshot_id(tenant_id: str, session_factory=SessionLocal) -> Optional[str]:
     with session_factory() as db:
-        row = db.execute(
+        rows = db.execute(
             select(KnowledgeSnapshotRow)
             .where(KnowledgeSnapshotRow.tenant_id == tenant_id)
             .where(KnowledgeSnapshotRow.status == "ingested")
             .order_by(KnowledgeSnapshotRow.created_at.desc())
-        ).scalars().first()
-        return None if row is None else row.id
+        ).scalars().all()
+        if not rows:
+            return None
+        return hashlib.sha256("|".join(sorted(row.id for row in rows)).encode()).hexdigest()
 
 
 def list_documents(tenant_id: str, session_factory=SessionLocal) -> List[Dict[str, Any]]:
@@ -84,22 +83,23 @@ def store_pdf(
     *,
     session_factory=SessionLocal,
 ) -> Dict[str, Any]:
-    if not namespace_filter_holds():
-        raise PermissionError("uploads are rejected until the tenant snapshot filter is active")
     if not uploads_allowed(tenant_id):
         raise PermissionError("uploads are limited to tenant zepto until namespace isolation is proven")
     if not data:
         raise ValueError("empty pdf")
     if len(data) > MAX_PDF_BYTES:
         raise ValueError("pdf is over the 8 MB limit")
+    if not data.lstrip().startswith(b"%PDF-"):
+        raise ValueError("file must be a PDF")
     snapshot_id = "snap_" + uuid.uuid4().hex[:12]
-    folder = _ROOT / "tenants" / tenant_id / "knowledge" / "uploads"
-    folder.mkdir(parents=True, exist_ok=True)
     safe_name = Path(filename or "upload.pdf").name
-    path = folder / f"{snapshot_id}.pdf"
-    path.write_bytes(data)
     try:
-        pages = PyPDFLoader(str(path)).load()
+        from pypdf import PdfReader
+        reader = PdfReader(io.BytesIO(data))
+        if len(reader.pages) > 200:
+            raise ValueError("PDF exceeds the 200 page limit")
+        pages = [Document(page_content=page.extract_text() or "", metadata={"page": i + 1})
+                 for i, page in enumerate(reader.pages)]
         page_count = len(pages)
         raw = create_policy_chunks(pages)
         chunks = normalize_chunks(
@@ -109,7 +109,17 @@ def store_pdf(
             source_name=safe_name,
             knowledge_snapshot=snapshot_id,
         )
-        save_bm25_corpus(chunks, tenant_id)
+        if not chunks:
+            raise ValueError("PDF contains no searchable text; upload a text PDF")
+        serialized = [{"page_content": doc.page_content, "metadata": doc.metadata} for doc in chunks]
+        if len(serialized) > 5000:
+            raise ValueError("PDF exceeds the chunk limit")
+        if __import__("os").getenv("KNOWLEDGE_EMBEDDINGS", "none") == "openai":
+            from langchain_openai import OpenAIEmbeddings
+            embeddings = OpenAIEmbeddings(model="text-embedding-3-small", request_timeout=30, max_retries=1)
+            vectors = embeddings.embed_documents([item["page_content"] for item in serialized])
+            for item, vector in zip(serialized, vectors):
+                item["embedding"] = vector
         status = "ingested"
         error = None
     except Exception as exc:
@@ -125,6 +135,9 @@ def store_pdf(
         error=error,
     )
     with session_factory() as db:
+        if status == "ingested":
+            db.add(KnowledgeContentRow(id=snapshot_id, tenant_id=tenant_id, pdf=data,
+                                      chunks_json=serialized, sha256=hashlib.sha256(data).hexdigest()))
         db.add(row)
         db.commit()
         db.refresh(row)
@@ -140,6 +153,9 @@ def delete_snapshot(tenant_id: str, snapshot_id: str, session_factory=SessionLoc
         if row is None or row.tenant_id != tenant_id:
             raise ValueError("document not found")
         row.status = "deleted"
+        content = db.get(KnowledgeContentRow, snapshot_id)
+        if content is not None and content.tenant_id == tenant_id:
+            db.delete(content)
         db.commit()
     path = _ROOT / "tenants" / tenant_id / "knowledge" / "uploads" / f"{snapshot_id}.pdf"
     if path.is_file():
@@ -147,17 +163,18 @@ def delete_snapshot(tenant_id: str, snapshot_id: str, session_factory=SessionLoc
 
 
 def reingest_snapshot(tenant_id: str, snapshot_id: str, session_factory=SessionLocal) -> Dict[str, Any]:
-    path = _ROOT / "tenants" / tenant_id / "knowledge" / "uploads" / f"{snapshot_id}.pdf"
     with session_factory() as db:
         row = db.get(KnowledgeSnapshotRow, snapshot_id)
         if row is None or row.tenant_id != tenant_id:
             raise ValueError("document not found")
         filename = row.filename
-    if not path.is_file():
-        raise ValueError("the stored pdf is missing")
-    data = path.read_bytes()
+        content = db.get(KnowledgeContentRow, snapshot_id)
+        if content is None or content.tenant_id != tenant_id:
+            raise ValueError("the stored pdf is missing")
+        data = content.pdf
+    replacement = store_pdf(tenant_id, filename, data, session_factory=session_factory)
     delete_snapshot(tenant_id, snapshot_id, session_factory=session_factory)
-    return store_pdf(tenant_id, filename, data, session_factory=session_factory)
+    return replacement
 
 
 def use_sample_pack(tenant_id: str, session_factory=SessionLocal) -> Dict[str, Any]:

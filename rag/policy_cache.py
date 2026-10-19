@@ -11,7 +11,9 @@ class PolicyCache:
 
     def _key(self, tenant_id: str, query: str) -> str:
         norm = " ".join((query or "").lower().split())
-        raw = f"{tenant_id}::{norm}"
+        from controlplane.knowledge import latest_snapshot_id
+        version = latest_snapshot_id(tenant_id) or "empty"
+        raw = f"{tenant_id}::{version}::{norm}"
         return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
     def get(self, tenant_id: str, query: str) -> Optional[Dict[str, Any]]:
