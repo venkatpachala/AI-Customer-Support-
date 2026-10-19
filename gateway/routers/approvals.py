@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel
 
-from controlplane.http import bearer_principal
+from controlplane.http import session_principal
 from identity.ops_session import COOKIE_NAME, ops_role
 from workflows.approvals import ApprovalError, approve_task, list_tasks, reject_task
 from workflows.engine import WorkflowEngine
@@ -28,9 +28,15 @@ class DecisionBody(BaseModel):
 
 
 def _tenant(request: Request, x_tenant_id: Optional[str]):
-    principal = bearer_principal(request)
+    principal = session_principal(request)
     if principal is not None:
+        supplied = (x_tenant_id or "").strip()
+        if supplied and supplied != principal.tenant_id:
+            raise HTTPException(status_code=403, detail="tenant mismatch")
         return principal, principal.tenant_id
+    from controlplane.settings import legacy_headers_allowed
+    if not legacy_headers_allowed():
+        raise HTTPException(status_code=401, detail="authenticated credential required")
     tenant = (x_tenant_id or "").strip()
     if not tenant:
         raise HTTPException(status_code=400, detail="X-Tenant-Id is required")

@@ -16,6 +16,8 @@ The edge sets `tenant_id` from the bearer key, the `d2c_owner` cookie, or the cu
 
 Owner sign-up is `POST /signup` (email and password). Sign-in is `POST /login` and sets `d2c_owner`. The seeded Zepto door remains `ops@zepto.local` with `OPS_PASSWORD` for the pilot script.
 
+The brand desk lives in `web/`. It is the Fronte-end-D2C app. `npm run dev` serves it on port 8080 and proxies `/v1/*`, `/chat`, signup, login, knowledge, connections, and install to this API (`D2C_API_ORIGIN`, default `http://127.0.0.1:8000`). The owner cookie is that tenant's supervisor in test mode. Live tools stay off until an admin enables them.
+
 ## URLs
 
 | Path | What it is |

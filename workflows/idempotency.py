@@ -2,12 +2,18 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from typing import Optional
 
 from sqlalchemy import select
 
 from db.models import WorkflowRunRow
 from workflows.state import REUSABLE_RUN_STATUSES
+
+
+def approval_fingerprint(slots: dict) -> str:
+    fields = {key: slots.get(key) for key in ("order_id", "amount", "currency", "payment_intent_id", "reason", "photos_received")}
+    return hashlib.sha256(json.dumps(fields, sort_keys=True, default=str).encode()).hexdigest()
 
 
 def build_idempotency_key(

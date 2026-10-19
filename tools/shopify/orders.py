@@ -39,8 +39,10 @@ def _normalize_order(order: Dict[str, Any]) -> Dict[str, Any]:
     status = "open"
     if order.get("cancelled_at"):
         status = "cancelled"
-    elif fulfillment_status == "fulfilled":
+    elif any(item.get("shipment_status") == "delivered" for item in fulfillments):
         status = "delivered"
+    elif fulfillment_status == "fulfilled":
+        status = "fulfilled"
     elif fulfillment_status == "partial":
         status = "partially_fulfilled"
 
@@ -70,6 +72,7 @@ def _normalize_order(order: Dict[str, Any]) -> Dict[str, Any]:
         "customer": {
             "id": customer.get("id"),
             "email": customer.get("email"),
+            "phone": customer.get("phone"),
             "first_name": customer.get("first_name"),
             "last_name": customer.get("last_name"),
         },
@@ -78,6 +81,55 @@ def _normalize_order(order: Dict[str, Any]) -> Dict[str, Any]:
         "note": order.get("note"),
         "fulfillments_count": len(fulfillments),
     }
+
+
+_ORDER_FIELDS = """
+    id name email phone createdAt cancelledAt displayFinancialStatus
+    displayFulfillmentStatus totalPriceSet { shopMoney { amount currencyCode } }
+    customer { id firstName lastName }
+"""
+
+
+def read_graphql_order(client: ShopifyClient, order_id: str, context: ToolContext,
+                       timeout: float = 8.0) -> Dict[str, Any]:
+    """Treat human order numbers as names, not Shopify's internal numeric IDs.
+
+    Search results are checked for an exact match before returning any contact data.
+    Carrier delivery is deliberately unknown: fulfilled does not mean delivered.
+    """
+    from tools.base.exceptions import ProviderUnavailableError
+    if re.fullmatch(r"gid://shopify/Order/\d+", order_id):
+        query = "query($id: ID!) { order(id: $id) { " + _ORDER_FIELDS + " } }"
+        variables = {"id": order_id}
+    else:
+        if not re.fullmatch(r"#?[A-Za-z0-9_-]{1,64}", order_id):
+            raise ValidationError("invalid order number")
+        query = "query($query: String!) { orders(first: 2, query: $query) { nodes { " + _ORDER_FIELDS + " } } }"
+        variables = {"query": 'name:"' + order_id + '"'}
+    payload = client.post("/graphql.json", context=context,
+                          json={"query": query, "variables": variables}, timeout=timeout)
+    if payload.get("errors"):
+        raise ProviderUnavailableError("Shopify order query failed; check connection scopes")
+    data = payload.get("data") or {}
+    if "id" in variables:
+        node = data.get("order")
+    else:
+        matches = [n for n in (data.get("orders") or {}).get("nodes", [])
+                   if str(n.get("name", "")).lstrip("#").lower() == order_id.lstrip("#").lower()]
+        node = matches[0] if len(matches) == 1 else None
+    if not node:
+        raise ResourceNotFoundError("Order not found or not uniquely identified")
+    money = (node.get("totalPriceSet") or {}).get("shopMoney") or {}
+    customer = node.get("customer") or {}
+    fulfillment = str(node.get("displayFulfillmentStatus") or "UNFULFILLED").lower()
+    return {"id": node["id"], "name": node["name"], "order_number": node["name"],
+            "financial_status": str(node.get("displayFinancialStatus") or "unknown").lower(),
+            "fulfillment_status": "partial" if fulfillment == "partially_fulfilled" else fulfillment,
+            "total_price": money.get("amount"), "currency": money.get("currencyCode"),
+            "created_at": node.get("createdAt"), "cancelled_at": node.get("cancelledAt"),
+            "customer": {"id": customer.get("id"), "first_name": customer.get("firstName"),
+                         "last_name": customer.get("lastName"), "email": node.get("email"),
+                         "phone": node.get("phone")}}
 
 
 class ShopifyGetOrder(BaseTool):
@@ -131,41 +183,21 @@ class ShopifyGetOrder(BaseTool):
         from tools.base.exceptions import BusinessRuleError
 
         creds = shopify_for_tenant(context.tenant_id)
+        client = self.client
         if creds:
-            self.client = ShopifyClient(
+            client = ShopifyClient(
                 timeout_seconds=self.timeout_seconds,
                 token=creds["token"],
                 domain=creds["domain"],
             )
-        elif os.getenv("TOOLS_MODE", "mock").strip().lower() != "live":
+        elif __import__("controlplane.settings", fromlist=["production"]).production() or os.getenv("TOOLS_MODE", "mock").strip().lower() != "live":
             raise BusinessRuleError("shopify credential is not stored for this tenant")
 
         try:
-            # existing live Shopify logic here...
-            if not order_id.isdigit():
-                data = self.client.get(
-                    "/orders.json",
-                    context=context,
-                    params={"name": order_id, "status": "any", "limit": 1},
-                    timeout=self.timeout_seconds,
-                )
-                orders = data.get("orders") or []
-                if not orders:
-                    raise ResourceNotFoundError(f"Order not found for name/id={order_id}")
-                order = orders[0]
-            else:
-                data = self.client.get(
-                    f"/orders/{order_id}.json",
-                    context=context,
-                    timeout=self.timeout_seconds,
-                )
-                order = data.get("order")
-                if not order:
-                    raise ResourceNotFoundError(f"Order not found for id={order_id}")
-
+            order = read_graphql_order(client, order_id, context, self.timeout_seconds)
             normalized = _normalize_order(order)
             customer = order.get("customer") or {}
-            shipping = order.get("shipping_address") or {}
+            shipping = {}
             log_event(
                 "shopify_order_loaded",
                 context.request_id,
@@ -180,9 +212,10 @@ class ShopifyGetOrder(BaseTool):
 
         except Exception as e:
             msg = str(e).lower()
-            # If live credentials/config are broken, degrade safely for support flows
+            # A live authentication failure is never converted into fictitious data.
             if "unauthorized" in msg or "invalid api key" in msg or "authentication" in msg:
-                return mock_order()
+                from tools.base.exceptions import AuthenticationError
+                raise AuthenticationError("Shopify connection needs to be reconnected") from e
             raise
 
         return _normalize_order(order)

@@ -54,8 +54,8 @@ def test_forged_body_key_is_ignored(monkeypatch):
     tool = StripeCreateRefund()
     seen = {}
 
-    def post_form(path, context, form_data, idempotency_key, timeout):
-        seen["auth"] = tool.client.auth.token
+    def post_form(path, context, form_data, idempotency_key, timeout, auth_token=None):
+        seen["auth"] = auth_token
         return {"id": "re_real", "status": "succeeded", "amount": 100, "currency": "inr"}
 
     tool.client.post_form = post_form
@@ -83,8 +83,8 @@ def test_tenant_stripe_secret_beats_the_host_key(monkeypatch):
     tool = StripeCreateRefund()
     seen = {}
 
-    def post_form(path, context, form_data, idempotency_key, timeout):
-        seen["auth"] = tool.client.auth.token
+    def post_form(path, context, form_data, idempotency_key, timeout, auth_token=None):
+        seen["auth"] = auth_token
         return {"id": "re_tenant", "status": "succeeded", "amount": 100, "currency": "inr"}
 
     tool.client.post_form = post_form
@@ -183,7 +183,7 @@ def test_forged_tenant_cannot_read_another_case():
     )
     assert denied.status_code == 403
     forged = client.post(
-        "/w/zepto/session",
+        f"/w/{created_b.json()['tenant_id']}/session",
         json={"customer_ref": "widget", "tenant_id": tenant_a},
     )
     assert forged.status_code == 400

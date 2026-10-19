@@ -5,14 +5,27 @@ import base64
 import hashlib
 import hmac
 import os
+from cryptography.fernet import Fernet, MultiFernet, InvalidToken
 
 _PREFIX = "enc:v1:"
+_CURRENT = "enc:v2:"
+
+
+def _cipher() -> MultiFernet:
+    keys = [key.strip() for key in os.getenv("CREDENTIAL_ENCRYPTION_KEYS", "").split(",") if key.strip()]
+    if not keys:
+        from controlplane.settings import production
+        secret = os.getenv("OPS_SESSION_SECRET", "")
+        if production() or not secret:
+            raise ValueError("credential encryption key is not configured")
+        keys = [base64.urlsafe_b64encode(hashlib.sha256(secret.encode()).digest()).decode()]
+    return MultiFernet([Fernet(key.encode()) for key in keys])
 
 
 def _key() -> bytes:
     secret = (os.getenv("OPS_SESSION_SECRET") or os.getenv("OPS_PASSWORD") or "").strip()
     if not secret:
-        secret = "local-dev-seal"
+        raise ValueError("legacy credential decryption secret is not configured")
     return hashlib.sha256(b"d2c-connection-seal|" + secret.encode("utf-8")).digest()
 
 
@@ -26,20 +39,22 @@ def _stream(key: bytes, nonce: bytes, length: int) -> bytes:
 
 
 def seal(plain: str) -> str:
-    data = (plain or "").encode("utf-8")
-    key = _key()
-    nonce = os.urandom(16)
-    cipher = bytes(left ^ right for left, right in zip(data, _stream(key, nonce, len(data))))
-    mac = hmac.new(key, nonce + cipher, hashlib.sha256).digest()
-    blob = base64.urlsafe_b64encode(nonce + mac + cipher).decode("ascii")
-    return _PREFIX + blob
+    return _CURRENT + _cipher().encrypt((plain or "").encode()).decode()
 
 
 def open_seal(stored: str) -> str:
     text = stored or ""
     if not text:
         return ""
+    if text.startswith(_CURRENT):
+        try:
+            return _cipher().decrypt(text[len(_CURRENT):].encode()).decode()
+        except InvalidToken as exc:
+            raise ValueError("credential seal failed") from exc
     if not text.startswith(_PREFIX):
+        from controlplane.settings import production
+        if production():
+            raise ValueError("unencrypted credentials must be reconnected")
         return text
     raw = base64.urlsafe_b64decode(text[len(_PREFIX):].encode("ascii"))
     if len(raw) < 48:

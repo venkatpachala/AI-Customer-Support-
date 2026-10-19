@@ -1,59 +1,40 @@
+"""One bounded provider configuration for routing, planning and generation."""
+from __future__ import annotations
 import os
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 
-# Routing / planning: faster, smaller
-SUPERVISOR_MODEL = os.getenv("SUPERVISOR_MODEL", "qwen2.5:3b")
-PLANNER_MODEL = os.getenv("PLANNER_MODEL", "qwen2.5:3b")
 
-# Final answer quality
-QA_MODEL = os.getenv("QA_MODEL", "qwen2.5:7b")
+def _client(role: str, temperature: float):
+    configured = os.getenv(f"{role}_MODEL", "")
+    provider = os.getenv("LLM_PROVIDER", "ollama" if ":" in configured or "qwen" in configured.lower() else "openai").lower()
+    timeout = float(os.getenv("LLM_TIMEOUT_SECONDS", "20"))
+    if provider == "ollama":
+        return ChatOllama(model=os.getenv(f"{role}_MODEL", os.getenv("OLLAMA_MODEL", "qwen2.5:3b")),
+            base_url=os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434"),
+            temperature=temperature, num_predict=600, client_kwargs={"timeout": timeout})
+    if provider != "openai":
+        raise ValueError("LLM_PROVIDER must be openai or ollama")
+    model = os.getenv(f"{role}_MODEL", os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
+    from observability.models import ModelMetrics
+    if ":" in model or "qwen" in model.lower():
+        raise ValueError(f"{role}_MODEL is not an OpenAI model; select LLM_PROVIDER=ollama")
+    return ChatOpenAI(model=model, temperature=temperature, timeout=timeout,
+                      api_key=os.getenv("OPENAI_API_KEY") or "unconfigured",
+                      callbacks=[ModelMetrics(model)], max_retries=1, max_tokens=600)
 
-OLLAMA_BASE = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
+
+def get_supervisor_llm(temperature: float = 0.0):
+    return _client("SUPERVISOR", temperature)
 
 
-def get_supervisor_llm(temperature: float = 0.0) -> ChatOllama:
-    return ChatOllama(
-        model=SUPERVISOR_MODEL,
-        base_url=OLLAMA_BASE,
-        temperature=temperature,
-    )
-
-
-def get_planner_llm(temperature: float = 0.0) -> ChatOllama:
-    return ChatOllama(
-        model=PLANNER_MODEL,
-        base_url=OLLAMA_BASE,
-        temperature=temperature,
-    )
+def get_planner_llm(temperature: float = 0.0):
+    return _client("PLANNER", temperature)
 
 
 def get_qa_llm(temperature: float = 0.1):
-    model = os.getenv("QA_MODEL", "gpt-4o-mini")
+    return _client("QA", temperature)
 
-    # safety: never send Ollama model names to OpenAI
-    if "qwen" in model.lower() or ":" in model:
-        model = "gpt-4o-mini"
 
-    return ChatOpenAI(
-        model=model,
-        temperature=temperature,
-        api_key=os.getenv("OPENAI_API_KEY"),
-    )
-
-import os
-from langchain_openai import ChatOpenAI
-
-def get_chat_llm(temperature: float = 0):
-    provider = os.getenv("LLM_PROVIDER", "openai").lower()
-    if provider == "ollama":
-        from langchain_ollama import ChatOllama
-        return ChatOllama(
-            model=os.getenv("OLLAMA_MODEL", "qwen2.5:7b"),
-            base_url=os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434"),
-            temperature=temperature,
-        )
-    return ChatOpenAI(
-        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-        temperature=temperature,
-    )
+def get_chat_llm(temperature: float = 0.0):
+    return _client("QA", temperature)

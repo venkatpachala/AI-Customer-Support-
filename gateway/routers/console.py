@@ -78,6 +78,13 @@ def _wants_json(request: Request) -> bool:
     return "application/json" in content_type or "application/json" in accept
 
 
+def _json_or_redirect(request: Request, payload: dict, location: str, status_code: int = 200):
+    if _wants_json(request):
+        return JSONResponse(payload, status_code=status_code)
+    code = 303 if status_code < 400 else 303
+    return RedirectResponse(location, status_code=code)
+
+
 async def _email_password(request: Request) -> tuple[str, str]:
     if _wants_json(request) and "application/json" in (request.headers.get("content-type") or "").lower():
         body = await request.json()
@@ -92,7 +99,7 @@ def _owner_cookie(response, tenant_id: str, request: Request):
         value=issue_owner_token(tenant_id),
         httponly=True,
         samesite="lax",
-        secure=request.url.scheme == "https",
+        secure=__import__("controlplane.settings", fromlist=["cookie_secure"]).cookie_secure() or request.url.scheme == "https",
         max_age=TTL_SECONDS,
         path="/",
     )
@@ -163,7 +170,9 @@ async def signup_submit(request: Request):
         return _render(request, "signup.html", status_code=429, error=reason)
     email, password = await _email_password(request)
     try:
-        account = signup(email, password)
+        content_type = request.headers.get("content-type", "")
+        body = await request.json() if "application/json" in content_type else await request.form()
+        account = signup(email, password, brand_name=str(body.get("brand") or ""))
     except ValueError as exc:
         if _wants_json(request):
             return JSONResponse({"detail": str(exc)}, status_code=400)
@@ -513,8 +522,8 @@ def connections_save(
     try:
         save_connection(tenant, provider, shop_domain=shop_domain, token=token)
     except ValueError as exc:
-        return RedirectResponse(f"/app/connections?error={exc}", status_code=303)
-    return RedirectResponse("/app/connections", status_code=303)
+        return _json_or_redirect(request, {"detail": str(exc)}, f"/app/connections?error={exc}", 400)
+    return _json_or_redirect(request, {"ok": True, "provider": provider, "tenant_id": tenant}, "/app/connections")
 
 
 @router.post("/app/connections/{provider}/test")
@@ -522,7 +531,7 @@ def connections_test(request: Request, provider: str):
     tenant = _require(request)
     result = probe_connection(tenant, provider)
     detail = result["detail"].replace(" ", "+")
-    return RedirectResponse(f"/app/connections?check={detail}", status_code=303)
+    return _json_or_redirect(request, result, f"/app/connections?check={detail}")
 
 
 def _key_context(request: Request, tenant: str) -> dict:
@@ -561,15 +570,23 @@ def install_page(request: Request):
 @router.post("/app/install/test-key")
 def install_test_key(request: Request):
     tenant = _require(request)
-    issue_key(tenant, role="widget", mode="test")
-    return RedirectResponse("/app/install", status_code=303)
+    _row, secret = issue_key(tenant, role="widget", mode="test")
+    return _json_or_redirect(
+        request,
+        {"ok": True, "tenant_id": tenant, "widget_key": secret},
+        "/app/install",
+    )
 
 
 @router.post("/app/install/rotate-test-key")
 def install_rotate_test_key(request: Request):
     tenant = _require(request)
-    rotate_key(tenant, role="widget", mode="test")
-    return RedirectResponse("/app/install", status_code=303)
+    _row, secret = rotate_key(tenant, role="widget", mode="test")
+    return _json_or_redirect(
+        request,
+        {"ok": True, "tenant_id": tenant, "widget_key": secret},
+        "/app/install",
+    )
 
 
 @router.post("/app/install/purge")
@@ -579,9 +596,9 @@ def install_purge(request: Request, ops_password: str = Form("")):
     given = hashlib.sha256((ops_password or "").encode("utf-8")).hexdigest()
     wanted = hashlib.sha256(expected.encode("utf-8")).hexdigest()
     if not expected or not hmac.compare_digest(given, wanted):
-        return RedirectResponse("/app/install?error=Admin+password+required", status_code=303)
+        return _json_or_redirect(request, {"detail": "Admin password required"}, "/app/install?error=Admin+password+required", 403)
     run_purge(tenant)
-    return RedirectResponse("/app/install", status_code=303)
+    return _json_or_redirect(request, {"ok": True, "tenant_id": tenant, "purged": True}, "/app/install")
 
 
 @router.post("/app/install/live-key")
@@ -589,27 +606,33 @@ def install_live_key(request: Request):
     tenant = _require(request)
     row = tenant_record(tenant)
     if row is None or row.sandbox_passed_at is None:
-        return RedirectResponse("/app/install?error=Available+after+sandbox+pass", status_code=303)
-    issue_key(tenant, role="widget", mode="live")
-    return RedirectResponse("/app/install", status_code=303)
+        return _json_or_redirect(
+            request,
+            {"detail": "Available after sandbox pass"},
+            "/app/install?error=Available+after+sandbox+pass",
+            403,
+        )
+    _issued, secret = issue_key(tenant, role="widget", mode="live")
+    return _json_or_redirect(request, {"ok": True, "tenant_id": tenant, "live_key": secret}, "/app/install")
 
 
 @router.post("/app/install/webhook")
 def install_webhook(request: Request, url: str = Form(...)):
     tenant = _require(request)
     try:
-        save_endpoint(tenant, url)
+        saved = save_endpoint(tenant, url)
     except ValueError as exc:
-        return RedirectResponse(f"/app/install?error={exc}", status_code=303)
-    return RedirectResponse("/app/install", status_code=303)
+        return _json_or_redirect(request, {"detail": str(exc)}, f"/app/install?error={exc}", 400)
+    return _json_or_redirect(request, {"ok": True, "webhook": saved}, "/app/install")
 
 
 @router.post("/app/install/kill")
 def install_kill(request: Request):
     tenant = _require(request)
     row = tenant_record(tenant)
-    set_killed(tenant, not bool(row and row.killed_at))
-    return RedirectResponse("/app/install", status_code=303)
+    killed = not bool(row and row.killed_at)
+    set_killed(tenant, killed)
+    return _json_or_redirect(request, {"ok": True, "killed": killed, "tenant_id": tenant}, "/app/install")
 
 
 @router.post("/app/install/live")
@@ -620,13 +643,14 @@ def install_live(request: Request, ops_password: str = Form("")):
     given = hashlib.sha256((ops_password or "").encode("utf-8")).hexdigest()
     wanted = hashlib.sha256(expected.encode("utf-8")).hexdigest()
     if not expected or not hmac.compare_digest(given, wanted):
-        return RedirectResponse("/app/install?error=Admin+password+required", status_code=303)
+        return _json_or_redirect(request, {"detail": "Admin password required"}, "/app/install?error=Admin+password+required", 403)
     row = tenant_record(tenant)
+    enabled = not bool(row and row.live_enabled_at)
     try:
-        set_live_enabled(tenant, not bool(row and row.live_enabled_at))
+        set_live_enabled(tenant, enabled)
     except ValueError as exc:
-        return RedirectResponse(f"/app/install?error={str(exc)[:180]}", status_code=303)
-    return RedirectResponse("/app/install", status_code=303)
+        return _json_or_redirect(request, {"detail": str(exc)[:180]}, f"/app/install?error={str(exc)[:180]}", 400)
+    return _json_or_redirect(request, {"ok": True, "live_enabled": enabled, "tenant_id": tenant}, "/app/install")
 
 
 def _save_intake(kind: str, email: str, note: str, tenant_id: str | None = None) -> None:

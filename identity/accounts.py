@@ -37,7 +37,7 @@ def verify_password(password: str, stored: str) -> bool:
     return hmac.compare_digest(hash_password(password, salt), f"pbkdf2${salt}${digest}")
 
 
-def signup(email: str, password: str, session_factory=SessionLocal) -> dict:
+def signup(email: str, password: str, session_factory=SessionLocal, *, brand_name: str = "") -> dict:
     cleaned = (email or "").strip().lower()
     if not _EMAIL.match(cleaned):
         raise ValueError("Enter a valid email")
@@ -51,7 +51,7 @@ def signup(email: str, password: str, session_factory=SessionLocal) -> dict:
             raise ValueError("An account with that email already exists")
     local = re.sub(r"[^a-z0-9]", "", cleaned.split("@", 1)[0])[:16] or "brand"
     tenant_id = f"{local}{secrets.token_hex(3)}"
-    ensure_tenant(tenant_id, cleaned.split("@", 1)[0], session_factory=session_factory)
+    ensure_tenant(tenant_id, (brand_name.strip() or cleaned.split("@", 1)[0])[:128], session_factory=session_factory)
     _widget, widget_key = issue_key(tenant_id, role="widget", mode="test", session_factory=session_factory)
     _supervisor, supervisor_key = issue_key(
         tenant_id, role="supervisor", mode="test", session_factory=session_factory

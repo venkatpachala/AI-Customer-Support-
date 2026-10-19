@@ -92,8 +92,8 @@ def _maybe_http(flag: str, module: str, pattern: re.Pattern[str], label: str) ->
         print(f"SKIP {label}")
         return {"status": "skip", "reason": f"{flag} is not 1"}
     if not _health_up():
-        print(f"SKIP {label} (API down)")
-        return {"status": "skip", "reason": "API down"}
+        print(f"FAIL {label} (API down)")
+        return {"status": "fail", "reason": "required API is down"}
     completed = subprocess.run(
         [sys.executable, "-m", module],
         cwd=ROOT,

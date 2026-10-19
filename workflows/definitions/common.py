@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import os
+import hashlib
+import json
+from common.money import to_minor
 from typing import Any, Dict, List, Optional
 
 from policy import evaluate
@@ -69,6 +72,11 @@ def fetch_order(rt: StepRuntime) -> StepResult:
             output={"requires_inputs": ["order_id"]},
             error="order_id",
         )
+    from controlplane.mode import current_tools_mode
+    if current_tools_mode() == "live":
+        from identity.verification import verified_order
+        if not verified_order(rt.ctx.case_id, order_id):
+            return StepResult(status=STEP_WAIT_AUTH, output={"requires_inputs": ["verification_code"]}, error="strong_verification_required")
     result = rt.call_tool("shopify_get_order", {"order_id": order_id})
     status = str(result.get("status") or "")
     if status != "success":
@@ -137,7 +145,17 @@ def _refund_task_status(rt: StepRuntime) -> Optional[str]:
             .where(HumanTaskRow.task_type == "refund_approval")
             .order_by(HumanTaskRow.created_at.desc())
         ).scalars().first()
-        return None if row is None else row.status
+        if row is None:
+            return None
+        fingerprint = (row.payload_json or {}).get("action_fingerprint")
+        if fingerprint and fingerprint != _action_fingerprint(rt):
+            return None
+        return row.status
+
+
+def _action_fingerprint(rt: StepRuntime) -> str:
+    from workflows.idempotency import approval_fingerprint
+    return approval_fingerprint(rt.ctx.slots)
 
 
 def require_refund_approval(rt: StepRuntime) -> StepResult:
@@ -172,6 +190,7 @@ def require_refund_approval(rt: StepRuntime) -> StepResult:
                 "photos_received": bool(slots.get("photos_received")),
                 "deny_code": policy.get("deny_code"),
                 "max_amount": policy.get("max_amount"),
+                "action_fingerprint": _action_fingerprint(rt),
             },
         }
         return StepResult(
@@ -214,41 +233,15 @@ def _approval_override(rt: StepRuntime, policy: Dict[str, Any]) -> bool:
 
 
 def _over_daily_cap(rt: StepRuntime) -> bool:
-    """Sum today's succeeded refund amounts. Over the tenant cap stays in approval."""
-    from datetime import datetime
-
-    from sqlalchemy import select
-
+    """Reserve before Stripe; concurrent workflows cannot oversubscribe the cap."""
     from config.tenant_contract import load_platform_tenant
-    from db.models import WorkflowRunRow
-
+    from workflows.refund_budget import reserve
     try:
-        cap = float(load_platform_tenant(rt.ctx.tenant_id).limits.live_refund_cap_inr)
-    except Exception:
-        cap = 20000.0
-    start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-    total = 0.0
-    with rt.session_factory() as db:
-        rows = db.execute(
-            select(WorkflowRunRow)
-            .where(WorkflowRunRow.tenant_id == rt.ctx.tenant_id)
-            .where(WorkflowRunRow.workflow_name == "refund")
-            .where(WorkflowRunRow.status == "succeeded")
-        ).scalars().all()
-        for row in rows:
-            finished = row.finished_at or row.updated_at or row.created_at
-            if finished is None or finished < start:
-                continue
-            slots = dict((row.input_json or {}).get("slots") or {})
-            try:
-                total += float(slots.get("amount") or 0)
-            except (TypeError, ValueError):
-                continue
-    try:
-        incoming = float(rt.ctx.slots.get("amount") or 0)
-    except (TypeError, ValueError):
-        incoming = 0.0
-    return total + incoming > cap
+        cap = to_minor(load_platform_tenant(rt.ctx.tenant_id).limits.live_refund_cap_inr)
+        amount = to_minor(rt.ctx.slots.get("amount"))
+    except (ValueError, TypeError):
+        return True
+    return not reserve(rt.ctx.tenant_id, rt.run_id, amount, cap, rt.session_factory)
 
 
 def execute_refund(rt: StepRuntime) -> StepResult:
@@ -263,6 +256,15 @@ def execute_refund(rt: StepRuntime) -> StepResult:
     from controlplane.mode import current_tools_mode
 
     tools_live = current_tools_mode() == "live"
+    if tools_live:
+        from identity.verification import verified_order
+        if not verified_order(rt.ctx.case_id, str(rt.ctx.slots.get("order_id") or "")):
+            return StepResult(status=STEP_WAIT_AUTH, error="strong_verification_required",
+                              output={"stripe_called": False, "requires_inputs": ["verification_code"]})
+    if tools_live and os.getenv("LIVE_REFUNDS_ENABLED") != "1":
+        return StepResult(status=STEP_WAIT_APPROVAL,
+                          output={"stripe_called": False, "policy": policy},
+                          error="live_refunds_disabled")
     stripe_mode = os.getenv("STRIPE_MODE", "test").strip().lower()
     force_fail = os.getenv("WORKFLOW_STRIPE_FAIL", "").strip() == "1"
     if force_fail and not (tools_live and stripe_mode in {"test", "live"}) and rt.attempt < 3:
@@ -289,14 +291,27 @@ def execute_refund(rt: StepRuntime) -> StepResult:
             error="daily_cap",
         )
     slots = dict(rt.ctx.slots)
+    payment_intent_id = slots.get("payment_intent_id")
+    if tools_live:
+        from datetime import datetime, timedelta
+        from sqlalchemy import select
+        from db.models import OrderPaymentRow
+        with rt.session_factory() as db:
+            mapping = db.execute(select(OrderPaymentRow).where(OrderPaymentRow.tenant_id == rt.ctx.tenant_id,
+                OrderPaymentRow.order_id == str(slots.get("order_id") or ""),
+                OrderPaymentRow.verified_at > datetime.utcnow() - timedelta(minutes=5))).scalars().first()
+            if mapping is None or mapping.currency.lower() != "inr" or to_minor(slots.get("amount")) > mapping.refundable_minor:
+                return StepResult(status=STEP_WAIT_APPROVAL, error="verified_payment_mapping_required",
+                                  output={"stripe_called": False, "policy": policy})
+            payment_intent_id = mapping.payment_intent_id
     params = {
         "order_id": slots.get("order_id"),
-        "amount": slots.get("amount"),
+        "amount": to_minor(slots.get("amount")),
         "currency": "inr",
         "reason": "requested_by_customer",
         "idempotency_key": stripe_step_key(rt.run_id),
         "require_approval_above_limit": False,
-        "payment_intent_id": slots.get("payment_intent_id"),
+        "payment_intent_id": payment_intent_id,
     }
     result = rt.call_tool("stripe_refund", params)
     status = str(result.get("status") or "")
@@ -308,6 +323,11 @@ def execute_refund(rt: StepRuntime) -> StepResult:
             output={"tool": result, "stripe_called": True, "denied": False},
             error=str(result.get("error") or "stripe_failed"),
         )
+    provider_status = str((result.get("data") or {}).get("status") or "")
+    if provider_status and provider_status != "succeeded":
+        return StepResult(status=STEP_WAIT_APPROVAL,
+                          output={"stripe": dict(result.get("data") or {}), "stripe_called": True},
+                          error="provider_confirmation_required")
     return StepResult(
         status=STEP_SUCCESS,
         output={"stripe": dict(result.get("data") or {}), "stripe_called": True, "denied": False},
@@ -332,13 +352,17 @@ def update_case_resolved(rt: StepRuntime) -> StepResult:
 
 
 def notify(rt: StepRuntime) -> StepResult:
+    from controlplane.webhooks import deliver_decision
+    deliver_decision(tenant_id=rt.ctx.tenant_id, case_id=rt.ctx.case_id,
+                     workflow_status="succeeded", run_id=rt.run_id,
+                     session_factory=rt.session_factory)
     tool = None
     getter = getattr(rt.ctx.tool_registry, "get", None)
     if callable(getter):
         tool = getter("gmail_send_email")
     if tool is None:
         return StepResult(status=STEP_SUCCESS, output={"notify": {"skipped": True}})
-    return StepResult(status=STEP_SUCCESS, output={"notify": {"skipped": True, "reason": "workflow_does_not_send_yet"}})
+    return StepResult(status=STEP_SUCCESS, output={"notify": {"queued": True, "channel": "webhook"}})
 
 
 def gate_on_policy(rt: StepRuntime, *, success_output: Dict[str, Any] | None = None) -> StepResult:

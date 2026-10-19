@@ -121,7 +121,6 @@ class StripeCreateRefund(BaseTool):
 
         if not secret:
             raise BusinessRuleError("stripe credential is not stored for this tenant")
-        self.client.auth = BearerTokenAuth(token=secret)
 
         if not payment_intent_id and not charge_id:
             # In a full system, resolve from order mapping DB.
@@ -146,7 +145,8 @@ class StripeCreateRefund(BaseTool):
                 latency_ms=0.0,
             )
 
-        amount_paise = int(amount) * 100
+        # Tool boundary is always minor units. Major-unit conversion belongs to the workflow.
+        amount_paise = int(amount)
         form_data: Dict[str, Any] = {
             "amount": str(amount_paise),
             "currency": currency,
@@ -179,6 +179,7 @@ class StripeCreateRefund(BaseTool):
             form_data=form_data,
             idempotency_key=idem_key,
             timeout=self.timeout_seconds,
+            auth_token=secret,
         )
 
         # Stripe error objects sometimes come with HTTP 200? usually non-2xx handled by HttpClient.

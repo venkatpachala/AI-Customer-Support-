@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from collections import deque
 from typing import Any, Callable, Dict, Optional
 
 from langchain_core.messages import HumanMessage
@@ -72,7 +73,7 @@ class SupportRuntime:
         self.new_request_id = new_request_id or (lambda: f"req_{int(time.time() * 1000)}")
         self.log_event = log_event
         self.apply_output_guard = apply_output_guard or (lambda x: x)
-        self._events: list[RuntimeEvent] = []
+        self._events = deque(maxlen=256)
 
     def _emit(self, event: RuntimeEvent) -> None:
         self._events.append(event)

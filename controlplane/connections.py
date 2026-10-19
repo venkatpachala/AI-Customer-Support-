@@ -69,6 +69,11 @@ def save_connection(
     domain = (shop_domain or "").strip()
     if provider == "shopify" and not domain:
         raise ValueError("shop domain is required")
+    if provider == "shopify":
+        import re
+        domain = domain.removeprefix("https://").rstrip("/").lower()
+        if not re.fullmatch(r"[a-z0-9][a-z0-9-]*\.myshopify\.com", domain):
+            raise ValueError("use the store's canonical .myshopify.com domain")
     if not secret:
         raise ValueError("token is required")
     last4 = secret[-4:]

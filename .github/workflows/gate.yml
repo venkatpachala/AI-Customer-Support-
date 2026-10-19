@@ -14,13 +14,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r requirements.txt
-      - run: python -m pytest tests/policy tests/platform tests/workflows tests/api tests/identity tests/evaluation tests/rag/test_tenant_isolation.py -q -rs
+      - run: pip install uv
+      - run: uv sync --frozen
+      - run: uv run python -m pytest tests/policy tests/platform tests/workflows tests/api tests/identity tests/evaluation tests/rag/test_tenant_isolation.py -q -rs
       - name: rag metric lock
-        run: python -m pytest tests/evaluation/test_rag_metrics.py -q
+        run: uv run python -m pytest tests/evaluation/test_rag_metrics.py -q
       - name: tenant filter must not be skipped
-        run: python -m pytest tests/rag/test_tenant_isolation.py -q -rs | tee tenant-filter.txt && ! grep -q skipped tenant-filter.txt
-      - run: python -m evaluation.release_gate
+        run: uv run python -m pytest tests/rag/test_tenant_isolation.py -q -rs | tee tenant-filter.txt && ! grep -q skipped tenant-filter.txt
+      - run: uv run python -m evaluation.release_gate
         env:
           TOOLS_MODE: mock
 
@@ -32,7 +33,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r requirements.txt
+      - run: pip install uv
+      - run: uv sync --frozen
       - name: boot and goldens
         env:
           TOOLS_MODE: mock
@@ -42,10 +44,11 @@ jobs:
           PINECONE_INDEX_NAME: ${{ secrets.PINECONE_INDEX_NAME }}
           DATABASE_URL: sqlite:///./data/d2c_agent.db
         run: |
-          python -m uvicorn gateway.main:app --host 127.0.0.1 --port 8000 &
+          uv run python -m evaluation.http_session
+          uv run python -m uvicorn gateway.main:app --host 127.0.0.1 --port 8000 &
           for i in 1 2 3 4 5 6 7 8 9 10; do
             curl -sf http://127.0.0.1:8000/health && break
             sleep 2
           done
-          python -m evaluation.release_gate
-          python -m evaluation.rag.run_retrieval
+          uv run python -m evaluation.release_gate
+          uv run python -m evaluation.rag.run_retrieval

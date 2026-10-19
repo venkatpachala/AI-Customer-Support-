@@ -2,7 +2,7 @@ import os
 from typing import Any, Dict, Optional
 from tools.base.http import HttpClient
 from tools.base.context import ToolContext
-from tools.shopify.auth import get_shopify_auth, get_shopify_base_url
+from tools.shopify.auth import get_shopify_auth, get_shopify_base_url, canonical_shop_domain, shopify_api_version
 
 
 class ShopifyClient:
@@ -11,8 +11,8 @@ class ShopifyClient:
 
         self.http = HttpClient(default_timeout=timeout_seconds)
         if token and domain:
-            host = domain.replace("https://", "").replace("http://", "").strip().strip("/")
-            version = os.getenv("SHOPIFY_API_VERSION", "2024-10").strip()
+            host = canonical_shop_domain(domain)
+            version = shopify_api_version()
             self.auth = ApiKeyAuth("X-Shopify-Access-Token", token)
             self.base_url = f"https://{host}/admin/api/{version}"
             return
@@ -27,7 +27,7 @@ class ShopifyClient:
                 self.auth = auth
         else:
             self.auth = ApiKeyAuth("X-Shopify-Access-Token", "mock-token")
-            self.base_url = "https://mock.myshopify.com/admin/api/2024-10"
+            self.base_url = f"https://mock.myshopify.com/admin/api/{shopify_api_version()}"
 
     def _headers(self, context: ToolContext) -> Dict[str, str]:
         headers = {

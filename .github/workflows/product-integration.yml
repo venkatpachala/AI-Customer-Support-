@@ -1,0 +1,63 @@
+name: product-integration
+on: [pull_request, workflow_dispatch]
+jobs:
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: testadmin
+          POSTGRES_PASSWORD: integration-only
+          POSTGRES_DB: d2c_test
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U testadmin -d d2c_test" --health-interval 5s --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install uv
+      - run: uv sync --frozen
+      - run: uv run python -m evaluation.check_postgres
+        env:
+          POSTGRES_TEST_ADMIN_URL: postgresql+psycopg2://testadmin:integration-only@127.0.0.1:5432/d2c_test
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: pip install uv
+      - run: uv sync --frozen
+      - run: npm ci --ignore-scripts
+        working-directory: web
+      - run: npx playwright install --with-deps chromium
+        working-directory: web
+      - run: npm run typecheck && npm test && npm run build
+        working-directory: web
+      - name: API and browser journeys
+        run: |
+          mkdir -p artifacts
+          uv run python tests/browser_server.py > artifacts/browser-api.log 2>&1 &
+          npm --prefix web run dev > artifacts/browser-web.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:8080/health && break
+            sleep 2
+          done
+          uv run python tests/make_browser_pdf.py
+          cd web
+          node scripts/support-e2e.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: product-browser-evidence
+          path: |
+            artifacts/*.log
+            web/screenshots/

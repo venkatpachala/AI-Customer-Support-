@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order help</title>
+  <style>
+    body { font-family: sans-serif; margin: 1.5rem; max-width: 40rem; color: #1b1b1b; }
+    label { display: block; margin: 0.75rem 0; }
+    input, textarea { width: 100%; box-sizing: border-box; }
+    #reply { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Order help</h1>
+  <form id="start">
+    <label>Customer reference <input id="customer" autocomplete="username" required /></label>
+    <button type="submit">Start</button>
+  </form>
+  <form id="talk" hidden>
+    <label>Message <textarea id="message" rows="4" required></textarea></label>
+    <button type="submit">Send</button>
+  </form>
+  <p id="notice"></p>
+  <p id="reply"></p>
+  <p id="citations"></p>
+  <p id="workflow"></p>
+  <p id="missing"></p>
+  <script src="/widget.js?tenant=zepto"></script>
+  <script>
+    var tenant = "zepto";
+    function show(body) {
+      var status = body.workflow_status || "";
+      var text = body.response || body.detail || body.error || "";
+      if (status !== "succeeded") {
+        text = String(text).replace(/\bre_[A-Za-z0-9]+\b/g, "");
+      }
+      document.getElementById("reply").textContent = text;
+      var cites = (body.citations || []).map(function (item) {
+        if (typeof item === "string") return item;
+        return item.clause || item.source || item.text || "";
+      }).filter(Boolean);
+      document.getElementById("citations").textContent = cites.length ? ("citations: " + cites.join(", ")) : "";
+      document.getElementById("workflow").textContent = status ? ("workflow_status: " + status) : "";
+      var missing = body.missing_inputs || [];
+      document.getElementById("missing").textContent = missing.length ? ("missing_inputs: " + missing.join(", ")) : "";
+      document.getElementById("notice").textContent = status === "waiting_approval" ? "a supervisor will review" : "";
+    }
+    document.getElementById("start").onsubmit = async function (event) {
+      event.preventDefault();
+      var response = await fetch("/v1/sessions", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenant_id: tenant, customer_ref: document.getElementById("customer").value })
+      });
+      var body = await response.json();
+      if (!response.ok) {
+        show(body);
+        return;
+      }
+      document.getElementById("talk").hidden = false;
+      document.getElementById("notice").textContent = "session started";
+    };
+    document.getElementById("talk").onsubmit = async function (event) {
+      event.preventDefault();
+      var message = document.getElementById("message").value;
+      var body = await window.D2CSupport.send(message);
+      show(body);
+    };
+  </script>
+</body>
+</html>
