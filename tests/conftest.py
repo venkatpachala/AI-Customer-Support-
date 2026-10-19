@@ -12,6 +12,7 @@ os.environ["DATABASE_URL"] = "sqlite:///" + (Path(_database_dir.name) / "tests.d
 os.environ["ALLOW_LEGACY_ACTOR_HEADERS"] = "1"
 os.environ["TOOLS_MODE"] = "mock"
 os.environ["KNOWLEDGE_EMBEDDINGS"] = "none"
+os.environ["PINECONE_API_KEY"] = ""
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
 os.environ.setdefault("OPS_SESSION_SECRET", "test-session-secret-that-is-at-least-32-characters")
 os.environ["LLM_PROVIDER"] = "openai"
