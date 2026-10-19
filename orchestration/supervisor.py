@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import re
 from concurrent.futures import ThreadPoolExecutor
+from common.concurrency import submit_with_context
 from typing import Any, Dict, Optional
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -173,6 +174,12 @@ def supervisor_node(state: AgentState) -> Dict:
             is_continuation = False
             affirmation_of = None
 
+        # Explicit commands can be routed even when the classifier is unavailable.
+        # This selects a gated workflow; it grants no identity or financial permission.
+        q = query.lower()
+        if intent == "general" and re.search(r"\brefund\s+(?:of\s+)?[₹\s]*\d|\brefund my\b", q):
+            intent, intent_type = "refund", "action"
+
         # Heuristic overrides (belt-and-suspenders)
         from identity.service import is_policy_or_info_query, is_action_request
         if is_policy_or_info_query(query, intent):
@@ -274,8 +281,8 @@ def supervisor_with_rag_node(state: Dict[str, Any]) -> Dict[str, Any]:
 
     if should_rag:
         with ThreadPoolExecutor(max_workers=2) as pool:
-            fut_sup = pool.submit(supervisor_node, state)
-            fut_rag = pool.submit(rag_prefetch_node, state)
+            fut_sup = submit_with_context(pool, supervisor_node, state)
+            fut_rag = submit_with_context(pool, rag_prefetch_node, state)
             sup_out = fut_sup.result() or {}
             rag_out = fut_rag.result() or {}
         merged = {}

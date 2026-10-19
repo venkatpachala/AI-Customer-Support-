@@ -4,6 +4,23 @@ import sys
 from datetime import datetime
 from typing import Any, Dict, Optional
 import uuid
+import re
+
+_PRIVATE = {"message", "query", "response", "prompt", "content", "text", "message_preview", "contact", "email", "phone", "token", "password", "authorization", "secret", "api_key"}
+
+
+def redact(value, key: str = ""):
+    if key.lower() in _PRIVATE or any(part in key.lower() for part in ("access_token", "secret_key", "password")):
+        return "[redacted]"
+    if isinstance(value, dict):
+        return {str(k): redact(v, str(k)) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [redact(item) for item in value]
+    if isinstance(value, str):
+        value = re.sub(r"(?:sk|pk)_(?:live|test)_[A-Za-z0-9_-]+", "[redacted]", value)
+        value = re.sub(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}", "[email]", value)
+        return value[:1000]
+    return value
 
 class JsonFormatter(logging.Formatter):
     def format(self, record):
@@ -46,7 +63,7 @@ def log_event(
     from controlplane.tenant_context import current_scope
 
     scope = current_scope()
-    payload = dict(data or {})
+    payload = redact(dict(data or {}))
     payload.setdefault("tenant_id", scope.tenant_id or None)
     payload.setdefault("case_id", scope.case_id or None)
     extra = {

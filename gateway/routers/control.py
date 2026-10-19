@@ -4,9 +4,10 @@ from __future__ import annotations
 from typing import Optional
 
 from fastapi import APIRouter, File, HTTPException, Request, UploadFile
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from controlplane.http import bearer_principal, require_principal
+from controlplane.http import require_principal, session_principal
+from controlplane.connections import list_cards
 from controlplane.keys import mark_sandbox_passed, set_killed, tenant_record, tenant_tools_live
 from controlplane.knowledge import list_documents, store_pdf, uploads_allowed
 from controlplane.quota import consume_chat
@@ -20,8 +21,33 @@ from observability.logging import log_event
 router = APIRouter(tags=["control-plane"])
 
 
+@router.get("/v1/me")
+def whoami(request: Request):
+    principal = session_principal(request)
+    if principal is None:
+        raise HTTPException(status_code=401, detail="sign in required")
+    row = tenant_record(principal.tenant_id)
+    sandbox_passed = bool(row and row.sandbox_passed_at)
+    live_enabled = bool(row and row.live_enabled_at)
+    return {
+        "tenant_id": principal.tenant_id,
+        "name": principal.tenant_id if row is None or not row.name else row.name,
+        "role": principal.role,
+        "mode": principal.mode,
+        "killed": principal.killed_at is not None,
+        "sandbox_passed_at": None if row is None or row.sandbox_passed_at is None else row.sandbox_passed_at.isoformat(),
+        "live_enabled": live_enabled,
+        "refund_cap": __import__("config.tenant_contract", fromlist=["load_platform_tenant"]).load_platform_tenant(principal.tenant_id).limits.auto_refund_max,
+        "connections": list_cards(
+            principal.tenant_id,
+            sandbox_passed=sandbox_passed,
+            live_enabled=live_enabled,
+        ),
+    }
+
+
 class ChatBody(BaseModel):
-    message: str
+    message: str = Field(min_length=1, max_length=8000)
     customer_ref: Optional[str] = None
     tenant_id: Optional[str] = None
     auth_level: Optional[str] = None
@@ -42,18 +68,20 @@ def _guard_chat(principal) -> None:
 @router.post("/v1/chat")
 async def product_chat(body: ChatBody, request: Request):
     # Body tenant_id, auth_level, and verified are accepted and ignored.
-    principal = bearer_principal(request)
+    principal = session_principal(request)
     if principal is not None:
         _guard_chat(principal)
         tenant_id = principal.tenant_id
         customer_ref = (body.customer_ref or "").strip() or "widget"
         try:
-            session = create_customer_session(tenant_id, customer_ref)
+            existing = load_customer_session(request.cookies.get(COOKIE_NAME))
+            session = existing if existing and existing.tenant_id == tenant_id and existing.customer_ref == customer_ref else create_customer_session(tenant_id, customer_ref)
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         session_id = session.id
     else:
-        loaded = load_customer_session(request.cookies.get(COOKIE_NAME))
+        from identity.session import request_session_token
+        loaded = load_customer_session(request_session_token(request))
         if loaded is None:
             raise HTTPException(status_code=401, detail="api key required")
         tenant_id = loaded.tenant_id
@@ -71,9 +99,7 @@ async def product_chat(body: ChatBody, request: Request):
             node="gateway",
             data={"edge_tenant": tenant_id, "body_tenant": body.tenant_id},
         )
-    if not consume_chat(tenant_id):
-        raise HTTPException(status_code=429, detail="daily request cap reached")
-    live = principal is not None and tenant_tools_live(tenant_id, key_mode=principal.mode)
+    live = tenant_tools_live(tenant_id, key_mode=principal.mode if principal is not None else "live")
     with use_tenant(tenant_id, request_id=getattr(request.state, "request_id", "") or ""):
         payload = await run_product_chat(
             request,
@@ -154,9 +180,11 @@ async def upload_knowledge(request: Request, file: UploadFile = File(...)):
             status_code=403,
             detail="uploads are limited to tenant zepto until namespace isolation is proven",
         )
-    data = await file.read()
+    from controlplane.knowledge import MAX_PDF_BYTES
+    data = await file.read(MAX_PDF_BYTES + 1)
     try:
-        view = store_pdf(principal.tenant_id, file.filename or "upload.pdf", data)
+        from starlette.concurrency import run_in_threadpool
+        view = await run_in_threadpool(store_pdf, principal.tenant_id, file.filename or "upload.pdf", data)
     except PermissionError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
     except Exception as exc:
@@ -168,6 +196,19 @@ async def upload_knowledge(request: Request, file: UploadFile = File(...)):
 def knowledge_list(request: Request):
     principal = require_principal(request)
     return {"documents": list_documents(principal.tenant_id), "uploads_open": uploads_allowed(principal.tenant_id)}
+
+
+@router.delete("/v1/knowledge/{snapshot_id}")
+def knowledge_delete(snapshot_id: str, request: Request):
+    principal = require_principal(request)
+    if principal.role != "supervisor":
+        raise HTTPException(403, "supervisor required")
+    from controlplane.knowledge import delete_snapshot
+    try:
+        delete_snapshot(principal.tenant_id, snapshot_id)
+    except ValueError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    return {"deleted": True}
 
 
 @router.post("/v1/webhooks")
